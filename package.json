@@ -1,10 +1,35 @@
 {
-  "name": "simpleshell",
-  "version": "1.0.0",
+  "name": "@arcsine/node-shell",
+  "version": "1.0.5",
   "description": "",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc"
   },
+  "bin": "./bin/nodesh",
+  "types": "./dist/index.d.ts",
+  "main": "./dist/index.js",
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "bin",
+    "npx",
+    "executable"
+  ],
+  "scripts": {
+    "clean": "rm -rf dist/",
+    "build": "npx tsc",
+    "build:dev": "npx tsc -w",
+    "prepublish": "npm run clean && npm run build"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^2.10.0",
+    "@typescript-eslint/parser": "^2.10.0",
+    "eslint": "^6.7.2",
+    "@types/node": "^12.12.14",
+    "typescript": "^3.7.2"
+  }
 }

@@ -1,0 +1,18 @@
+#!/usr/bin/env node
+const path = require('path');
+
+process.on('unhandledRejection', err => {
+  console.error(err);
+  process.exit(1);
+});
+
+const index = path.resolve(__dirname, '../dist/index');
+require(index);
+
+if (process.argv.length >= 3) {
+  const script = path.resolve(process.cwd(), process.argv[2]);
+  setImmediate(() => require(script));
+} else {
+  // eslint-disable-next-line no-eval
+  stdin.join('\n').forEach(eval).value;
+}

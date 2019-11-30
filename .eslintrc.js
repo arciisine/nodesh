@@ -3,6 +3,13 @@ module.exports = {
         "es6": true,
         "node": true
     },
+    "globals": {
+        "stdin": "readonly",
+        "stdout": "readonly",
+        "argv": "readonly",
+	"ask": "readonly",
+        "env": "readonly"
+    },
     "parser": "@typescript-eslint/parser",
     "extends": [
         "eslint:recommended",
@@ -46,6 +53,7 @@ module.exports = {
             "error",
             { classes: false }
         ],
+        "@typescript-eslint/no-namespace": [0],
         "@typescript-eslint/member-ordering": [
             "error",
             {
@@ -85,7 +93,8 @@ module.exports = {
             "error",
             {
                 "varsIgnorePattern": "^[A-Z][A-Za-z0-9]",
-                "args": "none"
+                "args": "none",
+
             }
         ],
         "@typescript-eslint/quotes": [
