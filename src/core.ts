@@ -35,7 +35,7 @@ declare global {
      * or sequence), and producing a flattened output.
      * @param fn
      */
-    flatMap<U>(fn: (item: T) => Gen<U> | { wrap: AsyncGenerator<U> }): AsyncGenerator<U, TReturn, TNext>;
+    flatMap<U>(fn: (item: T) => Gen<U> | { async: AsyncGenerator<U> }): AsyncGenerator<U, TReturn, TNext>;
     /**
      * This is the standard reduce operator and behaves similarly as `Array.prototype.reduce`.  This operator
      * takes in an accumulation function, which allows for computing a single value based on visiting each element
@@ -64,7 +64,7 @@ declare global {
     /**
      * If an error occurs, use the provided sequence instead
      */
-    onError(alt: () => AsyncGenerator<T>): AsyncGenerator<T>;
+    onError<U = T>(alt: OrCall<AsyncGenerator<U>>): AsyncGenerator<U>;
   }
 }
 
@@ -122,11 +122,11 @@ RegisterUtil.operators({
   async * wrap<T extends AsyncGenerator, U extends AsyncGenerator>(this: T, fn: (input: T) => U) {
     yield* fn(this);
   },
-  async * onError<T extends AsyncGenerator>(this: T, alt: () => AsyncGenerator<T>) {
+  async * onError<T extends AsyncGenerator>(this: T, alt: AsyncGenerator<T> | (() => AsyncGenerator<T>)) {
     try {
       yield* this;
     } catch (err) {
-      yield* alt();
+      yield* ('apply' in alt ? alt() : alt);
     }
   }
 });

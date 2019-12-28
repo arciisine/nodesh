@@ -28,6 +28,10 @@ declare global {
      * Simple property that allows any sequence to be automatically written to stdout
      */
     stdout: void;
+    /**
+     * Simple property that allows any sequence to be automatically called with `console.log`
+     */
+    console: void;
   }
 }
 
@@ -44,6 +48,11 @@ RegisterUtil.properties({
   stdout: {
     get(this: AsyncGenerator<any>) {
       return this.write(process.stdout);
+    }
+  },
+  console: {
+    get(this: AsyncGenerator<any>) {
+      return this.tap(console.log).values;
     }
   },
   values: {

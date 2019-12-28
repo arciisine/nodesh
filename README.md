@@ -249,7 +249,7 @@ fs.createReadStream('<file>')
 
 #### Flat Map 
 ```
-flatMap<U>(fn: (item: T) => Gen<U> | { wrap: AsyncGenerator<U> }): AsyncGenerator<U>
+flatMap<U>(fn: (item: T) => Gen<U> | { async: AsyncGenerator<U> }): AsyncGenerator<U>
 ```
 
 This is a combination of `map` and `flatten` as they are common enough in usage to warrant a combined operator.  This will map the the contents of the sequence (which produces an array or sequence), and producing a flattened output.
@@ -257,7 +257,7 @@ This is a combination of `map` and `flatten` as they are common enough in usage 
 ```javascript
 fs.createReadStream('<file>')
   .async //  Now a line-oriented sequence
-  .flatMap(line => line.split(/\s+/g)) // Now a string sequence for each word in the file
+  .flatMap(line => line.split(/\s+/g)) // Now a word sequence for the file
 ```
 
 #### Reduce
@@ -861,6 +861,21 @@ Simple property that allows any sequence to be automatically written to stdout
   .read() // Read file
   .map(line => line.length) // Convert each line to it's length
   .stdout // Pipe to stdout
+```
+
+#### Console
+```
+console: void;
+```
+
+Simple property that allows any sequence to be automatically called with `console.log`.
+
+```javascript
+'<file>'
+  .async
+  .read() // Read file
+  .json()
+  .console // Log out objects
 ```
 
 ## Creating a Custom Operator

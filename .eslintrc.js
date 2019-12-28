@@ -6,6 +6,7 @@ module.exports = {
     "globals": {
         "stdin": "readonly",
         "stdout": "readonly",
+	"of": "readonly",    
         "argv": "readonly",
 	"ask": "readonly",
         "env": "readonly"

@@ -7,4 +7,4 @@
   .map(x => new URL(x).host)
   .sort()
   .unique()
-  .forEach(console.log);
+  .console;
