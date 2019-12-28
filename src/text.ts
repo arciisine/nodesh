@@ -58,7 +58,7 @@ declare global {
 }
 
 RegisterUtil.operators({
-  async * columns(this: AsyncGenerator<string>, columnsOrSep: RegExp | string | string[] = /\s+/g, sep?: RegExp | string) {
+  async * columns(this: AsyncGenerator<string>, columnsOrSep?: RegExp | string | string[], sep?: RegExp | string) {
     let columns: string[] | undefined;
 
     if (Array.isArray(columnsOrSep)) {
@@ -72,10 +72,12 @@ RegisterUtil.operators({
     for await (const line of this) {
       const row = line.split(sep);
       if (columns !== undefined) {
-        yield row.reduce((acc, cell, i) => {
-          acc[columns![i]] = cell;
-          return acc;
-        }, {} as any);
+        const upper = Math.min(row.length, columns.length);
+        const out: any = {};
+        for (let i = 0; i < upper; i++) {
+          out[columns![i]] = row[i];
+        }
+        yield out;
       } else {
         yield row;
       }
@@ -118,7 +120,7 @@ RegisterUtil.operators({
   },
   join(joiner?: (x: string[]) => string) {
     if (!joiner) {
-      joiner = (x: string[]) => x.join('\n');
+      joiner = (x: string[]) => x.join('');
     } else if (typeof joiner === 'string') {
       const val = joiner;
       joiner = (x: string[]) => x.join(val);

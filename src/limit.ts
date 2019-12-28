@@ -23,6 +23,10 @@ declare global {
 
 RegisterUtil.operators({
   async * first(n: number = 1) {
+    if (!(n >= 1)) {
+      throw new Error('Invalid amount for first(). Must be >= 1');
+    }
+
     for await (const item of this) {
       yield item;
       n -= 1;
@@ -32,6 +36,10 @@ RegisterUtil.operators({
     }
   },
   async * last(n: number = 1) {
+    if (!(n >= 1)) {
+      throw new Error('Invalid amount for last(). Must be >= 1');
+    }
+
     const out = [];
     for await (const item of this) {
       out.push(item);
@@ -42,19 +50,39 @@ RegisterUtil.operators({
     yield* out;
   },
   async * skip(n: number) {
-    for await (const item of this) {
-      n -= 1;
-      if (n > 0) {
-        continue;
+    if (Number.isNaN(n) || n === 0) {
+      throw new Error('Invalid amount for skip(). Must be >= 1 or <= -1');
+    }
+
+    if (n > 0) {
+      for await (const item of this) {
+        n -= 1;
+        if (n >= 0) {
+          continue;
+        }
+        yield item;
       }
-      yield item;
+    } else {
+      n = Math.abs(n);
+      const buffer = [];
+      for await (const item of this) {
+        buffer.push(item);
+        if (buffer.length > n) {
+          yield buffer.shift(); // Yield first
+        }
+      }
     }
   },
-  async * repeat(n: number = Number.MAX_SAFE_INTEGER) {
+  async * repeat(n: number = -1) {
     const buffer = [];
     let readCount = 0;
+
+    if (n < 0) {
+      n = Number.MAX_SAFE_INTEGER;
+    }
+
     for await (const v of this) {
-      if (readCount >= n) {
+      if (buffer.length >= n) {
         break;
       }
       buffer.push(v);
@@ -64,8 +92,7 @@ RegisterUtil.operators({
 
     const off = buffer.length;
     while (readCount < n) {
-      yield buffer[(readCount - off) % off];
-      readCount += 1;
+      yield buffer[readCount++ % off];
     }
   }
 });

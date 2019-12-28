@@ -5,7 +5,7 @@ declare global {
   interface Generator<T = unknown, TReturn = any, TNext = unknown> {
     async: AsyncGenerator<T, TReturn, TNext>;
   }
-  interface AsyncGenerator<T = unknown, TReturn = any, TNext = unknown> {
+  interface AsyncGenerator<T = unknown, TReturn = any, TNext = unknown> extends Promise<T[]> {
     async: AsyncGenerator<T, TReturn, TNext>;
   }
   interface Array<T> {
@@ -33,6 +33,12 @@ declare global {
     interface ReadStream {
       async: AsyncGenerator<string>;
     }
+  }
+}
+
+declare module 'fs' {
+  interface ReadStream {
+    async: AsyncGenerator<string>;
   }
 }
 

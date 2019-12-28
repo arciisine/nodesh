@@ -81,9 +81,9 @@ Out of the box, the following types support an `.async` property that returns an
 
 #### Iterables
 * Generator - This will return the generator, but as an async generator
-* Set - This will return an async generator over the set contents
-* Map - This will return an async generator over the map's entries [key, value]
-* NodeJS:ReadStream - This will return a line-oriented async generator over the read stream
+* `Set` - This will return an async generator over the set contents
+* `Map` - This will return an async generator over the map's entries [key, value]
+* `NodeJS:ReadStream` - This will return a line-oriented async generator over the read stream
 
 **Example of read stream**
 ```typescript
@@ -167,12 +167,13 @@ A case insensitive map for accessing environment variables. Like `process.env`, 
 ```
 ### Of
 ```
-of: <T>(x: T | Iterable<T> | AsyncIterable<T>) => AsyncGenerator<T>
+of: <T>(x: T | Iterable<T> | AsyncIterable<T> | AsyncGenerator<T>) => AsyncGenerator<T>
 ```
 
 Will turn any value into a sequence. If the input value is of type:
 * `Iterable` - Returns sequence of elements
 * `AsyncIterable` - Returns sequence of elements
+* `AsyncGenerator` - Returns sequence of elements
 * `Readable`/`ReadStream` - Returns a sequence of lines read from stream
 * Everything else - Returns a sequence of a single element
 
@@ -187,6 +188,23 @@ of([1,2,3])
 
 ```
 
+### Range
+```
+range: (stop: number, start?: number, step?: number) => AsyncGenerator<number>
+```
+
+Produces a numeric range, between start (1 by default) and stop (inclusive).  A step
+parameter can be defined to specify the distance between iterated numbers.
+
+```javascript
+range(1, 3)
+  .map(x => x**2) 
+  // sequence of 1, 4, 9
+
+range(10, 1, 2)
+  // sequence of 1, 3, 5, 7, 9
+
+```
 ## Operators
 The entirety of this project centers on the set of available operators.  These operators can be broken into the following groups
 
@@ -466,7 +484,7 @@ batch(size: number): AsyncGenerator<T[]>
 
 #### Pair
 ```
-pair<U>(this: AsyncGenerator<T>, value: U | Iterable<U> | AsyncIterable<U>, mode?: 'repeat' | 'exact' | 'empty'): AsyncGenerator<[T, U]>
+pair<U>(this: AsyncGenerator<T>, value: OrCall<OrGen<U>>, mode?: 'repeat' | 'exact' | 'empty'): AsyncGenerator<[T, U]>
 ```
 
 `pair` allows for combining two sets of data into a single sequence of pairs.  The second value can either be a single value, which will be added to every item, or it could be an iterable element that will match with each item as possible. If the second iterator runs out, the remaining values can be affected by the mode parameter:
@@ -672,7 +690,7 @@ This will return the last `n` elements with a default of a single element.
 
 #### Repeat
 ```
-repeat(n?: number): AsyncGenerator<T>
+repeat(n?: number, iters?: number): AsyncGenerator<T>
 ```
 
 This will repeat the first `n` elements with a default of all elements.

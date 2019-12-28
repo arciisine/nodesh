@@ -5,9 +5,16 @@ export const PARENT = Symbol('PARENT');
 export class RegisterUtil {
 
   static properties(
-    props: PropertyDescriptorMap
+    props: PropertyDescriptorMap,
+    proto = Util.asyncGen.prototype
   ) {
-    Object.defineProperties(Util.asyncGen.prototype, props);
+    for (const key of Object.keys(props)) {
+      try {
+        Object.defineProperty(proto, key, props[key]);
+      } catch (err) {
+        // Do nothing
+      }
+    }
   }
 
   /**

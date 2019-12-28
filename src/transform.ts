@@ -1,5 +1,5 @@
 import { RegisterUtil } from './util/register';
-import { OrProm } from './util/types';
+import { OrProm, OrCall, OrGen } from './util/types';
 
 type PairMode = 'empty' | 'repeat' | 'exact';
 
@@ -37,13 +37,13 @@ declare global {
      * which will be added to every item, or it could be an iterable element that will match with each item as possible. If
      * the second iterator runs out, the remaining values can be affected by the mode parameter
      */
-    pair<U>(this: AsyncGenerator<T, TReturn, TNext>, value: U | Iterable<U> | AsyncIterable<U>, mode?: PairMode): AsyncGenerator<[T, U]>;
+    pair<U>(this: AsyncGenerator<T, TReturn, TNext>, value: OrCall<OrGen<U>>, mode?: PairMode): AsyncGenerator<[T, U]>;
   }
 }
 
 RegisterUtil.operators({
   notEmpty() {
-    return this.filter(x => x !== undefined && x !== null && x !== '');
+    return this.filter(x => x !== undefined && x !== null && (typeof x !== 'string' || x.trim() !== ''));
   },
   async * tap(fn?: (x: any) => any) {
     for await (const item of this) {
@@ -81,7 +81,11 @@ RegisterUtil.operators({
       yield out;
     }
   },
-  async * pair<U, T>(this: AsyncGenerator<T>, value: U | Iterable<U> | AsyncIterable<U>, mode?: PairMode): AsyncGenerator<[T, U]> {
+  async * pair<U, T>(this: AsyncGenerator<T>, value: OrCall<OrGen<U>>, mode?: PairMode): AsyncGenerator<[T, U]> {
+    if (['function', 'object'].includes(typeof value) && 'apply' in value) {
+      value = value();
+    }
+
     mode = mode ?? (typeof value === 'string' ? 'repeat' : 'empty');
 
     let suppl = of(value);
@@ -90,16 +94,16 @@ RegisterUtil.operators({
     }
     for await (const el of this) {
       const res = await suppl.next();
-      const v = res.value;
-      yield [el, v];
-
       if (res.done) {
         if (mode === 'exact') {
           break;
         } else if (mode === 'empty') {
-          suppl = of(undefined!).repeat();
+          suppl = of([undefined!]).repeat();
+          res.value = undefined;
         }
       }
+      const v = res.value;
+      yield [el, v];
     }
   }
 });

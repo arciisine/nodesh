@@ -13,9 +13,9 @@ export class ExecUtil {
       ...props
     });
     const err = StreamUtil.readStream(proc.stderr!, 'text').value;
+    const retCode = new Promise(res => proc.on('exit', res))
     const result = async function () {
-      const code = await new Promise(res => proc.on('exit', res));
-      if (code !== 0) {
+      if ((await retCode) !== 0) {
         throw new Error(await err);
       }
     }();

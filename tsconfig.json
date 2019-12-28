@@ -9,6 +9,7 @@
     "declaration": true,
     "strict": true,
     "allowJs": true,
+    "experimentalDecorators": true,
     "checkJs": true,
     "importHelpers": false
   }

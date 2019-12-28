@@ -1,5 +1,5 @@
 import { RegisterUtil } from './util/register';
-import { OrProm, Gen, Reducer } from './util/types';
+import { OrProm, Gen, Reducer, OrCall } from './util/types';
 
 declare global {
   interface AsyncGenerator<T = unknown, TReturn = any, TNext = unknown> {
@@ -97,10 +97,8 @@ RegisterUtil.operators({
   async * flatMap<T, U>(this: AsyncGenerator<T>, fn: (x: T) => Gen<U> | { async: AsyncGenerator<U> }) {
     for await (const el of this) {
       const val = await fn(el);
-      const res = ('async' in val ? val.async : val) as AsyncGenerator<U>;
-      for await (const sub of res) {
-        yield sub;
-      }
+      const res = ((val.hasOwnProperty('async') && 'async' in val) ? val.async : val) as AsyncGenerator<U>;
+      yield* res;
     }
   },
   async * reduce<T, U>(this: AsyncGenerator<T>, fn: Reducer<U, T> & { init?: () => U }, acc: U | undefined) {

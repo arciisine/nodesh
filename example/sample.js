@@ -3,7 +3,7 @@
 const path = require('path');
 
 /.[jt]s$/.async
-  .dir(path.resolve(process.cwd(), '../tim-resume/src'))
+  .dir({ base: path.resolve(process.cwd(), '../tim-resume/src') })
   .read()
   .match('URL', 'extract')
   .flatMap(url => url.async
@@ -11,11 +11,13 @@ const path = require('path');
     .match('URL', 'extract')
   )
   .map(x => new URL(x).host)
+  .tap(console.log)
   .startTime('Counting', true)
   .trim()
   .tokens(/[.\/:]+/g)
   .sort()
+  .tap(console.log)
   .exec('uniq', ['-c'])
-  // .tap(console.log)
+  .tap(console.log)
   .stopTime('Counting', true)
-  .stdout;
+  .console;

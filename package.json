@@ -1,9 +1,13 @@
 {
   "name": "@arcsine/node-shell",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "",
   "scripts": {
-    "build": "tsc"
+    "clean": "rm -rf dist/",
+    "build": "npx tsc",
+    "test": "npx trv test",
+    "build:dev": "npm run clean && npx tsc -w",
+    "prepublish": "npm run clean && npm run build"
   },
   "bin": "./bin/nodesh",
   "types": "./dist/index.d.ts",
@@ -19,17 +23,13 @@
     "npx",
     "executable"
   ],
-  "scripts": {
-    "clean": "rm -rf dist/",
-    "build": "npx tsc",
-    "build:dev": "npm run clean && npx tsc -w",
-    "prepublish": "npm run clean && npm run build"
-  },
   "devDependencies": {
+    "@travetto/cli": "^1.0.0-beta.1",
+    "@travetto/test": "^1.0.0-beta.1",
+    "@types/node": "^13.1.1",
     "@typescript-eslint/eslint-plugin": "^2.13.0",
     "@typescript-eslint/parser": "^2.13.0",
     "eslint": "^6.8.0",
-    "@types/node": "^13.1.1",
     "typescript": "^3.7.4"
   }
 }

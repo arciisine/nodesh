@@ -52,21 +52,19 @@ RegisterUtil.properties({
   },
   console: {
     get(this: AsyncGenerator<any>) {
-      return this.tap(console.log).values;
+      return this.forEach(console.log);
     }
   },
   values: {
     async get(this: AsyncGenerator<any>) {
-      const out = await this.collect();
-      RegisterUtil.kill(this);
-      return out;
+      return this.collect().value;
     }
   },
   value: {
     async get(this: AsyncGenerator<any>) {
-      const ret = (await this.next()).value;
+      const out = (await this.next()).value;
       RegisterUtil.kill(this);
-      return ret;
+      return out;
     }
   }
 });

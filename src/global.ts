@@ -1,6 +1,8 @@
 /// <reference path="./global-patch.d.ts" />
 
 import { GlobalUtil } from './util/global';
+import { OrGen } from './util/types';
+import { Util } from './util/util';
 
 declare global {
   namespace globalThis {
@@ -8,10 +10,6 @@ declare global {
      * Provides direct access to stdin as sequence of lines
      */
     const stdin: AsyncGenerator<string>;
-    /**
-     * Allows for simple prompting as a sequence of lines
-     */
-    const ask: (message: string) => AsyncGenerator<string>;
     /**
      * The cleaned argv parameters for the running script. Starting at index 0, is the
      * first meaning parameter for the script.
@@ -24,25 +22,16 @@ declare global {
     /**
      * Will turn any value into a sequence
      */
-    const of: <T>(x: T | Iterable<T> | AsyncIterable<T>) => AsyncGenerator<T>;
+    const of: typeof GlobalUtil['of'];
+    /**
+     *  Produces a numeric range, using with the current value as the end of the range
+     */
+    const range: (stop: number, start?: number, step?: number) => AsyncGenerator<number>;
   }
 }
 
 Object.assign(globalThis, {
   argv: process.argv.slice(3),
-  ask(message: string) {
-    return message
-      .async
-      .repeat()
-      .prompt()
-      .filter(x => {
-        if (x.trim()) {
-          return x;
-        } else {
-          console.log('Please enter a value');
-        }
-      });
-  },
   stdin: process.stdin.async,
   of: GlobalUtil.of,
   env: new Proxy({}, {
@@ -51,5 +40,15 @@ Object.assign(globalThis, {
         process.env[key.toUpperCase()] ??
         process.env[key.toLowerCase()];
     }
-  })
+  }),
+  async * range(stop: number, start = 1, step = 1) {
+    if (step > 0 && stop < start) {
+      let temp = start;
+      start = stop;
+      stop = temp;
+    }
+    for (let i = start; i <= stop; i += step) {
+      yield i;
+    }
+  }
 });
