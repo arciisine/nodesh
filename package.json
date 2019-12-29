@@ -1,6 +1,6 @@
 {
-  "name": "@arcsine/node-shell",
-  "version": "1.0.6",
+  "name": "@arcsine/nodesh",
+  "version": "1.0.7",
   "description": "",
   "scripts": {
     "clean": "rm -rf dist/",
@@ -16,6 +16,7 @@
   "license": "MIT",
   "files": [
     "dist",
+    "bin",
     "README.md"
   ],
   "keywords": [
