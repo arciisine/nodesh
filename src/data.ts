@@ -1,7 +1,7 @@
 import * as readline from 'readline';
 
 import { RegisterUtil } from './util/register';
-import { Reader, Writer } from './util/stream';
+import { Readable, Writable } from 'stream';
 
 declare global {
   interface AsyncGenerator<T = unknown, TReturn = any, TNext = unknown> {
@@ -21,7 +21,7 @@ declare global {
     /**
      * Will read string values from the input, delimited by new lines
      */
-    prompt<V = any>(this: AsyncGenerator<string, TReturn, TNext>, input?: Reader, output?: Writer): AsyncGenerator<V, TReturn, TNext>;
+    prompt<V = any>(this: AsyncGenerator<string, TReturn, TNext>, input?: Readable, output?: Writable): AsyncGenerator<V, TReturn, TNext>;
   }
 }
 
@@ -32,7 +32,7 @@ RegisterUtil.operators({
   csv<T extends readonly string[]>(this: AsyncGenerator<string>, columns: T) {
     return this.columns(columns, /,/);
   },
-  async * prompt(this: AsyncGenerator<string>, input = process.stdin, output = process.stdout) {
+  async * prompt(this: AsyncGenerator<string>, input: Readable = process.stdin, output: Writable = process.stdout) {
     let intf: readline.Interface;
     try {
       intf = readline.createInterface({ input, output });

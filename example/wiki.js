@@ -1,4 +1,4 @@
-#!/bin/npx nodesh
+#!/bin/npx @arcsine/nodesh
 
 `https://en.wikipedia.org/wiki/${env.page || 'Special:Random'}`.async
   .fetch() // Request URL

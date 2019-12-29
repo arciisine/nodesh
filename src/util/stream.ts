@@ -1,14 +1,14 @@
 import * as readline from 'readline';
 import * as fs from 'fs';
-import * as stream from 'stream';
+import { Readable, Writable } from 'stream';
 
 import { Util } from './util';
+import { EventEmitter } from 'events';
+import { OrStr } from './types';
 
 export type IOType = 'text' | 'line' | 'binary';
-export type Reader = string | String | NodeJS.ReadableStream; //eslint-disable-line
-export type Writer = string | String | NodeJS.WritableStream; //eslint-disable-line
 
-class MemoryStream extends stream.Writable {
+class MemoryStream extends Writable {
   store: Buffer[] = [];
 
   _write(chunk: Buffer, enc: string, cb: Function) {
@@ -35,8 +35,8 @@ export class StreamUtil {
    * Convert sequence to stream. If the input stream are buffers, send directly.
    * Otherwise, send as text, and if mode is line, append with newline.
    */
-  static toStream(gen: AsyncGenerator<any>, mode: IOType = 'line'): NodeJS.ReadableStream {
-    const inp = new stream.Readable();
+  static toStream(gen: AsyncGenerator<any>, mode: IOType = 'line'): Readable {
+    const inp = new Readable();
     inp._read = function (n: number) {
       gen.next().then(val => {
         if (val.done) {
@@ -59,12 +59,12 @@ export class StreamUtil {
   /**
    * Convert read stream into a sequence
    */
-  static readStream(file: Reader, mode: 'binary'): AsyncGenerator<Buffer>;
-  static readStream(file: Reader, mode: 'line' | 'text'): AsyncGenerator<string>;
-  static readStream(file: Reader, mode?: IOType): AsyncGenerator<string>;
-  static async * readStream(file: Reader, mode: IOType = 'line'): AsyncGenerator<Buffer | string> {
+  static readStream(file: OrStr<Readable>, mode: 'binary'): AsyncGenerator<Buffer>;
+  static readStream(file: OrStr<Readable>, mode: 'line' | 'text'): AsyncGenerator<string>;
+  static readStream(file: OrStr<Readable>, mode?: IOType): AsyncGenerator<string>;
+  static async * readStream(file: OrStr<Readable>, mode: IOType = 'line'): AsyncGenerator<Buffer | string> {
     const strm = typeof file === 'string' ? fs.createReadStream(file, { encoding: 'utf8', autoClose: true }) : file;
-    const src = mode === 'line' ? readline.createInterface(strm as NodeJS.ReadableStream) : strm as NodeJS.ReadableStream;
+    const src: EventEmitter = mode === 'line' ? readline.createInterface(strm) : strm;
 
     let done = false;
     let buffer: (string | Buffer)[] = [];
@@ -101,9 +101,9 @@ export class StreamUtil {
   /**
    * Pipe sequence to writable output stream
    */
-  static async write(src: AsyncGenerator, writable: Writer) {
+  static async write(src: AsyncGenerator, writable: OrStr<Writable>) {
     const res = typeof writable !== 'string' && 'write' in writable ? writable :
-      await fs.createWriteStream(writable as string, { flags: 'w', autoClose: true });
+      await fs.createWriteStream(writable, { flags: 'w', autoClose: true });
     return src.stream().pipe(res);
   }
 }

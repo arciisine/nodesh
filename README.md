@@ -4,7 +4,7 @@ Node shell is an npm package aimed at providing bash-like operations/simplicity 
 **(remote-tokens.js) Example of processing URLs from the input stream** 
 
 ```javascript
-#!/bin/npx nodesh
+#!/bin/npx @arcsine/nodesh
 
 stdin // Automatically pipe from stdin
   .match('URL', 'extract')  // Retain only URL patterns and emit as single values
@@ -105,7 +105,7 @@ const bigIntGen = of(10000n);
 
 ...
 
-const numberGen = 100000.async;
+const numberGen = (100000).async;
 const numberGen2 = of(10000);
 
 ```
@@ -114,7 +114,7 @@ const numberGen2 = of(10000);
 Within the framework there are some common enough patterns that exposing them globally proves useful.  
 
 ### Stdin
-```
+```typescript
 stdin: AsyncGenerator<string>
 ```
 
@@ -126,21 +126,8 @@ stdin // Stream stdin, one line at a time
   .stdout // Pipe to stdout
 ```
 
-### Ask
-```
-
-Allows for simple prompting as a sequence of lines.  Here a user can be prompted for information, with each line (newline terminated) acting as a single value in the sequence.
-
-
-```javascript
-ask('Which file to output?') // Read file name (will require a non-empty string)
-  .first()
-  .read() // Read file
-  .stdout // Pipe to stdout
-```
-
 ### Argv
-```
+```typescript
 argv: string[];
 ```
 
@@ -154,7 +141,7 @@ The cleaned argv parameters for the running script. Starting at index 0, is the 
 ```
 
 ### Env
-```
+```typescript
 env: Record<string, string>
 ```
 
@@ -166,7 +153,7 @@ A case insensitive map for accessing environment variables. Like `process.env`, 
   .map(userName => ... ) 
 ```
 ### Of
-```
+```typescript
 of: <T>(x: T | Iterable<T> | AsyncIterable<T> | AsyncGenerator<T>) => AsyncGenerator<T>
 ```
 
@@ -189,7 +176,7 @@ of([1,2,3])
 ```
 
 ### Range
-```
+```typescript
 range: (stop: number, start?: number, step?: number) => AsyncGenerator<number>
 ```
 
@@ -212,7 +199,7 @@ The entirety of this project centers on the set of available operators.  These o
 The core functionality provides some very basic support for sequences
 
 #### Map
-```
+```typescript
 map<U>(fn: (item: T) => OrProm<U>): AsyncGenerator<U>
 ```
 
@@ -225,7 +212,7 @@ fs.createReadStream('<file>')
 ```
 
 #### Filter
-```
+```typescript
 filter(pred: (item: T) => OrProm<boolean>): AsyncGenerator<T>
 ```
 
@@ -239,7 +226,7 @@ fs.createReadStream('<file>')
 ```
 
 #### For Each
-```
+```typescript
 forEach(fn: (item: T) => OrProm<any>): Promise<void>
 ```
 
@@ -252,7 +239,7 @@ fs.createReadStream('<file>')
 ```
 
 #### Flatten
-```
+```typescript
 flatten<U>(this: AsyncGenerator<U[]> | AsyncGenerator<AsyncGenerator<U>>): AsyncGenerator<U>
 ```
 
@@ -266,7 +253,7 @@ fs.createReadStream('<file>')
 ```
 
 #### Flat Map 
-```
+```typescript
 flatMap<U>(fn: (item: T) => Gen<U> | { async: AsyncGenerator<U> }): AsyncGenerator<U>
 ```
 
@@ -279,7 +266,7 @@ fs.createReadStream('<file>')
 ```
 
 #### Reduce
-```
+```typescript
 reduce<U>(fn: Reducer<U, T>, acc: U): AsyncGenerator<U>
 ```
 
@@ -296,7 +283,7 @@ fs.createReadStream('<file>')
 ```
 
 #### Collect
-```
+```typescript
 collect(this: AsyncGenerator<T>): AsyncGenerator<T>
 ```
 
@@ -311,7 +298,7 @@ fs.createReadStream('<file>')
 ```
 
 #### Wrap
-```
+```typescript
 wrap<U>(fn: (iter: AsyncGenerator<T>) => AsyncGenerator<U>): AsyncGenerator<U>
 ```
 
@@ -319,13 +306,13 @@ This is the simplest mechanism for extending the framework as the operator takes
 
 ```javascript
 async function translate*(lang, gen) {
-    for await (const line of gen) {
-      for (const word of line.split(/\s+/g)) {
-        const translated = await doTranslate(lang, word);
-        yield translated;
-      }
+  for await (const line of gen) {
+    for (const word of line.split(/\s+/g)) {
+      const translated = await doTranslate(lang, word);
+      yield translated;
     }
   }
+}
 
 fs.createReadStream('<file>')
   .async //  Now a line-oriented sequence  
@@ -336,7 +323,7 @@ fs.createReadStream('<file>')
 Some of the most common shell operations are iterating through files, and operating upon those files.  To support this, the framework supports producing files as a sequence of file objects or filenames, given a file extension or a regex pattern. With `String`s and `RegExp`s supporting the `.async` property, these are the most common way of finding files.
 
 #### Read
-```
+```typescript
 read(this: AsyncGenerator<string>, type?: IOType): AsyncGenerator<string>
 ```
 
@@ -362,7 +349,7 @@ This operator will treat the inbound string sequence as file names, and will con
 
 ```
 #### Dir
-```
+```typescript
 dir(this: AsyncGenerator<string | RegExp>, config?: DirConfig): AsyncGenerator<string | ScanEntry>
 ```
 
@@ -409,7 +396,7 @@ Simple file example:
 ### Transform
 
 #### Not Empty
-```
+```typescript
 notEmpty(): AsyncGenerator<T>
 ```
 
@@ -423,7 +410,7 @@ This is a special type of filter that excludes `null`, `undefined` and `''`.  Us
 ```
 
 #### Tap
-```
+```typescript
 tap(visit?: (item: T) => OrProm<any>): AsyncGenerator<T>
 ```
 
@@ -438,7 +425,7 @@ tap(visit?: (item: T) => OrProm<any>): AsyncGenerator<T>
 ```
 
 #### Unique
-```
+```typescript
 unique(this: AsyncGenerator<T>, equal?: (a: T, b: T) => OrProm<boolean>): AsyncGenerator<T>
 ```
 
@@ -452,7 +439,7 @@ unique(this: AsyncGenerator<T>, equal?: (a: T, b: T) => OrProm<boolean>): AsyncG
 ```
 
 #### Sort
-```
+```typescript
 sort(this: AsyncGenerator<T>, compare?: (a: T, b: T) => number): AsyncGenerator<T>
 ```
 
@@ -467,7 +454,7 @@ sort(this: AsyncGenerator<T>, compare?: (a: T, b: T) => number): AsyncGenerator<
 ```
 
 #### Batch
-```
+```typescript
 batch(size: number): AsyncGenerator<T[]>
 ```
 
@@ -483,7 +470,7 @@ batch(size: number): AsyncGenerator<T[]>
 ``` 
 
 #### Pair
-```
+```typescript
 pair<U>(this: AsyncGenerator<T>, value: OrCall<OrGen<U>>, mode?: 'repeat' | 'exact' | 'empty'): AsyncGenerator<[T, U]>
 ```
 
@@ -504,12 +491,11 @@ pair<U>(this: AsyncGenerator<T>, value: OrCall<OrGen<U>>, mode?: 'repeat' | 'exa
   // Generator of file lines with, file name attached
 ``` 
 
-
 ### Text
 As text operators, these only apply to sequences that produce string values. 
 
 #### Columns
-```
+```typescript
 columns(this: AsyncGenerator<string>, sep?: RegExp | string): AsyncGenerator<T[]>
 ```
 
@@ -524,9 +510,10 @@ columns(this: AsyncGenerator<string>, sep?: RegExp | string): AsyncGenerator<T[]
 
 ```
 
-```
+```typescript
 columns(this: AsyncGenerator<string>, names: string[], sep?: RegExp | string): AsyncGenerator<Record<string, string>>
 ```
+
 Additionally, `columns` supports passing in column names to produce objects instead of tuples.  These values will be matched
 with the columns produced by the separator.
 
@@ -540,7 +527,7 @@ with the columns produced by the separator.
 ```
 
 #### Tokens
-```
+```typescript
 tokens(this: AsyncGenerator<string>, sep?: RegExp | string): AsyncGenerator<T>
 ```
 
@@ -555,7 +542,7 @@ This operator allows for producing a single sequence of tokens out of lines of t
 ```
 
 #### Match
-```
+```typescript
 match(this: AsyncGenerator<string>, regex: RegExp | string | RegexType, mode?: MatchMode): AsyncGenerator<string>
 ```
 
@@ -583,7 +570,7 @@ Additionally, mode will determine what is emitted when a match is found (within 
 ```
 
 #### Replace
-```
+```typescript
 replace(this: AsyncGenerator<string>, regex: RegExp | string, sub: string | Replacer): AsyncGenerator<string>
 ```
 
@@ -598,7 +585,7 @@ replace(this: AsyncGenerator<string>, regex: RegExp | string, sub: string | Repl
 ```
 
 #### Trim
-```
+```typescript
 trim(this: AsyncGenerator<string>): AsyncGenerator<string>
 ```
 
@@ -613,13 +600,11 @@ trim(this: AsyncGenerator<string>): AsyncGenerator<string>
 ```
 
 #### Single Line
-```
+```typescript
 singleLine(this: AsyncGenerator<string>): AsyncGenerator<string>
 ```
 
-```
-singleLine
-``` is a convenience method for converting an entire block of text into a single line.  This is useful when looking for patterns that may span multiple lines.
+`singleLine` is a convenience method for converting an entire block of text into a single line.  This is useful when looking for patterns that may span multiple lines.
 
 ```javascript
 '<file>.html'
@@ -630,7 +615,7 @@ singleLine
 ```
 
 #### Join
-```
+```typescript
 join(this: AsyncGenerator<string>, joiner?: string | ((a: string[]) => string): AsyncGenerator<string>
 ```
 
@@ -647,7 +632,7 @@ This operator allows for combining a sequence of strings into a single value sim
 ### Limit
 
 #### First
-```
+```typescript
 first(n?: number): AsyncGenerator<T>
 ```
 
@@ -661,7 +646,7 @@ This will return the first `n` elements with a default of a single element.
 ```
 
 #### Skip
-```
+```typescript
 skip(n: number): AsyncGenerator<T>
 ```
 
@@ -675,7 +660,7 @@ This will return all but the first `n` elements.
 ```
 
 #### Last
-```
+```typescript
 last(n?: number): AsyncGenerator<T>
 ```
 
@@ -689,7 +674,7 @@ This will return the last `n` elements with a default of a single element.
 ```
 
 #### Repeat
-```
+```typescript
 repeat(n?: number, iters?: number): AsyncGenerator<T>
 ```
 
@@ -705,16 +690,14 @@ This will repeat the first `n` elements with a default of all elements.
 ### Net
 
 #### Fetch
-```
+```typescript
 fetch(this: AsyncGenerator<string>, output?: IOType, opts?: HttpOpts): AsyncGenerator<string | Buffer>
 ```
 
 This is meant as a simple equivalent of `curl`.  Will fetch a single page (and follow redirects).  By default, it will return lines from the response. Optionally, can return the entire page as a single string, or a sequence of `Buffer`s depending on the output type.  
 
 ```javascript
-```
-https://en.wikipedia.org/wiki/Special:Random
-```
+`https://en.wikipedia.org/wiki/Special:Random`
   .async
   .fetch() // Request URL
   .match('URL', 'extract') // Pull out URLs
@@ -723,7 +706,7 @@ https://en.wikipedia.org/wiki/Special:Random
 ### Exec
 
 #### Exec Each
-```
+```typescript
 execEach(cmd: string, ...args: string[]): AsyncGenerator<string>
 ```
 
@@ -737,7 +720,7 @@ Execute the command against each item in the sequence. Allow for a list of args 
 ```
 
 #### Exec
-```
+```typescript
 exec(cmd: string, args?: string[], output?: IOType): AsyncGenerator<string>
 ```
 
@@ -755,23 +738,21 @@ Pipe the entire sequence as input into the command to be executed.  Allow for ar
 ### Data
 
 #### JSON
-```
+```typescript
 json<V = any>(this: AsyncGenerator<string>): AsyncGenerator<V>
 ```
 
 Converts the inbound JSON string into JS Object by way of `JSON.parse`.  This will operate on individual values in the sequence, so each value should be a complete document.
 
 ```javascript
-```
-https://jsonplaceholder.typicode.com/todos/1
-```
+`https://jsonplaceholder.typicode.com/todos/1`
   .async
   .fetch() // request url
   .json()  // Convert from JSON
 ```
 
 #### CSV
-```
+```typescript
 csv(this:AsyncGenerator<string>, columns?: string[]): AsyncGenerator<string[] | Record<V[number], string>>
 ```
 
@@ -786,23 +767,23 @@ Converts the inbound CSV string into JS Object.  Converts by using simple CSV su
 ```
 
 #### Prompt
-```
+```typescript
 prompt<V = any>(this: AsyncGenerator<string>, password?: boolean): AsyncGenerator<V>
 ```
 
 Will read string values from the input, delimited by new lines
 
 ```javascript
-  'Enter a file name:'
-    .async
-    .prompt() // Request file name
-    .read() // Read file
+'Enter a file name:'
+  .async
+  .prompt() // Request file name
+  .read() // Read file
 ```
 
 ### Export
 
 #### Stream
-```
+```typescript
 stream(this: AsyncGenerator<T>, mode?: IOType): NodeJS.ReadableStream
 ```
 
@@ -820,7 +801,7 @@ stream.pipe(fs.createWriteStream('out.png')); // Write out
 ```
 
 #### Write
-```
+```typescript
 write<U extends string | Buffer | any>(this: AsyncGenerator<U>, writable: Writer): Promise<void>
 ```
 
@@ -835,7 +816,7 @@ Emits the sequence contents to a write stream.  If the write stream is a string,
 ```
 
 #### Values
-```
+```typescript
 values: Promise<T[]>
 ```
 
@@ -853,7 +834,7 @@ const values = await '<file>.csv'
 ```
 
 #### Value
-```
+```typescript
 value: Promise<T>
 ```
 
@@ -867,7 +848,7 @@ const name = await 'What is your name?'
 ```
 
 #### Stdout
-```
+```typescript
 stdout: void
 ```
 
@@ -882,7 +863,7 @@ Simple property that allows any sequence to be automatically written to stdout
 ```
 
 #### Console
-```
+```typescript
 console: void;
 ```
 

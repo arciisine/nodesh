@@ -1,4 +1,4 @@
-#!/usr/bin/npx nodesh
+#!/usr/bin/npx @arcsine/nodesh
 
 /**
  *

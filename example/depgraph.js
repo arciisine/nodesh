@@ -1,4 +1,4 @@
-#!/bin/npx nodesh
+#!/bin/npx @arcsine/nodesh
 
 /[.]ts$/.async
   .dir({ base: argv[0], full: true })

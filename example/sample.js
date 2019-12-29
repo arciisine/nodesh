@@ -1,4 +1,4 @@
-#!/bin/npx nodesh
+#!/bin/npx @arcsine/nodesh
 
 const path = require('path');
 

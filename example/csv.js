@@ -1,6 +1,6 @@
-#!/usr/bin/npx nodesh
+#!/usr/bin/npx @arcsine/nodesh
 
-ask('Enter A Row')
+'Enter A Row'.async.prompt()
   .first()
   .csv(['One', 'Two', 'Three'])
   .tap(x => console.log(x))

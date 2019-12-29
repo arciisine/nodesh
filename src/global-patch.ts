@@ -1,7 +1,6 @@
 /// <reference path="./global-patch.d.ts" />
 
-import * as stream from 'stream';
-import * as tty from 'tty';
+import { Readable } from 'stream';
 
 import { GlobalUtil } from './util/global';
 import { Util } from './util/util';
@@ -12,7 +11,7 @@ import { RegisterUtil } from './util/register';
   Boolean, Number, String, RegExp,
   Array, Set, Map,
   Util.gen,
-  stream.Readable, tty.ReadStream
+  Readable
 ]
   .forEach(
     cons => RegisterUtil.properties({
@@ -33,10 +32,10 @@ RegisterUtil.properties({
       return (fn: Function) => {
         Promise.resolve().then(() => {
           fn((this as any).values);
-        })
+        });
 
         return this;
-      }
+      };
     }
   }
-}, Util.asyncGen.prototype)
+}, Util.asyncGen.prototype);

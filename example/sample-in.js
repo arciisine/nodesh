@@ -1,4 +1,4 @@
-#!/bin/npx nodesh
+#!/bin/npx @arcsine/nodesh
 
 /**
  * @param {Map<string, number>} acc

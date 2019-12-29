@@ -1,4 +1,3 @@
-import * as tty from 'tty';
 import * as stream from 'stream';
 
 import { StreamUtil } from './stream';
@@ -18,7 +17,7 @@ export class GlobalUtil {
       yield val as T;
     } else if (val instanceof Util.asyncGen) {
       return val;
-    } else if (val instanceof stream.Readable || val instanceof tty.ReadStream) {
+    } else if (val instanceof stream.Readable) {
       yield* StreamUtil.readStream(val) as AsyncGenerator<any>;
     } else if ((val as any)[Symbol.iterator] || (val as any)[Symbol.asyncIterator]) {
       yield* (val as any);

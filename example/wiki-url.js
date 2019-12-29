@@ -1,4 +1,4 @@
-#!/bin/npx nodesh
+#!/bin/npx @arcsine/nodesh
 
 `https://en.wikipedia.org/wiki/Special:Random`
   .async
