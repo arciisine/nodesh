@@ -38,10 +38,10 @@ RegisterUtil.operators({
       await result;
     }
   },
-  async * exec(cmd: string, args: string[] = [], output: IOType = 'line') {
+  async * exec(cmd: string, args: string[] = [], outMode: IOType = 'line', inMode: IOType = outMode) {
     const { proc, result } = ExecUtil.exec(cmd, [...args]);
-    this.stream().pipe(proc.stdin!);
-    yield* StreamUtil.readStream(proc.stdout!, output);
+    this.stream(inMode).pipe(proc.stdin!);
+    yield* StreamUtil.readStream(proc.stdout!, outMode);
     await result;
   }
 });

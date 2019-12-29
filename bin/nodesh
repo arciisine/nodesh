@@ -6,7 +6,7 @@ process.on('unhandledRejection', err => {
   process.exit(1);
 });
 
-const index = path.resolve(__dirname, '../dist/index');
+const index = path.resolve(__dirname, '..', 'dist', 'index');
 require(index);
 
 if (process.argv.length >= 3) {

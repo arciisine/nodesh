@@ -1,6 +1,8 @@
+import * as fs from 'fs';
 import { Readable, Writable } from 'stream';
 import { IOType, StreamUtil } from './util/stream';
 import { RegisterUtil } from './util/register';
+import { OrStr } from './util/types';
 
 declare global {
   interface AsyncGenerator<T = unknown, TReturn = any, TNext = unknown> {
@@ -15,7 +17,12 @@ declare global {
      * is considered to be a file name. Buffer contents are written as is.  String contents
      * are written as lines.
      */
-    write<U extends string | Buffer | any>(this: AsyncGenerator<U, TReturn, TNext>, writable: Writable): Promise<void>;
+    write<U extends string | Buffer | any>(this: AsyncGenerator<U, TReturn, TNext>, writable: OrStr<Writable>): Promise<void>;
+    /**
+     * Writes the entire stream to a file, as a final step. The write stream will not be created until all the values
+     * have been emitted.  This is useful for reading and writing the same file.
+     */
+    writeFinal(this: AsyncGenerator<string, TReturn, TNext>, file: string): Promise<void>;
     /**
      * Extract all sequence contents into a single array and return
      * as a promise
@@ -37,8 +44,14 @@ declare global {
 }
 
 RegisterUtil.operators<any>({
-  write(this: AsyncGenerator, writable: Writable) {
+  write(this: AsyncGenerator, writable: OrStr<Writable>) {
     return this.stream().pipe(StreamUtil.getWritable(writable));
+  },
+  async writeFinal(this: AsyncGenerator<string>, file: string) {
+    const text = await this.join().value;
+    const str = fs.createWriteStream(file);
+    await new Promise(r => str.write(text, r));
+    str.close();
   },
   stream(this: AsyncGenerator, mode: IOType = 'text') {
     return StreamUtil.toStream(this, mode);
@@ -46,26 +59,18 @@ RegisterUtil.operators<any>({
 });
 
 RegisterUtil.properties({
-  stdout: {
-    get(this: AsyncGenerator<any>) {
-      return this.stream('line').pipe(process.stdout);
-    }
+  stdout(this: AsyncGenerator<any>) {
+    return this.stream('line').pipe(process.stdout);
   },
-  console: {
-    get(this: AsyncGenerator<any>) {
-      return this.forEach(console.log);
-    }
+  console(this: AsyncGenerator<any>) {
+    return this.forEach(console.log);
   },
-  values: {
-    async get(this: AsyncGenerator<any>) {
-      return this.collect().value;
-    }
+  async values(this: AsyncGenerator<any>) {
+    return this.collect().value;
   },
-  value: {
-    async get(this: AsyncGenerator<any>) {
-      const out = (await this.next()).value;
-      RegisterUtil.kill(this);
-      return out;
-    }
+  async value(this: AsyncGenerator<any>) {
+    const out = (await this.next()).value;
+    RegisterUtil.kill(this);
+    return out;
   }
 });

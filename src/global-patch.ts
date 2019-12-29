@@ -15,10 +15,8 @@ import { RegisterUtil } from './util/register';
 ]
   .forEach(
     cons => RegisterUtil.properties({
-      async: {
-        get(this: any) {
-          return GlobalUtil.of(this);
-        }
+      async(this: any) {
+        return GlobalUtil.of(this);
       }
     }, cons.prototype)
   );

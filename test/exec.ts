@@ -15,7 +15,7 @@ export class ExecSuite {
       .map(x => path.resolve(__dirname, 'files', x))
       .execEach('wc', ['-c'])
       .columns(['count'])
-      .map(({ count }) => parseInt(count));
+      .map(({ count }) => parseInt(count, 10));
 
     assert(res === [1, 5, 10]);
   }
@@ -34,9 +34,9 @@ export class ExecSuite {
       .async
       .exec('wc', ['-c'])
       .columns(['count'])
-      .map(({ count }) => parseInt(count))
+      .map(({ count }) => parseInt(count, 10))
       .value;
 
-    assert(val === 19);
+    assert(val === 24);
   }
 }

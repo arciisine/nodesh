@@ -37,21 +37,20 @@ export class StreamUtil {
    */
   static toStream(gen: AsyncGenerator<any>, mode: IOType = 'line'): Readable {
     const inp = new Readable();
-    inp._read = function (n: number) {
-      gen.next().then(val => {
-        if (val.done) {
-          inp.push(null);
-        } else if (val.value !== undefined) {
-          if (val.value instanceof Buffer) {
-            inp.push(val.value);
-          } else {
-            inp.push(Util.toText(val.value));
-            if (mode === 'line') {
-              inp.push('\n');
-            }
-          }
+    inp._read = async function (n: number) {
+      const { done, value } = await gen.next();
+      if (done) {
+        inp.push(null);
+      } else if (value === undefined) {
+        return;
+      } else if (value instanceof Buffer) {
+        inp.push(value);
+      } else {
+        inp.push(Util.toText(value));
+        if (mode === 'line') {
+          inp.push('\n');
         }
-      });
+      }
     };
     return inp;
   }
@@ -63,8 +62,9 @@ export class StreamUtil {
   static readStream(file: OrStr<Readable>, mode: 'line' | 'text'): AsyncGenerator<string>;
   static readStream(file: OrStr<Readable>, mode?: IOType): AsyncGenerator<string>;
   static async * readStream(file: OrStr<Readable>, mode: IOType = 'line'): AsyncGenerator<Buffer | string> {
-    const strm = typeof file === 'string' ? fs.createReadStream(file, { encoding: 'utf8', autoClose: true }) : file;
+    const strm = typeof file === 'string' ? fs.createReadStream(file, { encoding: 'utf8' }) : file;
     const src: EventEmitter = mode === 'line' ? readline.createInterface(strm) : strm;
+    const destroyed = new Promise(r => strm.once('close', r));
 
     let done = false;
     let buffer: (string | Buffer)[] = [];
@@ -96,6 +96,11 @@ export class StreamUtil {
         yield* (buffer as any);
       }
     }
+    if (!strm.destroyed) {
+      strm.destroy();
+    }
+
+    await destroyed;
   }
 
   static getWritable(writable: OrStr<Writable>) {

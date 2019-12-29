@@ -5,12 +5,16 @@ export const PARENT = Symbol('PARENT');
 export class RegisterUtil {
 
   static properties(
-    props: PropertyDescriptorMap,
+    props: PropertyDescriptorMap | Record<string, Function>,
     proto = Util.asyncGen.prototype
   ) {
     for (const key of Object.keys(props)) {
       try {
-        Object.defineProperty(proto, key, props[key]);
+        let val = props[key];
+        if ('apply' in val) {
+          val = { get: val } as any;
+        }
+        Object.defineProperty(proto, key, val);
       } catch (err) {
         // Do nothing
       }
