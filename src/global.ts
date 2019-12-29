@@ -43,7 +43,7 @@ Object.assign(globalThis, {
   }),
   async * range(stop: number, start = 1, step = 1) {
     if (step > 0 && stop < start) {
-      let temp = start;
+      const temp = start;
       start = stop;
       stop = temp;
     }

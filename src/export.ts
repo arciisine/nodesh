@@ -38,7 +38,7 @@ declare global {
 
 RegisterUtil.operators<any>({
   write(this: AsyncGenerator, writable: Writable) {
-    return StreamUtil.write(this, writable);
+    return this.stream().pipe(StreamUtil.getWritable(writable));
   },
   stream(this: AsyncGenerator, mode: IOType = 'text') {
     return StreamUtil.toStream(this, mode);
@@ -48,7 +48,7 @@ RegisterUtil.operators<any>({
 RegisterUtil.properties({
   stdout: {
     get(this: AsyncGenerator<any>) {
-      return this.write(process.stdout);
+      return this.stream('line').pipe(process.stdout);
     }
   },
   console: {

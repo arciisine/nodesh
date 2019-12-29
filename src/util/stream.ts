@@ -98,12 +98,8 @@ export class StreamUtil {
     }
   }
 
-  /**
-   * Pipe sequence to writable output stream
-   */
-  static async write(src: AsyncGenerator, writable: OrStr<Writable>) {
-    const res = typeof writable !== 'string' && 'write' in writable ? writable :
-      await fs.createWriteStream(writable, { flags: 'w', autoClose: true });
-    return src.stream().pipe(res);
+  static getWritable(writable: OrStr<Writable>) {
+    return typeof writable !== 'string' && 'write' in writable ? writable :
+      fs.createWriteStream(writable, { flags: 'w', autoClose: true });
   }
 }
