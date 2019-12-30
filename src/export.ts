@@ -5,7 +5,7 @@ import { RegisterUtil } from './util/register';
 import { OrStr } from './util/types';
 
 declare global {
-  interface AsyncGenerator<T = unknown, TReturn = any, TNext = unknown> {
+  interface AsyncGenerator<T> {
     /**
      * Converts a sequence into a node stream.  This readable stream should be
      * considered standard, and usable in any place a stream is expected. The mode
@@ -17,12 +17,12 @@ declare global {
      * is considered to be a file name. Buffer contents are written as is.  String contents
      * are written as lines.
      */
-    write<U extends string | Buffer | any>(this: AsyncGenerator<U, TReturn, TNext>, writable: OrStr<Writable>): Promise<void>;
+    write<U extends string | Buffer | any>(this: AsyncGenerator<U>, writable: OrStr<Writable>): Promise<void>;
     /**
      * Writes the entire stream to a file, as a final step. The write stream will not be created until all the values
      * have been emitted.  This is useful for reading and writing the same file.
      */
-    writeFinal(this: AsyncGenerator<string, TReturn, TNext>, file: string): Promise<void>;
+    writeFinal(this: AsyncGenerator<string>, file: string): Promise<void>;
     /**
      * Extract all sequence contents into a single array and return
      * as a promise

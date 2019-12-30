@@ -3,21 +3,21 @@ import { TimeUtil } from './util/time';
 import { RegisterUtil } from './util/register';
 
 declare global {
-  interface AsyncGenerator<T = unknown, TReturn = any, TNext = unknown> {
+  interface AsyncGenerator<T> {
     /**
      * Pause for a specified number of milliseconds
      */
-    wait(ms: number): AsyncGenerator<T, TReturn, TNext>;
+    wait(ms: number): AsyncGenerator<T>;
     /**
      * Track the beginning of a timing operation.  The all parameter indicates whether or not
      * the timing process should be per sequence element or for the entire
      * sequence.
      */
-    startTime(name: string, all?: boolean): AsyncGenerator<T, TReturn, TNext>;
+    startTime(name: string, all?: boolean): AsyncGenerator<T>;
     /**
      * Track completion of a timing operation
      */
-    stopTime(name: string, all?: boolean): AsyncGenerator<T, TReturn, TNext>;
+    stopTime(name: string, all?: boolean): AsyncGenerator<T>;
   }
 }
 

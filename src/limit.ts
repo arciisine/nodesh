@@ -1,23 +1,23 @@
 import { RegisterUtil } from './util/register';
 
 declare global {
-  interface AsyncGenerator<T = unknown, TReturn = any, TNext = unknown> {
+  interface AsyncGenerator<T> {
     /**
      * This will return the first `n` elements with a default of a single element.
      */
-    first(n?: number): AsyncGenerator<T, TReturn, TNext>;
+    first(n?: number): AsyncGenerator<T>;
     /**
      * This will return all but the first `n` elements.
      */
-    skip(n: number): AsyncGenerator<T, TReturn, TNext>;
+    skip(n: number): AsyncGenerator<T>;
     /**
      * This will return the last `n` elements with a default of a single element.
      */
-    last(n?: number): AsyncGenerator<T, TReturn, TNext>;
+    last(n?: number): AsyncGenerator<T>;
     /**
      * This will repeat the first `n` elements with a default of all elements.
      */
-    repeat(n?: number): AsyncGenerator<T, TReturn, TNext>;
+    repeat(n?: number): AsyncGenerator<T>;
   }
 }
 

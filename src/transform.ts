@@ -4,40 +4,40 @@ import { OrProm, OrCall, OrGen } from './util/types';
 type PairMode = 'empty' | 'repeat' | 'exact';
 
 declare global {
-  interface AsyncGenerator<T = unknown, TReturn = any, TNext = unknown> {
+  interface AsyncGenerator<T> {
     /**
      * This is a special type of filter that excludes `null`, `undefined` and `''`.
      * Useful for removing empty values.
      */
-    notEmpty(): AsyncGenerator<T, TReturn, TNext>;
+    notEmpty(): AsyncGenerator<T>;
     /**
      * Provides the ability to inspect the sequence without affecting it's production.  The function passed in
      * can produce a promise that will be waited on, if needed.
      */
-    tap(visit?: (item: T) => OrProm<any>): AsyncGenerator<T, TReturn, TNext>;
+    tap(visit?: (item: T) => OrProm<any>): AsyncGenerator<T>;
     /**
      * Ensures the output sequence does not have any consecutive duplicates, similar to the unix `uniq` command.
      * The uniqueness is only guaranteed linearly, to allow for streaming.  Otherwise this would need to wait
      * for all data before proceeding.  You can also specify a custom equality function as needed.
      */
-    unique(this: AsyncGenerator<T, TReturn, TNext>, equal?: (a: T, b: T) => OrProm<boolean>): AsyncGenerator<T, TReturn, TNext>;
+    unique(this: AsyncGenerator<T>, equal?: (a: T, b: T) => OrProm<boolean>): AsyncGenerator<T>;
     /**
      * A blocking operation as it requires all the data to be able to sort properly.  This means it will wait on the entire sequence
      * before producing new data.  The function operates identically to how `Array.prototype.sort`.
      */
-    sort(this: AsyncGenerator<T, TReturn, TNext>, compare?: (a: T, b: T) => number): AsyncGenerator<T, TReturn, TNext>;
+    sort(this: AsyncGenerator<T>, compare?: (a: T, b: T) => number): AsyncGenerator<T>;
     /**
      * Allows for iterative grouping of streamed data, and produces a sequence of arrays.  Each array will be `batch` sized,
      * except for the final array which will be at most `batch` size.
      */
-    batch(size: number): AsyncGenerator<T[], TReturn, TNext>;
+    batch(size: number): AsyncGenerator<T[]>;
 
     /**
      * Allows for combining two sets of data into a single sequence of pairs.  The second value can either be a single value,
      * which will be added to every item, or it could be an iterable element that will match with each item as possible. If
      * the second iterator runs out, the remaining values can be affected by the mode parameter
      */
-    pair<U>(this: AsyncGenerator<T, TReturn, TNext>, value: OrCall<OrGen<U>>, mode?: PairMode): AsyncGenerator<[T, U]>;
+    pair<U>(this: AsyncGenerator<T>, value: OrCall<OrGen<U>>, mode?: PairMode): AsyncGenerator<[T, U]>;
   }
 }
 

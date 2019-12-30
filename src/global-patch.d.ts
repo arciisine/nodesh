@@ -2,11 +2,11 @@ import * as stream from 'stream';
 import { IOType } from './util/stream';
 
 declare global {
-  interface Generator<T = unknown, TReturn = any, TNext = unknown> {
-    async: AsyncGenerator<T, TReturn, TNext>;
+  interface Generator<T> {
+    async: AsyncGenerator<T>;
   }
-  interface AsyncGenerator<T = unknown, TReturn = any, TNext = unknown> extends Promise<T[]> {
-    async: AsyncGenerator<T, TReturn, TNext>;
+  interface AsyncGenerator<T> extends Promise<T[]> {
+    async: AsyncGenerator<T>;
   }
   interface Array<T> {
     async: AsyncGenerator<T>;

@@ -4,24 +4,24 @@ import { RegisterUtil } from './util/register';
 import { Readable, Writable } from 'stream';
 
 declare global {
-  interface AsyncGenerator<T = unknown, TReturn = any, TNext = unknown> {
+  interface AsyncGenerator<T> {
     /**
      * Converts the inbound JSON string into JS Object by way of `JSON.parse`.  This will
      * operate on individual values in the sequence, so each value should be a
      * complete document.
      */
-    json<V = any>(this: AsyncGenerator<string, TReturn, TNext>): AsyncGenerator<V, TReturn, TNext>;
+    json<V = any>(this: AsyncGenerator<string>): AsyncGenerator<V>;
     /**
      * Converts the inbound CSV string into JS Object.  Converts by using simple CSV support and
      * splitting on commas.  Each value in the sequence is assumed to be a single row in the output.
      */
     csv<V extends readonly string[]>(
-      this: AsyncGenerator<string, TReturn, TNext>, columns: V
-    ): AsyncGenerator<Record<V[number], string>, TReturn, TNext>;
+      this: AsyncGenerator<string>, columns: V
+    ): AsyncGenerator<Record<V[number], string>>;
     /**
      * Will read string values from the input, delimited by new lines
      */
-    prompt<V = any>(this: AsyncGenerator<string, TReturn, TNext>, input?: Readable, output?: Writable): AsyncGenerator<V, TReturn, TNext>;
+    prompt<V = any>(this: AsyncGenerator<string>, input?: Readable, output?: Writable): AsyncGenerator<V>;
   }
 }
 

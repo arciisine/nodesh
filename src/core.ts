@@ -2,19 +2,19 @@ import { RegisterUtil } from './util/register';
 import { OrProm, Gen, Reducer, OrCall } from './util/types';
 
 declare global {
-  interface AsyncGenerator<T = unknown, TReturn = any, TNext = unknown> {
+  interface AsyncGenerator<T> {
     /**
      * Converts the sequence of data into another, by applying an operation
      * on each element.
      * @param fn
      */
-    map<U>(fn: (item: T) => OrProm<U>): AsyncGenerator<U, TReturn, TNext>;
+    map<U>(fn: (item: T) => OrProm<U>): AsyncGenerator<U>;
     /**
      * Determines if items in the sequence are valid or not. Invalid items
      * are discarded, while valid items are retained.
      * @param pred
      */
-    filter(pred: (item: T) => OrProm<boolean>): AsyncGenerator<T, TReturn, TNext>;
+    filter(pred: (item: T) => OrProm<boolean>): AsyncGenerator<T>;
     /**
      * This operator is a terminal action that receives each element of the sequence in sequence,
      * but returns no value.  This function produces a promise that should be waited on to ensure the
@@ -28,14 +28,14 @@ declare global {
      * return arrays/sequences, to be able to be represented as a single sequence.
      * @param this
      */
-    flatten<U>(this: AsyncGenerator<U[], TReturn, TNext> | AsyncGenerator<AsyncGenerator<U>, TReturn, TNext>): AsyncGenerator<U, TReturn, TNext>;
+    flatten<U>(this: AsyncGenerator<U[]> | AsyncGenerator<AsyncGenerator<U>>): AsyncGenerator<U>;
     /**
      * This is a combination of `map` and `flatten` as they are common enough in usage to warrant a
      * combined operator.  This will map the the contents of the sequence (which produces an array
      * or sequence), and producing a flattened output.
      * @param fn
      */
-    flatMap<U>(fn: (item: T) => Gen<U> | { async: AsyncGenerator<U> }): AsyncGenerator<U, TReturn, TNext>;
+    flatMap<U>(fn: (item: T) => Gen<U> | { async: AsyncGenerator<U> }): AsyncGenerator<U>;
     /**
      * This is the standard reduce operator and behaves similarly as `Array.prototype.reduce`.  This operator
      * takes in an accumulation function, which allows for computing a single value based on visiting each element
@@ -45,21 +45,21 @@ declare global {
      * @param fn
      * @param acc
      */
-    reduce<U>(fn: Reducer<U, T> & { init: () => U }, acc?: U): AsyncGenerator<U, TReturn, TNext>;
-    reduce<U>(fn: Reducer<U, T>, acc: U): AsyncGenerator<U, TReturn, TNext>;
+    reduce<U>(fn: Reducer<U, T> & { init: () => U }, acc?: U): AsyncGenerator<U>;
+    reduce<U>(fn: Reducer<U, T>, acc: U): AsyncGenerator<U>;
 
     /**
      * Gathers the entire sequence output as a single array.  This is useful if you need the entire stream to perform an action.
      */
-    collect(this: AsyncGenerator<T, TReturn, TNext>): AsyncGenerator<T[], TReturn, TNext>;
+    collect(this: AsyncGenerator<T>): AsyncGenerator<T[]>;
 
     /**
      * This is the simplest mechanism for extending the framework as the operator takes in a function that operates on the sequence of
      * data as a whole.  It will consume the sequence and produce an entirely new sequence.
      */
-    wrap<U, UReturn = any, UNext = unknown>(
-      fn: (iter: AsyncGenerator<T, TReturn, TNext>) => AsyncGenerator<U, UReturn, UNext>
-    ): AsyncGenerator<U, UReturn, UNext>;
+    wrap<U>(
+      fn: (iter: AsyncGenerator<T>) => AsyncGenerator<U>
+    ): AsyncGenerator<U>;
 
     /**
      * If an error occurs, use the provided sequence instead

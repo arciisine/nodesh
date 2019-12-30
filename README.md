@@ -817,7 +817,7 @@ Emits the sequence contents to a write stream.  If the write stream is a string,
 
 #### Write Final
 ```typescript
-writeFinal(this: AsyncGenerator<string, TReturn, TNext>, file: string): Promise<void>;
+writeFinal(this: AsyncGenerator<string>, file: string): Promise<void>;
 ```
 
 Writes the entire stream to a file, as a final step. The write stream will not be created until all the values
