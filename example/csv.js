@@ -4,4 +4,4 @@
   .first()
   .csv(['One', 'Two', 'Three'])
   .tap(x => console.log(x))
-  .values;
+  .then(x => x);

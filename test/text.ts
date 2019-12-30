@@ -88,10 +88,9 @@ export class TextSuite {
     const res = await 'test/files/book.txt'
       .async
       .read()
-      .replace(/Chapter/, 'Ch.')
-      .value;
+      .replace(/Chapter/, 'Ch.');
 
-    assert(res == 'Ch. 1');
+    assert(res[0] == 'Ch. 1');
   }
 
   @Test()
@@ -108,26 +107,23 @@ export class TextSuite {
     const res = await ['  a  \n', 'b         \n', '        c']
       .async
       .trim()
-      .singleLine()
-      .value;
+      .singleLine();
 
-    assert(res === 'a b c');
+    assert(res === ['a b c']);
   }
 
   @Test()
   async testJoin() {
     const res = await range(5)
       .map(x => '' + x)
-      .join('~')
-      .value;
+      .join('~');
 
-    assert(res === '1~2~3~4~5');
+    assert(res === ['1~2~3~4~5']);
 
     const res2 = await range(5)
       .map(x => '' + x)
-      .join()
-      .value;
+      .join();
 
-    assert(res2 === '12345');
+    assert(res2 === ['12345']);
   }
 }

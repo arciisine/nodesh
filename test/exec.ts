@@ -30,12 +30,11 @@ export class ExecSuite {
       'k,,'
     ];
 
-    const val = await data
+    const [val] = await data
       .async
       .exec('wc', ['-c'])
       .columns(['count'])
-      .map(({ count }) => parseInt(count, 10))
-      .value;
+      .map(({ count }) => parseInt(count, 10));
 
     assert(val === 24);
   }

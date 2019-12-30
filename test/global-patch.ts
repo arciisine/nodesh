@@ -1,6 +1,5 @@
 import * as assert from 'assert';
 import * as fs from 'fs';
-import * as path from 'path';
 
 import { Suite, Test } from '@travetto/test';
 
@@ -11,12 +10,12 @@ export class GlobalPatchSuite {
 
   @Test()
   async testPrimitives() {
-    assert(await (5).async.value === 5);
-    assert(await '5'.async.value === '5');
+    assert(await (5).async === [5]);
+    assert(await '5'.async === ['5']);
     // @ts-ignore
-    assert(await /5/g.async.value instanceof RegExp);
+    assert((await /5/g.async)[0] instanceof RegExp);
     // @ts-ignore
-    assert(await (true).async.value === true);
+    assert((await (true).async)[0] === true);
   }
 
   @Test()
@@ -34,7 +33,7 @@ export class GlobalPatchSuite {
       }
     }
 
-    assert(await count().async.last().value === 9);
+    assert(await count().async.last() === [9]);
 
     async function* countAsync() {
       for (let i = 0; i < 10; i++) {
@@ -42,7 +41,7 @@ export class GlobalPatchSuite {
       }
     }
 
-    assert(await countAsync().async.last().value === 9);
+    assert(await countAsync().async.last() === [9]);
 
     const iter = countAsync();
     assert(iter === iter.async);
@@ -52,6 +51,8 @@ export class GlobalPatchSuite {
   async testStreams() {
     const lines = await fs.createReadStream('./test/files/book.txt')
       .async;
+
+    console.log(lines);
 
     assert(lines.length === 7);
   }

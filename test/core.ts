@@ -115,7 +115,7 @@ export class CoreSuite {
   @Test()
   async onError() {
     const ret = await (async function* () {
-      yield -1;
+      yield -1 as number;
       yield 0;
       if (true) {
         throw new Error('Uhoho');
