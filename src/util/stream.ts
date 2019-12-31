@@ -4,7 +4,7 @@ import { Readable, Writable } from 'stream';
 
 import { Util } from './util';
 import { EventEmitter } from 'events';
-import { OrStr } from './types';
+import { OrStr } from '../types';
 
 export type IOType = 'text' | 'line' | 'binary';
 

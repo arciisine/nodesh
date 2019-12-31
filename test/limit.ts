@@ -15,13 +15,13 @@ export class LimitSuite {
       yield 2;
     };
 
-    const val = await badGen().async.first().value;
+    const [val] = await badGen().async.first();
     assert(val === 1);
   }
 
   @Test()
   async testSkip() {
-    const val = await range(4).skip(3).value;
+    const [val] = await range(4).skip(3);
     assert(val === 4);
   }
 

@@ -12,6 +12,7 @@ export class NetUtil {
   static fetch(url: string, output?: IOType, opts?: HttpOpts, level?: number): AsyncGenerator<string | Buffer>;
   static fetch(url: string, output: 'line' | 'text', opts?: HttpOpts): AsyncGenerator<string>;
   static fetch(url: string, output: 'binary', opts?: HttpOpts): AsyncGenerator<Buffer>;
+  static fetch(url: string): AsyncGenerator<string>;
   static async* fetch(url: string, output: IOType = 'line', opts: HttpOpts = {}, level = 0): AsyncGenerator<string | Buffer> {
     const messageProm = new Promise<http.IncomingMessage>((res, rej) => {
       const src = (url.startsWith('https') ? https.request : http.request)(url, opts, res);

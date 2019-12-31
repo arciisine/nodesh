@@ -36,16 +36,6 @@ $ find . -name '*.ts' |\
   + [Sources](#sources)
 * [Global Helpers](#global-helpers)
 * [Operators](#operators)
-  + [Core](#core)
-  + [Files](#files)
-  + [Transform](#transform)
-  + [Text](#text)
-  + [Limit](#limit)
-  + [Net](#net)
-  + [Exec](#exec)
-  + [Data](#data)
-  + [Export](#export)
-* [Creating a Custom Operator](#creating-a-custom-operator)
 
 ## Goals
 This tools is aimed at simple workflows that normally live within the domain of bash scripts.  It is meant to be an alternative of staying in bash or jumping over to another language like python.  It's aimed at being able to leverage node libraries and utilities while providing a solid set of foundational elements. 
@@ -110,51 +100,17 @@ const numberGen2 = of(10000);
 
 ```
 
-## Global Helpers
-Within the framework there are some common enough patterns that exposing them globally proves useful.  
 
-### Stdin
+### GlobalHelpers
+
+Within the framework there are some common enough patterns that
+exposing them globally proves useful.
+
+
+
+#### Of
 ```typescript
-stdin: AsyncGenerator<string>
-```
-
-Provides direct access to stdin as sequence of lines.
-
-```javascript
-stdin // Stream stdin, one line at a time
-  .map(line => line.split('').reverse().join('')) // Reverse each line
-  .stdout // Pipe to stdout
-```
-
-### Argv
-```typescript
-argv: string[];
-```
-
-The cleaned argv parameters for the running script. Starting at index 0, is the first meaning parameter for the script.  This differs from `process.argv` by excluding the executable and script name.  This is useful as the script may be invoked in many different ways and the desire is to limit the amount of guessing needed to handle inputs appropriately.  If you are going to use a command line parsing tool, then you would continue to use `process.argv` as normal.
-
-```javascript
-(argv[0] ?? ask('Enter a file name:')) 
-  // Pull in name from argv[0] or prompt if missing
-  .async
-  .read() // Read file
-```
-
-### Env
-```typescript
-env: Record<string, string>
-```
-
-A case insensitive map for accessing environment variables. Like `process.env`, but doesn't require knowledge of the case.  Useful for simplifying script interactions.
-
-```javascript
-(env.user_name ?? ask('Enter a user name')) // Prompt user name if there
-  .async // Can call async on sequences and it will return the same value
-  .map(userName => ... ) 
-```
-### Of
-```typescript
-of: <T>(x: T | Iterable<T> | AsyncIterable<T> | AsyncGenerator<T>) => AsyncGenerator<T>
+get of(): typeof RegisterUtil.of;
 ```
 
 Will turn any value into a sequence. If the input value is of type:
@@ -166,18 +122,106 @@ Will turn any value into a sequence. If the input value is of type:
 
 ```javascript
 of([1,2,3])
-  .map(x => x ** 2)
+   .map(x => x ** 2)
 
-// Should be identical
+ // Should be identical
 
-[1,2,3].async
-  .map(x => x ** 2)  
+ [1,2,3].async
+   .map(x => x ** 2)
 
 ```
 
-### Range
+#### RegisterOperator
 ```typescript
-range: (stop: number, start?: number, step?: number) => AsyncGenerator<number>
+get registerOperator(): (op: Function) => void;
+```
+
+In the process of using the tool, there may be a need for encapsulating common
+operations.  By default, `wrap` provides an easy path for re-using functionality,
+but it lacks the clarity of intent enjoyed by the built in operators.
+
+```javascript
+ (reverse.js)
+class Custom {
+  reverse() {
+    return this
+      .collect() // Gather the entire sequence as an array
+      .map(x => x.reverse()) // Reverse it
+      .flatten(); // Flatten it back into a single sequence
+  }
+}
+
+registerOperator(Custom);
+
+module global { // Typescript only
+  interface AsyncGenerator<T = unknown, TReturn = any, TNext = unknown> extends Custom;
+}
+
+```
+
+```javascript
+require('./reverse')
+
+[1,2,3]
+  .async
+  .reverse() // Reverse is now available
+
+```
+
+#### Argv
+```typescript
+get argv(): string[];
+```
+
+The cleaned argv parameters for the running script. Starting at index 0,
+is the first meaning parameter for the script.  This differs from `process.argv`
+by excluding the executable and script name.  This is useful as the script may
+be invoked in many different ways and the desire is to limit the amount of
+guessing needed to handle inputs appropriately.
+
+NOTE: If you are going to use a command line parsing tool, then you would continue to
+use `process.argv` as normal.
+
+```javascript
+(argv[0] ?? 'Enter a file name:'.prompt())
+  // Pull in name from argv[0] or prompt if missing
+  .async
+  .read() // Read file
+
+```
+
+#### Stdin
+```typescript
+get stdin(): AsyncGenerator<string>;
+```
+
+Provides direct access to stdin as sequence of lines
+
+```javascript
+stdin // Stream stdin, one line at a time
+ .map(line => line.split('').reverse().join('')) // Reverse each line
+ .stdout // Pipe to stdout
+
+```
+
+#### Env
+```typescript
+get env(): Record<string, string>;
+```
+
+A case insensitive map for accessing environment variables. Like `process.env`, but
+doesn't require knowledge of the case.  Useful for simplifying script interactions.
+
+```javascript
+(env.user_name ?? ask('Enter a user name')) // Prompt user name if there
+  .async // Can call async on sequences and it will return the same value
+  .map(userName => ... )
+
+```
+
+#### Range
+```typescript
+range(stop: number, start?: number, step?: number): AsyncGenerator<number, void, unknown>;
 ```
 
 Produces a numeric range, between start (1 by default) and stop (inclusive).  A step
@@ -185,124 +229,143 @@ parameter can be defined to specify the distance between iterated numbers.
 
 ```javascript
 range(1, 3)
-  .map(x => x**2) 
+  .map(x => x**2)
   // sequence of 1, 4, 9
 
 range(10, 1, 2)
   // sequence of 1, 3, 5, 7, 9
 
 ```
+
 ## Operators
 The entirety of this project centers on the set of available operators.  These operators can be broken into the following groups
 
+
 ### Core
+
 The core functionality provides some very basic support for sequences
 
-#### Map
+
+
+#### ForEach
 ```typescript
-map<U>(fn: (item: T) => OrProm<U>): AsyncGenerator<U>
+forEach<T>(this: AsyncGenerator<T>, fn: (x: T) => OrProm<any>): Promise<void>;
 ```
 
-Converts the sequence of data into another, by applying an operation on each element. 
-```javascript
-fs.createReadStream('<file>')
-  .async //  Now a line-oriented sequence
-  .map(line => line.toUpperCase()) 
-  // is now a sequence of all uppercase lines
-```
-
-#### Filter
-```typescript
-filter(pred: (item: T) => OrProm<boolean>): AsyncGenerator<T>
-```
-
-Determines if items in the sequence are valid or not. Invalid items are discarded, while valid items are retained.
-
-```javascript
-fs.createReadStream('<file>')
-  .async //  Now a line-oriented sequence
-  .filter(x => x.length > 10) 
-  // Will retain all lines that are more than 10 characters
-```
-
-#### For Each
-```typescript
-forEach(fn: (item: T) => OrProm<any>): Promise<void>
-```
-
-This operator is a terminal action that receives each element of the sequence in sequence, but returns no value.  This function produces a promise that should be waited on to ensure the sequence is exhausted.
-
+This operator is a terminal action that receives each element of the sequence in sequence,
+but returns no value.  This function produces a promise that should be waited on to ensure the
+sequence is exhausted.
 ```javascript
 fs.createReadStream('<file>')
   .async //  Now a line-oriented sequence
   .forEach(console.log)  // Will output each line
+
+```
+
+#### Map
+```typescript
+map<T, U>(this: AsyncGenerator<T>, fn: (x: T) => OrProm<U>): AsyncGenerator<U, void, unknown>;
+```
+
+Converts the sequence of data into another, by applying an operation
+on each element.
+```javascript
+fs.createReadStream('<file>')
+ .async //  Now a line-oriented sequence
+ .map(line => line.toUpperCase())
+ // is now a sequence of all uppercase lines
+
+```
+
+#### Filter
+```typescript
+filter<T>(this: AsyncGenerator<T>, pred: (x: T) => OrProm<boolean>): AsyncGenerator<T, void, unknown>;
+```
+
+Determines if items in the sequence are valid or not. Invalid items
+are discarded, while valid items are retained.
+```javascript
+fs.createReadStream('<file>')
+  .async //  Now a line-oriented sequence
+  .filter(x => x.length > 10)
+  // Will retain all lines that are more than 10 characters
+
 ```
 
 #### Flatten
 ```typescript
-flatten<U>(this: AsyncGenerator<U[]> | AsyncGenerator<AsyncGenerator<U>>): AsyncGenerator<U>
+flatten<T, U>(this: AsyncGenerator<U[]> | AsyncGenerator<AsyncGenerator<U>>): AsyncGenerator<U>;
 ```
 
-Flattens a sequence of arrays, or a sequence of sequences.  This allows for operators that return arrays/sequences, to be able to be represented as a single sequence.
-
+Flattens a sequence of arrays, or a sequence of sequences.  This allows for operators that
+return arrays/sequences, to be able to be represented as a single sequence.
 ```javascript
 fs.createReadStream('<file>')
   .async //  Now a line-oriented sequence
   .map(line => line.split(/\s+/g)) // Now a string[] sequence
   .flatten() // Now a string sequence for each word in the file
+
 ```
 
-#### Flat Map 
+#### FlatMap
 ```typescript
-flatMap<U>(fn: (item: T) => Gen<U> | { async: AsyncGenerator<U> }): AsyncGenerator<U>
+flatMap<T, U>(this: AsyncGenerator<T>, fn: (x: T) => Gen<U> | {async: AsyncGenerator<U>;}): AsyncGenerator<U>;
 ```
 
-This is a combination of `map` and `flatten` as they are common enough in usage to warrant a combined operator.  This will map the the contents of the sequence (which produces an array or sequence), and producing a flattened output.
-
+This is a combination of `map` and `flatten` as they are common enough in usage to warrant a
+combined operator.  This will map the the contents of the sequence (which produces an array
+or sequence), and producing a flattened output.
 ```javascript
 fs.createReadStream('<file>')
   .async //  Now a line-oriented sequence
   .flatMap(line => line.split(/\s+/g)) // Now a word sequence for the file
+
 ```
 
 #### Reduce
 ```typescript
-reduce<U>(fn: Reducer<U, T>, acc: U): AsyncGenerator<U>
+reduce<T, U>(this: AsyncGenerator<T>, fn: Reducer<U, T> & {init?: () => U;}, acc?: U): AsyncGenerator<U>;
 ```
 
-This is the standard reduce operator and behaves similarly as `Array.prototype.reduce`.  This operator takes in an accumulation function, which allows for computing a single value based on visiting each element in the sequence.  Given that reduce is a comprehensive and produces a singular value, this operation cannot stream and will block until the sequence is exhausted. Normally it is common to understand `map` and `filter` as being implemented by `reduce`, but in this situation they behave differently.
-
+This is the standard reduce operator and behaves similarly as `Array.prototype.reduce`.  This operator
+takes in an accumulation function, which allows for computing a single value based on visiting each element
+in the sequence.  Given that reduce is a comprehensive and produces a singular value, this operation cannot
+stream and will block until the stream is exhausted. Normally it is common to understand `map` and `filter` as
+being implemented by `reduce`, but in this situation they behave differently.
 ```javascript
 fs.createReadStream('<file>')
-  .async //  Now a line-oriented sequence  
+  .async //  Now a line-oriented sequence
   .flatMap(line => line.split(/\s+/g)) // Now a string sequence for each word in the file
   .reduce((acc, token) => {
     acc[token] = (acc[token] ?? 0) + 1;
     return acc;
   }, {}); // Produces a map of words and their respective frequencies within the document
+
 ```
 
 #### Collect
 ```typescript
-collect(this: AsyncGenerator<T>): AsyncGenerator<T>
+collect<T>(this: AsyncGenerator<T>): AsyncGenerator<T[]>;
 ```
 
-`collect` gathers the entire sequence output as a single array.  This is useful if you need the entire sequence to perform an action.
+Gathers the entire sequence output as a single array.  This is useful if you need the entire stream to perform an action.
 
 ```javascript
 fs.createReadStream('<file>')
-  .async //  Now a line-oriented sequence  
+  .async //  Now a line-oriented sequence
   .collect() // Now a sequence with a single array (of all the lines)
   .map(lines => lines.join('\n'))
   // Produces a single string of the whole file
+
 ```
 
 #### Wrap
 ```typescript
-wrap<U>(fn: (iter: AsyncGenerator<T>) => AsyncGenerator<U>): AsyncGenerator<U>
+wrap<T, U>(this: AsyncGenerator<T>, fn: (input: AsyncGenerator<T>) => AsyncGenerator<U>): AsyncGenerator<U, void, unknown>;
 ```
 
-This is the simplest mechanism for extending the framework as the operator takes in a function that operates on the sequence of data as a whole.  It will consume the sequence and produce an entirely new sequence.
+This is the simplest mechanism for extending the framework as the operator takes in a function that operates on the sequence of
+data as a whole.  It will consume the sequence and produce an entirely new sequence.
 
 ```javascript
 async function translate*(lang, gen) {
@@ -315,135 +378,154 @@ async function translate*(lang, gen) {
 }
 
 fs.createReadStream('<file>')
-  .async //  Now a line-oriented sequence  
+  .async //  Now a line-oriented sequence
   .wrap(translate.bind(null, 'fr')); // Produces a sequence of french-translated word
+
 ```
 
-### Files
-Some of the most common shell operations are iterating through files, and operating upon those files.  To support this, the framework supports producing files as a sequence of file objects or filenames, given a file extension or a regex pattern. With `String`s and `RegExp`s supporting the `.async` property, these are the most common way of finding files.
+#### OnError
+```typescript
+onError<T>(this: AsyncGenerator<T>, alt: AsyncGenerator<T> | (() => AsyncGenerator<T>)): AsyncGenerator<T, void, unknown>;
+```
+
+If an error occurs, use the provided sequence instead
+
+
+
+
+### File
+
+Some of the most common shell operations are iterating through files,
+and operating upon those files.  To support this, the framework supports
+producing files as a sequence of file objects or filenames, given a file
+extension or a regex pattern. With `String`s and `RegExp`s supporting the
+`.async` property, these are the most common way of finding files.
+
+
 
 #### Read
 ```typescript
-read(this: AsyncGenerator<string>, type?: IOType): AsyncGenerator<string>
+read(this: AsyncGenerator<string>, type: 'binary'): AsyncGenerator<Buffer>;
+read(this: AsyncGenerator<string>, type?: IOType): AsyncGenerator<string>;
+read(this: AsyncGenerator<string>, type: 'line' | 'text'): AsyncGenerator<string>;
 ```
 
-This operator will treat the inbound string sequence as file names, and will convert the filename (based on IOType) to:
-
+This operator will treat the inbound string sequence as file names, and will convert the filename (based on IOType)
 * `line` (default) - The sequence will produce as series of lines of text
 * `text` - The sequence will produce the entire file contents as a single text string
 * `binary` - The sequence will produce a series of `Buffer` objects
-
 
 ```javascript
 '<file>'
   .async //  Now a sequence of a single value, a file name
   .read('binary') // Read as a series of buffers
-  .reduce((acc, buffer) => { 
+  .reduce((acc, buffer) => {
     return acc  + buffer.length;
   }, 0); // Count number of bytes in file
 
+```
+
+```javascript
 '<file>'
   .async //  Now a sequence of a single value, a file name
   .read('text') // Read as a single string
   .map(text => text.length); // Count number of characters in file
 
-```
-#### Dir
-```typescript
-dir(this: AsyncGenerator<string | RegExp>, config?: DirConfig): AsyncGenerator<string | ScanEntry>
+
 ```
 
-`dir` provides the ability to recursively search for files within a file system.  It expects as the input sequence type:
+#### Dir
+```typescript
+dir(this: AsyncGenerator<string | RegExp>, config: Omit<DirConfig, 'full'> & {full: true;}): AsyncGenerator<ScanEntry>;
+dir(this: AsyncGenerator<string | RegExp>, config: DirConfig): AsyncGenerator<string>;
+dir(this: AsyncGenerator<string | RegExp>): AsyncGenerator<string>;
+dir(this: AsyncGenerator<string | RegExp>, config?: DirConfig): AsyncGenerator<string | ScanEntry>;
+```
+
+`dir` provides the ability to recursively search for files within a file system.  It expects as the
+input sequence type:
 * A `string` which represents a suffix search on file names (e.g. `.csv`)
 * A `RegExp` which represents a file pattern to search on (e.g. `/path\/sub\/.*[.]js/`)
 
-In addition to the input sequence type, there is an optional config to affect the output.  By default the output of this sequence will be a series of file names, relative to the `process.cwd()` that will be eligible for reading or any other file operation.
+In addition to the input sequence type, there is an optional config to affect the output.
+By default the output of this sequence will be a series of file names, relative to the `process.cwd()`
+that will be eligible for reading or any other file operation.
 
-The config shape looks like: 
-```typescript
-type DireConfig = { 
-  // The starting point for all file searches (defaults to process.cwd())
-  base?: string; 
-  // Whether or not to return just the file name (default) or the full Scan object (true)
-  full?: boolean;
-};
-```
-
-If a full return type is desired, the resulting sequence will return objects of the following type:
-```typescript
-type ScanEntry = {
-  // Fully qualified file name
-  file: string;
-  // File name relative to base
-  relative: string;
-  // The fs.stats output, includes mtime/ctime useful for sorting searching
-  stats: fs.Stats;
-}
-```
-
-Simple file example:
 ```javascript
-
 '.csv'
   .async
   .dir({ full: true }) // List all '.csv' files, recursively
-  .forEach(f => { 
+  .forEach(f => {
     // Display the filename, and it's modification time
     console.log(f.file, f.stats.mtime);
-  })
+  });
+
 ```
+
 
 ### Transform
 
-#### Not Empty
+Standard operators regarding common patterns for transformations
+
+
+
+#### NotEmpty
 ```typescript
-notEmpty(): AsyncGenerator<T>
+notEmpty<T>(this: AsyncGenerator<T>): AsyncGenerator<T>;
 ```
 
-This is a special type of filter that excludes `null`, `undefined` and `''`.  Useful for removing empty values.
+This is a special type of filter that excludes `null`, `undefined` and `''`.
+Useful for removing empty values.
 
 ```javascript
 '<file>'
   .async
   .read()
   .notEmpty() // Return all non-empty lines of the file
+
 ```
 
 #### Tap
 ```typescript
-tap(visit?: (item: T) => OrProm<any>): AsyncGenerator<T>
+tap<T>(this: AsyncGenerator<T>, visit?: (item: T) => OrProm<any>): AsyncGenerator<T>;
 ```
 
-`tap` provides the ability to inspect the sequence without affecting it's production.  The function passed into to `tap` can produce a promise that will be waited on, if needed.
+`tap` provides the ability to inspect the sequence without affecting it's production.  The function passed in
+can produce a promise that will be waited on, if needed.
 
 ```javascript
 '.csv'
   .async
   .dir()
-  .tap(({stats}) => collectMetrics(stats)) 
+  .tap(({stats}) => collectMetrics(stats))
   // Stream unchanged, but was able to track file stat information
+
 ```
 
 #### Unique
 ```typescript
-unique(this: AsyncGenerator<T>, equal?: (a: T, b: T) => OrProm<boolean>): AsyncGenerator<T>
+unique<T>(this: AsyncGenerator<T>, compare?: (a: T, b: T) => OrProm<boolean>): AsyncGenerator<T>;
 ```
 
-`unique` will ensure the output sequence does not have any consecutive duplicates, similar to the unix `uniq` command.  The uniqueness is only guaranteed linearly, to allow for streaming.  Otherwise this would need to wait for all data before proceeding.  You can also specify a custom equality function as needed.  
+`unique` will ensure the output sequence does not have any consecutive duplicates, similar to the unix `uniq` command.
+The uniqueness is only guaranteed linearly, to allow for streaming.  Otherwise this would need to wait
+for all data before proceeding.  You can also specify a custom equality function as needed.
 
 ```javascript
 [1, 2, 2, 3, 4, 5, 5, 1, 7]
   .async
   .unique() // Will produce [1, 2, 3, 4, 5, 1, 7]
-  // The final 1 repeats as it's not duplicated in sequence 
+  // The final 1 repeats as it's not duplicated in sequence
+
 ```
 
 #### Sort
 ```typescript
-sort(this: AsyncGenerator<T>, compare?: (a: T, b: T) => number): AsyncGenerator<T>
+sort<T>(this: AsyncGenerator<T>, compare?: (a: T, b: T) => number): AsyncGenerator<T, any, any>;
 ```
 
-`sort` is a blocking operation as it requires all the data to be able to sort properly.  This means it will wait on the entire sequence before producing new data.  The function operates identically to how `Array.prototype.sort` behaves.
+`sort` is a blocking operation as it requires all the data to be able to sort properly.  This means it will wait
+on the entire sequence before producing new data.  The function operates identically to how `Array.prototype.sort` behaves.
 
 ```javascript
 '<file>'
@@ -451,14 +533,16 @@ sort(this: AsyncGenerator<T>, compare?: (a: T, b: T) => number): AsyncGenerator<
   .read() // Now a sequence of lines
   .sort() // Sort lines alphabetically
   // Now a sequence of sorted lines
+
 ```
 
 #### Batch
 ```typescript
-batch(size: number): AsyncGenerator<T[]>
+batch<T>(this: AsyncGenerator<T>, size: number): AsyncGenerator<T[]>;
 ```
 
-`batch` allows for iterative grouping of streamed data, and produces a sequence of arrays.  Each array will be `batch` sized, except for the final array which will be at most `batch` size. 
+Allows for iterative grouping of streamed data, and produces a sequence of arrays.  Each array will be `batch` sized,
+except for the final array which will be at most `batch` size.
 
 ```javascript
 '<file>'
@@ -467,17 +551,21 @@ batch(size: number): AsyncGenerator<T[]>
   .batch(20) // Generator of array of lines, at most 20 items in length
   .map(lines => lines.sort()) // Sort each batch
   // Generator of sorted list strings
-``` 
+
+```
 
 #### Pair
 ```typescript
-pair<U>(this: AsyncGenerator<T>, value: OrCall<OrGen<U>>, mode?: 'repeat' | 'exact' | 'empty'): AsyncGenerator<[T, U]>
+pair<T, U>(this: AsyncGenerator<T>, value: OrCall<OrGen<U>>, mode?: PairMode): AsyncGenerator<[T, U]>;
 ```
 
-`pair` allows for combining two sets of data into a single sequence of pairs.  The second value can either be a single value, which will be added to every item, or it could be an iterable element that will match with each item as possible. If the second iterator runs out, the remaining values can be affected by the mode parameter:
-* * `'empty'`  - Fill in with `undefined` once the second iterator is exhausted.  This is default for iterable values.
-* * `'repeat'` - Loop iteration on the secondary iterator.  This is default for string values.
-* * `'exact'`  - Stop the emitting values once the secondary iterator is exhausted.
+`pair` allows for combining two sets of data into a single sequence of pairs.
+The second value can either be a single value, which will be added to every item,
+or it could be an iterable element that will match with each item as possible. If the second
+iterator runs out, the remaining values can be affected by the mode parameter:
+* `'empty'`  - Fill in with `undefined` once the second iterator is exhausted.  This is default for iterable values.
+* `'repeat'` - Loop iteration on the secondary iterator.  This is default for string values.
+* `'exact'`  - Stop the emitting values once the secondary iterator is exhausted.
 
 ```javascript
 '.ts'
@@ -489,17 +577,28 @@ pair<U>(this: AsyncGenerator<T>, value: OrCall<OrGen<U>>, mode?: 'repeat' | 'exa
     .map(([a,b]) => [b, a]) // Reverse the order of the columns
   )
   // Generator of file lines with, file name attached
-``` 
+
+```
+
 
 ### Text
-As text operators, these only apply to sequences that produce string values. 
+
+Support for common textual operations.
+
+As text operators, these only apply to sequences that
+produce string values.
+
+
 
 #### Columns
 ```typescript
-columns(this: AsyncGenerator<string>, sep?: RegExp | string): AsyncGenerator<T[]>
+columns(this: AsyncGenerator<string>, sep?: RegExp | string): AsyncGenerator<string[]>;
 ```
 
-`columns` is similar to the unix `awk` in that it allows for production of columns from a single line of text. This is useful for dealing with column oriented output.  The separator defaults to all whitespace but can tailored as needed by regex or string.
+`columns` is similar to the unix `awk` in that it allows for production of
+columns from a single line of text. This is useful for dealing with column
+oriented output.  The separator defaults to all whitespace but can tailored
+as needed by regex or string.
 
 ```javascript
 '<file>.tsv' // Tab-separated file
@@ -510,12 +609,14 @@ columns(this: AsyncGenerator<string>, sep?: RegExp | string): AsyncGenerator<T[]
 
 ```
 
+#### Columns
 ```typescript
-columns(this: AsyncGenerator<string>, names: string[], sep?: RegExp | string): AsyncGenerator<Record<string, string>>
+columns<V extends readonly string[]>(this: AsyncGenerator<string>, names: V, sep?: RegExp | string): AsyncGenerator<Record<V[number], string>>;
 ```
 
-Additionally, `columns` supports passing in column names to produce objects instead of tuples.  These values will be matched
-with the columns produced by the separator.
+Supports passing in column names to produce objects instead of tuples.  These values will be
+matched with the columns produced by the separator. Any row that is shorter than the names
+array will have undefined for the associated keys.
 
 ```javascript
 '<file>.tsv' // Tab-separated file
@@ -528,83 +629,97 @@ with the columns produced by the separator.
 
 #### Tokens
 ```typescript
-tokens(this: AsyncGenerator<string>, sep?: RegExp | string): AsyncGenerator<T>
+tokens(this: AsyncGenerator<string>, sep?: RegExp | string): AsyncGenerator<string, any, any>;
 ```
 
 This operator allows for producing a single sequence of tokens out of lines of text.  The default separator is whitespace.
 
 ```javascript
+
 '<file>'
   .async
   .read() // Read file as lines
-  .tokens() // Convert to words 
+  .tokens() // Convert to words
   .filter(x => x.length > 5) // Retain only words 6-chars or longer
+
 ```
 
 #### Match
 ```typescript
-match(this: AsyncGenerator<string>, regex: RegExp | string | RegexType, mode?: MatchMode): AsyncGenerator<string>
+match(this: AsyncGenerator<string>, regex: RegExp | string | RegexType, mode?: MatchMode): AsyncGenerator<string>;
 ```
 
-`match` is similar to tokens, but will emit based on a pattern instead of just word boundaries.  In addition to simple regex or string patterns, there is built in support for some common use cases (`RegexType`)
+`match` is similar to tokens, but will emit based on a pattern instead of
+just word boundaries.
+
+In addition to simple regex or string patterns, there is built in support for some common use cases (`RegexType`)
 * `'URL'` - Will match on all URLs
 * `'EMAIL'` - Will match on all emails
 
-Additionally, mode will determine what is emitted when a match is found (within a single line)
+Additionally, mode will determine what is emitted when a match is found (within a single line):
 * `undefined` - (default) Return entire line
 * `'extract'` - Return only matched element
-* `'negate'` - Return only lines that do not match 
+* `'negate'` - Return only lines that do not match
 
 ```javascript
 '<file>'
   .async
   .read()
-  .match(/(FIXME|TODO)/, 'negate')  
+  .match(/(FIXME|TODO)/, 'negate')
   // Exclude all lines that include FIXME or TODO
 
+```
+
+```javascript
 '<file>'
   .async
   .read()
-  .match(/\d{3}(-)?\d{3}(-)?\d{4}/, 'extract)  
+  .match(/\d{3}(-)?\d{3}(-)?\d{4}/, 'extract)
   // Return all phone numbers in the sequence
+
 ```
 
 #### Replace
 ```typescript
-replace(this: AsyncGenerator<string>, regex: RegExp | string, sub: string | Replacer): AsyncGenerator<string>
+replace(this: AsyncGenerator<string>, pattern: RegExp | string, sub: string | Replacer): AsyncGenerator<string>;
 ```
 
-`replace` behaves identically to `String.prototype.replace`, but will only operate on a single sequence value at a time.
+`replace` behaves identically to `String.prototype.replace`, but will only operate
+on a single sequence value at a time.
 
 ```javascript
-'<file>'
+ '<file>'
   .async
   .read()
   .replace(/TODO/, 'FIXME')
   // All occurrences replaced
+
 ```
 
 #### Trim
 ```typescript
-trim(this: AsyncGenerator<string>): AsyncGenerator<string>
+trim(this: AsyncGenerator<string>): AsyncGenerator<string>;
 ```
 
-`trim` behaves identically to `String.prototype.trim`, but will only operate on a single sequence value at a time.
+`trim` behaves identically to `String.prototype.trim`, but will only operate on a single sequence value at a time
 
 ```javascript
 '<file>'
   .async
   .read()
-  .trim() 
+  .trim()
   // Cleans leading/trailing whitespace per line
+
 ```
 
-#### Single Line
+#### SingleLine
 ```typescript
-singleLine(this: AsyncGenerator<string>): AsyncGenerator<string>
+singleLine(this: AsyncGenerator<string>): AsyncGenerator<string>;
 ```
 
-`singleLine` is a convenience method for converting an entire block of text into a single line.  This is useful when looking for patterns that may span multiple lines.
+`singleLine` is a convenience method for converting an entire block of
+text into a single line.  This is useful when looking for patterns that
+may span multiple lines.
 
 ```javascript
 '<file>.html'
@@ -612,42 +727,57 @@ singleLine(this: AsyncGenerator<string>): AsyncGenerator<string>
   .read()
   .singleLine() // Convert to a single line
   .replace(/<[^>]+?>/) // Remove all HTML tags
+
 ```
 
 #### Join
 ```typescript
-join(this: AsyncGenerator<string>, joiner?: string | ((a: string[]) => string): AsyncGenerator<string>
+join(this: AsyncGenerator<string>, joiner?: string | ((a: string[]) => string)): AsyncGenerator<string>;
 ```
 
-This operator allows for combining a sequence of strings into a single value similar to `String.prototype.join`. 
+This operator allows for combining a sequence of strings into a single value similar to `String.prototype.join`.
 
 ```javascript
 '<file>'
   .async
   .read() // Read as a series of lines
-  .join('\n') 
+  .join('\n')
   // Produces a single value of the entire file
+
 ```
+
 
 ### Limit
 
+Support for limiting sequence values based on ordering
+
+
+
 #### First
 ```typescript
-first(n?: number): AsyncGenerator<T>
+first<T>(this: AsyncGenerator<T>, n?: number): AsyncGenerator<T, void, unknown>;
 ```
 
 This will return the first `n` elements with a default of a single element.
-
 ```javascript
 '<file>'
   .async
   .read()
   .first(10) // Read first 10 lines
+
+```
+
+```javascript
+'<file>'
+  .async
+  .read()
+  .first() // Read first line
+
 ```
 
 #### Skip
 ```typescript
-skip(n: number): AsyncGenerator<T>
+skip<T>(this: AsyncGenerator<T>, n: number): AsyncGenerator<T>;
 ```
 
 This will return all but the first `n` elements.
@@ -657,25 +787,37 @@ This will return all but the first `n` elements.
   .async
   .read()
   .skip(1) // Skip header
+
 ```
 
 #### Last
 ```typescript
-last(n?: number): AsyncGenerator<T>
+last<T>(this: AsyncGenerator<T, any, any>, n?: number): AsyncGenerator<T, any, any>;
 ```
 
 This will return the last `n` elements with a default of a single element.
+Since this method requires knowledge of the length of the sequence to
+work properly, this now becomes a blocking operator.
 
 ```javascript
 '<file>'
   .async
   .read()
   .last(7) // Read last 7 lines of file
+
+```
+
+```javascript
+'<file>'
+  .async
+  .read()
+  .last() // Read last line of file
+
 ```
 
 #### Repeat
 ```typescript
-repeat(n?: number, iters?: number): AsyncGenerator<T>
+repeat<T>(this: AsyncGenerator<T>, n?: number): AsyncGenerator<T>;
 ```
 
 This will repeat the first `n` elements with a default of all elements.
@@ -685,109 +827,70 @@ This will repeat the first `n` elements with a default of all elements.
   .async
   .read()
   .first(10) // Read first 10 lines
+
 ```
 
-### Net
-
-#### Fetch
-```typescript
-fetch(this: AsyncGenerator<string>, output?: IOType, opts?: HttpOpts): AsyncGenerator<string | Buffer>
-```
-
-This is meant as a simple equivalent of `curl`.  Will fetch a single page (and follow redirects).  By default, it will return lines from the response. Optionally, can return the entire page as a single string, or a sequence of `Buffer`s depending on the output type.  
-
-```javascript
-`https://en.wikipedia.org/wiki/Special:Random`
-  .async
-  .fetch() // Request URL
-  .match('URL', 'extract') // Pull out URLs
-```
 
 ### Exec
 
-#### Exec Each
+Support for dealing with execution of external programs
+
+
+
+#### ExecEach
 ```typescript
-execEach(cmd: string, ...args: string[]): AsyncGenerator<string>
+execEach<T>(this: AsyncGenerator<T>, cmd: string, args: string[]): AsyncGenerator<string>;
 ```
 
-Execute the command against each item in the sequence. Allow for a list of args to prepend to the command execution.  The command's stdout is returned as individual lines.
+Execute the command against each item in the sequence. Allow for a list of args
+to prepend to the command execution.  The command's stdout is returned as individual
+lines.
 
 ```javascript
 '.ts'
   .async
   .dir() // Get all files
   .execEach('wc', '-l') // Execute word count for each line
+
 ```
 
 #### Exec
 ```typescript
-exec(cmd: string, args?: string[], output?: IOType): AsyncGenerator<string>
+exec(cmd: string, args: string[], output: 'line' | 'text'): AsyncGenerator<string>;
+exec(cmd: string, args: string[], output: 'binary'): AsyncGenerator<Buffer>;
+exec(cmd: string, args: string[]): AsyncGenerator<string>;
+exec(cmd: string): AsyncGenerator<string>;
 ```
 
-Pipe the entire sequence as input into the command to be executed.  Allow for args to be prepended to the command as needed.  If the output is specified as 'binary', the sequence will return a sequence of Buffers, otherwise will return strings
+Pipe the entire sequence as input into the command to be executed.  Allow for args to be
+prepended to the command as needed.  If the output is specified as 'binary', the generator
+will return a sequence of Buffers, otherwise will return strings
 
 ```javascript
 '.ts'
   .async
   .dir() // Get all files
   .read() // Read all files
-  .exec('wc', ['-l']) // Execute word count for all files 
+  .exec('wc', ['-l']) // Execute word count for all files
   // Run in a single operation
+
 ```
 
-### Data
-
-#### JSON
-```typescript
-json<V = any>(this: AsyncGenerator<string>): AsyncGenerator<V>
-```
-
-Converts the inbound JSON string into JS Object by way of `JSON.parse`.  This will operate on individual values in the sequence, so each value should be a complete document.
-
-```javascript
-`https://jsonplaceholder.typicode.com/todos/1`
-  .async
-  .fetch() // request url
-  .json()  // Convert from JSON
-```
-
-#### CSV
-```typescript
-csv(this:AsyncGenerator<string>, columns?: string[]): AsyncGenerator<string[] | Record<V[number], string>>
-```
-
-Converts the inbound CSV string into JS Object.  Converts by using simple CSV support and splitting on commas.  Each value in the sequence is assumed to be a single row in the output.
-
-```javascript
-'<file>.csv'
-  .async
-  .read() // Read file
-  .csv(['Name', 'Age', 'Major']) 
-  // Convert to objects from CSV
-```
-
-#### Prompt
-```typescript
-prompt<V = any>(this: AsyncGenerator<string>, password?: boolean): AsyncGenerator<V>
-```
-
-Will read string values from the input, delimited by new lines
-
-```javascript
-'Enter a file name:'
-  .async
-  .prompt() // Request file name
-  .read() // Read file
-```
 
 ### Export
 
+Support for exporting data from a sequence
+
+
+
 #### Stream
 ```typescript
-stream(this: AsyncGenerator<T>, mode?: IOType): NodeJS.ReadableStream
+stream<T>(this: AsyncGenerator<T>, mode?: IOType): Readable;
 ```
 
-Converts a sequence into a node stream.  This readable stream should be considered standard, and usable in any place a stream is expected. The mode determines if the stream is string or `Buffer` oriented.
+Converts a sequence into a node stream.  This readable stream should be
+considered standard, and usable in any place a stream is expected. The mode
+determines if the stream is string or `Buffer` oriented.
 
 ```javascript
 const stream = '<file>.png'
@@ -802,10 +905,12 @@ stream.pipe(fs.createWriteStream('out.png')); // Write out
 
 #### Write
 ```typescript
-write<U extends string | Buffer | any>(this: AsyncGenerator<U>, writable: Writer): Promise<void>
+write<T extends string | Buffer | any>(this: AsyncGenerator<T>, writable: OrStr<Writable>): Writable;
 ```
 
-Emits the sequence contents to a write stream.  If the write stream is a string, it is considered to be a file name. Buffer contents are written as is.  String contents are written as lines.
+Emits the sequence contents to a write stream.  If the write stream is a string, it
+is considered to be a file name. Buffer contents are written as is.  String contents
+are written as lines.
 
 ```javascript
 '<file>.png'
@@ -813,11 +918,13 @@ Emits the sequence contents to a write stream.  If the write stream is a string,
   .read('binary') // Read file as binary
   .exec('convert', ['-size=100x20']) // Pipe to convert function
   .write('out.png') // Write file out
+
 ```
 
-#### Write Final
+#### WriteFinal
 ```typescript
 writeFinal(this: AsyncGenerator<string>, file: string): Promise<void>;
+export declare class ExportPropOperators<T> {
 ```
 
 Writes the entire stream to a file, as a final step. The write stream will not be created until all the values
@@ -828,47 +935,51 @@ have been emitted.  This is useful for reading and writing the same file.
   .async
   .read()
   .replace(/TEMP/, 'final')
-  .writeText('<file>');
+  .writeFinal('<file>');
+
 ```
 
 #### Values
 ```typescript
-values: Promise<T[]>
+get values(this: AsyncGenerator<T>): Promise<T[]>;
 ```
 
-Extract all sequence contents into a single array and return as a promise.
+Extract all sequence contents into a single array and return
+as a promise
 
 ```javascript
 const values = await '<file>.csv'
   .async
   .read()
   .csv('Width', 'Depth', 'Height'])// Convert to objects
-  .map(({Width, Height, Depth}) => 
+  .map(({Width, Height, Depth}) =>
     int(Width) * int(Height) * int(Depth) // Compute volume
-  ) 
+  )
   .values // Get all values;
+
 ```
 
 #### Value
 ```typescript
-value: Promise<T>
+get value(this: AsyncGenerator<T>): Promise<T>;
 ```
 
-* Extract first sequence element and return as a promise.
+Extract first sequence element and return as a promise
 
 ```javascript
 const name = await 'What is your name?'
   .async
   .prompt() // Prompt for name
   .value  // Get single value
+
 ```
 
 #### Stdout
 ```typescript
-stdout: void
+get stdout(this: AsyncGenerator<T>): Writable;
 ```
 
-Simple property that allows any sequence to be automatically written to stdout
+Simple method that allows any sequence to be automatically written to stdout
 
 ```javascript
 '<file>'
@@ -876,73 +987,21 @@ Simple property that allows any sequence to be automatically written to stdout
   .read() // Read file
   .map(line => line.length) // Convert each line to it's length
   .stdout // Pipe to stdout
+
 ```
 
 #### Console
 ```typescript
-console: void;
+get console(this: AsyncGenerator<T>): Promise<void>;
 ```
 
-Simple property that allows any sequence to be automatically called with `console.log`.
+Simple property that allows any sequence to be automatically called with `console.log`
 
 ```javascript
 '<file>'
-  .async
-  .read() // Read file
-  .json()
-  .console // Log out objects
-```
-
-## Creating a Custom Operator
-
-In the process of using the tool, there may be a need for encapsulating common operations.  By default, `wrap` provides an easy path for re-using functionality, but it lacks the clarity of intent enjoyed by the built in operators.
-
-```javascript
-function reverse(stream) {
-  return stream
-    .collect() // Gather the entire sequence as an array
-    .map(x => x.reverse()) // Reverse it 
-    .flatten(); // Flatten it back into a single sequence
-}
-
-[1,2,3]
-  .async
-  .wrap(reverse)
-```
-
-The above example is more than sufficient, but would better as:
-
-```javascript
-[1,2,3]
-  .async
-  .reverse()
-```
-
-This can be achieved by leveraging the built-in utilities found in the `util/register` utility class.
-
-**Simple registration script**
-```javascript
-import {RegisterUtil} from '@arcsine/nodeshell';
-
-function reverse() {
-  return this
-    .collect() // Gather the entire sequence as an array
-    .map(x => x.reverse()) // Reverse it 
-    .flatten(); // Flatten it back into a single sequence
-}
-
-RegisterUtil.operators({
-  reverse
-});
-```
-
-**Using Custom Operator**
-```javascript
-require('./register');
-
-[1,2,3]
-  .async
-  .reverse() // Reverse is now available
+ .async
+ .read() // Read file
+ .json()
+ .console // Log out objects
 
 ```
-

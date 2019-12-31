@@ -48,15 +48,14 @@ export class ExportSuite {
       .async
       .writeFinal(temp);
 
-    assert(await temp.async.read('text').value === '1\n2\n3\n');
+    assert(await temp.async.read('text') === ['1\n2\n3\n']);
   }
 
   @Test()
   async testValues() {
     const ret = await [[1], [2], [3]]
       .async
-      .flatten()
-      .values;
+      .flatten();
 
     assert(ret === [1, 2, 3]);
   }

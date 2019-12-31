@@ -19,10 +19,9 @@ export class FileSuite {
 
   @Test()
   async testReadText() {
-    const content = await `${__dirname}/files/book.txt`
+    const [content] = await `${__dirname}/files/book.txt`
       .async
-      .read('text')
-      .value;
+      .read('text');
 
     assert(content.length > 40);
     assert(content.includes('Chapter 1'));

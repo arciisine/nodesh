@@ -1,8 +1,5 @@
 
 export class Util {
-  static asyncGen = ((async function* () { })()).constructor;
-  static gen = ((function* () { })()).constructor;
-
   /**
    * Gets the textual representation of a value
    */
