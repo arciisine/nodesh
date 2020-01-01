@@ -73,7 +73,7 @@ function processTypings(files) {
           .map(x => x.replace(/@example\n?/, ''))
           .map(t => `${CODE}javascript\n${t}\n${CODE}`).join('\n\n')
 
-        output.push(`\n#### ${method}\n${sigs}\n${doc.description}\n${examples}`);
+        output.push(`\n#### ${method}\n${doc.description}\n${sigs}\nExample\n${examples}`);
       }
       return output.join('\n');
     }).join('\n\n');
