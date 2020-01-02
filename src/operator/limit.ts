@@ -5,14 +5,12 @@ export class LimitOperators {
   /**
    * This will return the first `n` elements with a default of a single element.
    * @example
-   * '<file>'
-   *   .async
+   * '<file>'.$
    *   .read()
    *   .first(10) // Read first 10 lines
 
    * @example
-   * '<file>'
-   *   .async
+   * '<file>'.$
    *   .read()
    *   .first() // Read first line
    */
@@ -29,12 +27,12 @@ export class LimitOperators {
       }
     }
   }
+
   /**
    * This will return all but the first `n` elements.
-   * 
+   *
    * @example
-   * '<file>.csv'
-   *   .async
+   * '<file>.csv'.$
    *   .read()
    *   .skip(1) // Skip header
    */
@@ -62,20 +60,19 @@ export class LimitOperators {
       }
     }
   }
+
   /**
    * This will return the last `n` elements with a default of a single element.
-   * Since this method requires knowledge of the length of the sequence to 
+   * Since this method requires knowledge of the length of the sequence to
    * work properly, this now becomes a blocking operator.
-   * 
+   *
    * @example
-   * '<file>'
-   *   .async
+   * '<file>'.$
    *   .read()
    *   .last(7) // Read last 7 lines of file
-   * 
+   *
    * @example
-   * '<file>'
-   *   .async
+   * '<file>'.$
    *   .read()
    *   .last() // Read last line of file
    */
@@ -93,12 +90,12 @@ export class LimitOperators {
     }
     yield* out;
   }
+
   /**
    * This will repeat the first `n` elements with a default of all elements.
    *
-   * @example 
-   * '<file>'
-   *   .async
+   * @example
+   * '<file>'.$
    *   .read()
    *   .first(10) // Read first 10 lines
    */

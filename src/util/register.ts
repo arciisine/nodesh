@@ -1,49 +1,18 @@
-import * as stream from 'stream';
-
-import { StreamUtil } from './stream';
-import { OrGen, AsyncGeneratorCons } from '../types';
-
-async function* ofOne<T>(e: T) {
-  yield e;
-}
-
-const PARENT = Symbol('PARENT');
+import { AsyncUtil } from './async';
+import { PARENT } from '../types';
 
 export class RegisterUtil {
 
   /**
-   * Produce an async generator from any value
-   */
-  static of<T>(val: AsyncGenerator<T>): AsyncGenerator<T>; // eslint-disable-line
-  static of<T>(val: AsyncIterable<T>): AsyncGenerator<T>; // eslint-disable-line
-  static of<T>(val: Iterable<T>): AsyncGenerator<T>; // eslint-disable-line
-  static of<T>(val: T): AsyncGenerator<T>; // eslint-disable-line
-  static of<T extends object>(val: OrGen<T>): AsyncGenerator<T> {
-    if (val === null || val === undefined || typeof val === 'string') {
-      return ofOne(val);
-    } else if (val.constructor === AsyncGeneratorCons) {
-      return val as AsyncGenerator<T>;
-    } else if (val instanceof stream.Readable) {
-      return StreamUtil.readStream(val) as AsyncGenerator<any>;
-    } else if ((val as any)[Symbol.iterator] || (val as any)[Symbol.asyncIterator]) {
-      return (async function* () {
-        yield* (val as any);
-      })();
-    } else {
-      return ofOne(val) as AsyncGenerator<T>;
-    }
-  }
-
-  /**
    * Register new type as asyncable
-   * @param t 
+   * @param t
    */
   static registerAsyncable(t: Function) {
     RegisterUtil.properties({
-      async(this: any) {
-        return RegisterUtil.of(this);
+      $(this: any) {
+        return AsyncUtil.toGenerator(this);
       }
-    }, t.prototype)
+    }, t.prototype);
   }
 
   /**
@@ -53,9 +22,9 @@ export class RegisterUtil {
     RegisterUtil.properties({
       then: {
         get() {
-          return (fn: Function) => {
+          return (fn: (data: Promise<any[]>) => void) => {
             Promise.resolve().then(() => {
-              fn((this as any).values);
+              fn((this as AsyncGenerator).values);
             });
 
             return this;
@@ -65,6 +34,11 @@ export class RegisterUtil {
     }, t.prototype);
   }
 
+  /**
+   * Define properties on prototype
+   * @param props
+   * @param proto
+   */
   static properties(
     props: PropertyDescriptorMap | Record<string, Function>,
     proto: Record<string, any>
@@ -75,6 +49,7 @@ export class RegisterUtil {
         if ('apply' in val) {
           val = { get: val } as any;
         }
+        (val as any).configurable = true;
         Object.defineProperty(proto, key, val);
       } catch (err) {
         // Do nothing
@@ -82,13 +57,18 @@ export class RegisterUtil {
     }
   }
 
+  static createOperator<T = any>(target: (...args: any[]) => AsyncGenerator<T>) {
+    return function (this: AsyncGenerator<T>, ...args: any[]) {
+      const ret = target.call(this, ...args);
+      ret[PARENT] = this; // Track heritage
+      return ret;
+    };
+  }
+
   /**
    * Registers global async operators
    */
-  static registerOperators(
-    cons: Function[],
-    target: Record<string, any>
-  ) {
+  static registerOperators(cons: Function[], target: Record<string, any>) {
     for (const { name, prototype } of cons) {
       if (!name) {
         continue;
@@ -98,15 +78,15 @@ export class RegisterUtil {
           continue;
         }
         let prop = Object.getOwnPropertyDescriptor(prototype, key)!;
-        if (prop.get) {
-          Object.defineProperty(target.prototype, key, prop);
-        } else {
-          (target.prototype as any)[key] = function (...args: any[]) {
-            const ret = prototype[key].call(this, ...args);
-            (ret as any)[PARENT] = this; // Track heritage
-            return ret;
+        if (!prop.get) {
+          prop = {
+            get() {
+              return RegisterUtil.createOperator(prototype[key]);
+            }
           };
         }
+        prop.configurable = true;
+        Object.defineProperty(target.prototype, key, prop);
       }
     }
   }
@@ -115,8 +95,8 @@ export class RegisterUtil {
    * Get parent of sequence
    */
   static getParent<T>(gen: AsyncGenerator<T>) {
-    while ((gen as any)[PARENT]) {
-      gen = (gen as any)[PARENT] as AsyncGenerator<T>;
+    while (!!gen[PARENT]) {
+      gen = gen[PARENT]!;
     }
     return gen;
   }

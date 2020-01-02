@@ -10,8 +10,7 @@ export class ExecSuite {
 
   @Test()
   async testExecEach() {
-    const res = await ['a.txt', 'b.txt', 'c.txt']
-      .async
+    const res = await ['a.txt', 'b.txt', 'c.txt'].$
       .map(x => path.resolve(__dirname, 'files', x))
       .execEach('wc', ['-c'])
       .columns(['count'])
@@ -30,8 +29,7 @@ export class ExecSuite {
       'k,,'
     ];
 
-    const [val] = await data
-      .async
+    const [val] = await data.$
       .exec('wc', ['-c'])
       .columns(['count'])
       .map(({ count }) => parseInt(count, 10));

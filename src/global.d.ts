@@ -10,15 +10,15 @@ import { LimitOperators } from './operator/limit';
 import { NetOperators } from './operator/net';
 import { TimeOperators } from './operator/time';
 import { TransformOperators } from './operator/transform';
-import { Asyncable } from './types';
+import { AsyncAware, PARENT } from './types';
 
 declare module 'fs' {
-  interface ReadStream extends Asyncable<string> { }
+  interface ReadStream extends AsyncAware<string> { }
 }
 
 declare module 'stream' {
   namespace ReadableConstructor {
-    const async: AsyncGenerator<string>;
+    const $: AsyncGenerator<string>;
   }
 }
 
@@ -45,17 +45,19 @@ declare global {
     TimeOperators,
     Promise<T[]>,
     TransformOperators,
-    Asyncable<T> { }
+    AsyncAware<T> {
+    [PARENT]?: AsyncGenerator<T, TReturn, TNext>;
+  }
 
-  interface Generator<T> extends Asyncable<T> { }
-  interface Array<T> extends Asyncable<T> { }
-  interface String extends Asyncable<string> { }
-  interface Number extends Asyncable<number> { }
-  interface Boolean extends Asyncable<boolean> { }
-  interface RegExp extends Asyncable<RegExp> { }
-  interface Set<T> extends Asyncable<T> { }
-  interface Map<K, V> extends Asyncable<[K, V]> { }
+  interface Generator<T> extends AsyncAware<T> { }
+  interface Array<T> extends AsyncAware<T> { }
+  interface String extends AsyncAware<string> { }
+  interface Number extends AsyncAware<number> { }
+  interface Boolean extends AsyncAware<boolean> { }
+  interface RegExp extends AsyncAware<RegExp> { }
+  interface Set<T> extends AsyncAware<T> { }
+  interface Map<K, V> extends AsyncAware<[K, V]> { }
   namespace NodeJS {
-    interface ReadStream extends Asyncable<string> { }
+    interface ReadStream extends AsyncAware<string> { }
   }
 }

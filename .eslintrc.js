@@ -6,9 +6,10 @@ module.exports = {
     "globals": {
         "stdin": "readonly",
         "stdout": "readonly",
-	"of": "readonly",    
+        "of": "readonly",
+        "range": "readonly",
         "argv": "readonly",
-	"ask": "readonly",
+        "ask": "readonly",
         "env": "readonly"
     },
     "parser": "@typescript-eslint/parser",

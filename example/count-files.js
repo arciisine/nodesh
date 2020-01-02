@@ -1,6 +1,6 @@
 #!/usr/bin/npx @arcsine/nodesh
 
-'.js'.async
+'.js'.$
   .dir({ full: true })
   .map(file => file.stats.size)
   // .reduce((acc, v) => acc + v, 0)

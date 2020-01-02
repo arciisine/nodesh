@@ -9,8 +9,7 @@ export class FileSuite {
 
   @Test()
   async testRead() {
-    const content = await `${__dirname}/files/book.txt`
-      .async
+    const content = await `${__dirname}/files/book.txt`.$
       .read();
 
     assert(content.length === 7);
@@ -19,8 +18,7 @@ export class FileSuite {
 
   @Test()
   async testReadText() {
-    const [content] = await `${__dirname}/files/book.txt`
-      .async
+    const [content] = await `${__dirname}/files/book.txt`.$
       .read('text');
 
     assert(content.length > 40);
@@ -31,8 +29,7 @@ export class FileSuite {
 
   @Test()
   async testReadData() {
-    const buffers = await `${__dirname}/files/book.txt`
-      .async
+    const buffers = await `${__dirname}/files/book.txt`.$
       .read('binary');
 
     const content = Buffer.concat(buffers).toString('utf8');
@@ -46,8 +43,7 @@ export class FileSuite {
 
   @Test()
   async testDir() {
-    const all = await '.txt'
-      .async
+    const all = await '.txt'.$
       .dir({ base: __dirname })
       .map(x => x.split(__dirname)[1])
       .sort();
@@ -58,8 +54,7 @@ export class FileSuite {
 
   @Test()
   async testDirRegex() {
-    const all = await /^test\/files\/.*[.]txt/
-      .async
+    const all = await /^test\/files\/.*[.]txt/.$
       .dir()
       .map(x => x.split(__dirname)[1])
       .sort();
@@ -70,8 +65,7 @@ export class FileSuite {
 
   @Test()
   async testDirObj() {
-    const all = await '.txt'
-      .async
+    const all = await '.txt'.$
       .dir({ base: __dirname, full: true })
       .sort((a, b) => a.relative.localeCompare(b.relative));
 

@@ -67,7 +67,7 @@ async function * asyncWorker() {
 ```
 
 ### Sources
-Out of the box, the following types support an `.async` property that returns an async generator for the supported type.  Currently the supported types are:
+Out of the box, the following types support an `.$` property that returns an async generator for the supported type.  Currently the supported types are:
 
 #### Iterables
 * Generator - This will return the generator, but as an async generator
@@ -77,11 +77,11 @@ Out of the box, the following types support an `.async` property that returns an
 
 **Example of read stream**
 ```typescript
-const lineGenerator = fs.createReadStream('data.txt').async;
+const lineGenerator = fs.createReadStream('data.txt').$;
 ```
 
 #### Primitives
-The following primitives also support `.async`, but will return a generator that only has 
+The following primitives also support `.$`, but will return a generator that only has 
 a single value, that of the primitive
 * `String`
 * `Number`
@@ -95,7 +95,7 @@ const bigIntGen = of(10000n);
 
 ...
 
-const numberGen = (100000).async;
+const numberGen = (100000).$;
 const numberGen2 = of(10000);
 
 ```

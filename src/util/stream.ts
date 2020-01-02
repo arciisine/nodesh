@@ -2,11 +2,9 @@ import * as readline from 'readline';
 import * as fs from 'fs';
 import { Readable, Writable } from 'stream';
 
-import { Util } from './util';
 import { EventEmitter } from 'events';
-import { OrStr } from '../types';
-
-export type IOType = 'text' | 'line' | 'binary';
+import { IOType } from '../types';
+import { TimeUtil } from './time';
 
 class MemoryStream extends Writable {
   store: Buffer[] = [];
@@ -32,36 +30,41 @@ export class StreamUtil {
   }
 
   /**
+   * Gets the textual representation of a value
+   */
+  static toText(val: any) {
+    if (val === undefined || val === null) {
+      return '';
+    }
+    return typeof val === 'string' ? val : JSON.stringify(val);
+  }
+
+  /**
    * Convert sequence to stream. If the input stream are buffers, send directly.
    * Otherwise, send as text, and if mode is line, append with newline.
    */
-  static toStream(gen: AsyncGenerator<any>, mode: IOType = 'line'): Readable {
-    const inp = new Readable();
-    inp._read = async function (n: number) {
-      const { done, value } = await gen.next();
-      if (done) {
-        inp.push(null);
-      } else if (value === undefined) {
-        return;
-      } else if (value instanceof Buffer) {
-        inp.push(value);
-      } else {
-        inp.push(Util.toText(value));
-        if (mode === 'line') {
-          inp.push('\n');
+  static toStream(gen: AsyncIterable<any>, mode: IOType = 'line'): Readable {
+    return Readable.from((async function* () {
+      for await (const value of gen) {
+        if (value === undefined) {
+          continue;
+        } else if (value instanceof Buffer) {
+          yield value;
+        } else {
+          const text = StreamUtil.toText(value);
+          yield mode === 'line' ? `${text}\n` : text;
         }
       }
-    };
-    return inp;
+    })());
   }
 
   /**
    * Convert read stream into a sequence
    */
-  static readStream(file: OrStr<Readable>, mode: 'binary'): AsyncGenerator<Buffer>;
-  static readStream(file: OrStr<Readable>, mode: 'line' | 'text'): AsyncGenerator<string>;
-  static readStream(file: OrStr<Readable>, mode?: IOType): AsyncGenerator<string>;
-  static async * readStream(file: OrStr<Readable>, mode: IOType = 'line'): AsyncGenerator<Buffer | string> {
+  static readStream(file: Readable | string, mode: 'binary'): AsyncGenerator<Buffer>;
+  static readStream(file: Readable | string, mode: 'line' | 'text'): AsyncGenerator<string>;
+  static readStream(file: Readable | string, mode?: IOType): AsyncGenerator<string>;
+  static async * readStream(file: Readable | string, mode: IOType = 'line'): AsyncGenerator<Buffer | string> {
     const strm = typeof file === 'string' ? fs.createReadStream(file, { encoding: 'utf8' }) : file;
     const src: EventEmitter = mode === 'line' ? readline.createInterface(strm) : strm;
     const destroyed = new Promise(r => strm.once('close', r));
@@ -82,7 +85,7 @@ export class StreamUtil {
     }
 
     while (!done) {
-      await new Promise(r => setTimeout(r, 50));
+      await TimeUtil.sleep(50);
 
       if (buffer.length && mode !== 'text') {
         yield* (buffer as any);
@@ -103,7 +106,11 @@ export class StreamUtil {
     await destroyed;
   }
 
-  static getWritable(writable: OrStr<Writable>) {
+  /**
+   * Get writable stream
+   * @param writable
+   */
+  static getWritable(writable: Writable | string) {
     return typeof writable !== 'string' && 'write' in writable ? writable :
       fs.createWriteStream(writable, { flags: 'w', autoClose: true });
   }

@@ -1,8 +1,8 @@
 #!/usr/bin/npx @arcsine/nodesh
 
-'.js'.async
+'.js'.$
   .dir({ base: 'dist' })
-  .forEach(file => file.async
+  .forEach(file => file.$
     .read('text')
     .replace(/\n/g, '')
     .replace(/[ ]+/g, ' ')

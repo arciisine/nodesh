@@ -18,6 +18,9 @@ export class TimeUtil {
     return parseFloat((ms + ns).toFixed(3));
   }
 
+  /**
+   * Mark start of time, define by name
+   */
   static startTime(name: string, count = true) {
     if (count || !this.timings.has(name)) {
       this.timings.set(name, this.getTime());
@@ -26,6 +29,9 @@ export class TimeUtil {
     }
   }
 
+  /**
+   * Mark end of time, define by name
+   */
   static stopTime(name: string) {
     if (this.timings.has(name)) {
       const delta = TimeUtil.getTime() - this.timings.get(name)!;
@@ -34,5 +40,12 @@ export class TimeUtil {
       this.timingCounts.delete(name);
       return [delta, count] as const;
     }
+  }
+
+  /**
+   * Sleep for a specified amount of time
+   */
+  static sleep(ms: number) {
+    return new Promise<any>(res => setTimeout(res, ms).unref());
   }
 }
