@@ -67,7 +67,7 @@ async function * asyncWorker() {
 ```
 
 ### Sources
-Out of the box, the following types support an `.async` property that returns an async generator for the supported type.  Currently the supported types are:
+Out of the box, the following types support an `.$` property that returns an async generator for the supported type.  Currently the supported types are:
 
 #### Iterables
 * Generator - This will return the generator, but as an async generator
@@ -77,11 +77,11 @@ Out of the box, the following types support an `.async` property that returns an
 
 **Example of read stream**
 ```typescript
-const lineGenerator = fs.createReadStream('data.txt').async;
+const lineGenerator = fs.createReadStream('data.txt').$;
 ```
 
 #### Primitives
-The following primitives also support `.async`, but will return a generator that only has 
+The following primitives also support `.$`, but will return a generator that only has 
 a single value, that of the primitive
 * `String`
 * `Number`
@@ -95,7 +95,7 @@ const bigIntGen = of(10000n);
 
 ...
 
-const numberGen = (100000).async;
+const numberGen = (100000).$;
 const numberGen2 = of(10000);
 
 ```
@@ -118,7 +118,7 @@ Will turn any value into a sequence. If the input value is of type:
 * Everything else - Returns a sequence of a single element
 
 ```typescript
-get of(): typeof RegisterUtil.of;
+get of(): typeof AsyncUtil.of;
 ```
 Example
 ```javascript
@@ -259,7 +259,7 @@ This operator is a terminal action that receives each element of the sequence in
 but returns no value.  This function produces a promise that should be waited on to ensure the
 sequence is exhausted.
 ```typescript
-forEach<T>(this: AsyncGenerator<T>, fn: (x: T) => OrProm<any>): Promise<void>;
+forEach<T>(this: AsyncGenerator<T>, fn: PromFunc<T, any>): Promise<void>;
 ```
 Example
 ```javascript
@@ -274,7 +274,7 @@ fs.createReadStream('<file>')
 Converts the sequence of data into another, by applying an operation
 on each element.
 ```typescript
-map<T, U>(this: AsyncGenerator<T>, fn: (x: T) => OrProm<U>): AsyncGenerator<U, void, unknown>;
+map<T, U>(this: AsyncGenerator<T>, fn: PromFunc<T, U>): AsyncGenerator<U, void, unknown>;
 ```
 Example
 ```javascript
@@ -290,7 +290,7 @@ fs.createReadStream('<file>')
 Determines if items in the sequence are valid or not. Invalid items
 are discarded, while valid items are retained.
 ```typescript
-filter<T>(this: AsyncGenerator<T>, pred: (x: T) => OrProm<boolean>): AsyncGenerator<T, void, unknown>;
+filter<T>(this: AsyncGenerator<T>, pred: PromFunc<T, boolean>): AsyncGenerator<T, void, unknown>;
 ```
 Example
 ```javascript
@@ -306,7 +306,7 @@ fs.createReadStream('<file>')
 Flattens a sequence of arrays, or a sequence of sequences.  This allows for operators that
 return arrays/sequences, to be able to be represented as a single sequence.
 ```typescript
-flatten<T, U>(this: AsyncGenerator<U[]> | AsyncGenerator<AsyncGenerator<U>>): AsyncGenerator<U>;
+flatten<T, U>(this: AsyncGenerator<AsyncStream<U>>): AsyncGenerator<U>;
 ```
 Example
 ```javascript
@@ -323,7 +323,7 @@ This is a combination of `map` and `flatten` as they are common enough in usage 
 combined operator.  This will map the the contents of the sequence (which produces an array
 or sequence), and producing a flattened output.
 ```typescript
-flatMap<T, U>(this: AsyncGenerator<T>, fn: (x: T) => Gen<U> | {async: AsyncGenerator<U>;}): AsyncGenerator<U>;
+flatMap<T, U>(this: AsyncGenerator<T>, fn: PromFunc<T, AsyncStream<U>>): AsyncGenerator<U, any, any>;
 ```
 Example
 ```javascript
@@ -341,7 +341,7 @@ in the sequence.  Given that reduce is a comprehensive and produces a singular v
 stream and will block until the stream is exhausted. Normally it is common to understand `map` and `filter` as
 being implemented by `reduce`, but in this situation they behave differently.
 ```typescript
-reduce<T, U>(this: AsyncGenerator<T>, fn: Reducer<U, T> & {init?: () => U;}, acc?: U): AsyncGenerator<U>;
+reduce<T, U>(this: AsyncGenerator<T>, fn: ((acc: U, item: T) => OrProm<U>) & {init?: () => U;}, acc?: U): AsyncGenerator<U>;
 ```
 Example
 ```javascript
@@ -378,7 +378,7 @@ This is the simplest mechanism for extending the framework as the operator takes
 data as a whole.  It will consume the sequence and produce an entirely new sequence.
 
 ```typescript
-wrap<T, U>(this: AsyncGenerator<T>, fn: (input: AsyncGenerator<T>) => AsyncGenerator<U>): AsyncGenerator<U, void, unknown>;
+wrap<T, U>(this: AsyncGenerator<T>, fn: (input: AsyncGenerator<T>) => AsyncStream<U>): AsyncGenerator<U, void, undefined>;
 ```
 Example
 ```javascript
@@ -402,10 +402,29 @@ fs.createReadStream('<file>')
 If an error occurs, use the provided sequence instead
 
 ```typescript
-onError<T>(this: AsyncGenerator<T>, alt: AsyncGenerator<T> | (() => AsyncGenerator<T>)): AsyncGenerator<T, void, unknown>;
+onError<T>(this: AsyncGenerator<T>, alt: OrCallable<AsyncStream<T>>): AsyncGenerator<T, void, undefined>;
 ```
 Example
+```javascript
+'<file>'
+ .async
+ .read()
+ .onError(() => `Sample Text`)
 
+```
+
+#### Parallel
+
+Run iterator in parallel, returning values in order of first completion
+
+```typescript
+parallel<T>(this: AsyncGenerator<Promise<T>>): AsyncGenerator<T>;
+```
+Example
+```javascript
+
+
+```
 
 
 ### File
@@ -509,7 +528,7 @@ Example
 can produce a promise that will be waited on, if needed.
 
 ```typescript
-tap<T>(this: AsyncGenerator<T>, visit?: (item: T) => OrProm<any>): AsyncGenerator<T>;
+tap<T>(this: AsyncGenerator<T>, visit?: PromFunc<T, any>): AsyncGenerator<T>;
 ```
 Example
 ```javascript
@@ -587,7 +606,7 @@ iterator runs out, the remaining values can be affected by the mode parameter:
 * `'exact'`  - Stop the emitting values once the secondary iterator is exhausted.
 
 ```typescript
-pair<T, U>(this: AsyncGenerator<T>, value: OrCall<OrGen<U>>, mode?: PairMode): AsyncGenerator<[T, U]>;
+pair<T, U>(this: AsyncGenerator<T>, value: OrCallable<OrAsyncStream<U>>, mode?: PairMode): AsyncGenerator<[T, U]>;
 ```
 Example
 ```javascript
@@ -948,7 +967,7 @@ is considered to be a file name. Buffer contents are written as is.  String cont
 are written as lines.
 
 ```typescript
-write<T extends string | Buffer | any>(this: AsyncGenerator<T>, writable: OrStr<Writable>): Writable;
+write<T extends string | Buffer | any>(this: AsyncGenerator<T>, writable: Writable | string): Writable;
 ```
 Example
 ```javascript

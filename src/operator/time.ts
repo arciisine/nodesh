@@ -1,4 +1,3 @@
-import { Util } from '../util/util';
 import { TimeUtil } from '../util/time';
 
 function log(name: string, all: boolean, phase: 'start' | 'end', ...extra: any[]) {
@@ -16,8 +15,9 @@ export class TimeOperators {
    * Pause for a specified number of milliseconds
    */
   wait<T>(this: AsyncGenerator<T>, ms: number): AsyncGenerator<T> {
-    return this.tap(() => Util.sleep(ms));
+    return this.tap(() => TimeUtil.sleep(ms));
   }
+
   /**
    * Track the beginning of a timing operation.  The all parameter indicates whether or not
    * the timing process should be per sequence element or for the entire
@@ -30,6 +30,7 @@ export class TimeOperators {
       }
     });
   }
+
   /**
    * Track completion of a timing operation
    */

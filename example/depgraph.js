@@ -1,9 +1,9 @@
 #!/bin/npx @arcsine/nodesh
 
-/[.]ts$/.async
+/[.]ts$/.$
   .dir({ base: argv[0], full: true })
   .filter(({ relative }) => !relative.includes('node_modules'))
-  .flatMap(({ file }) => file.async.read()
+  .flatMap(({ file }) => file.$.read()
     .match(/^import/)
     .columns(/\s*from\s*/)
     .map(([, p]) => p)

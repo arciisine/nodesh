@@ -1,10 +1,13 @@
-export type OrProm<X> = X | Promise<X>;
-export type OrArray<X> = X | Array<X>;
-export type OrStr<X> = string | X;
-export type OrCall<X> = X | (() => X);
-export type OrGen<X> = X | Iterable<X> | AsyncIterable<X> | AsyncGenerator<X>;
-export type Gen<U> = OrProm<Iterator<U> | AsyncGenerator<U> | AsyncIterator<U> | U[]>;
-export type Reducer<U, T> = (acc: U, item: T) => OrProm<U>;
-export type Asyncable<T> = { async: AsyncGenerator<T>; };
-export const AsyncGeneratorCons = ((async function* () { })()).constructor;
-export const GeneratorCons = ((function* () { })()).constructor;
+export const { constructor: AsyncGeneratorCons } = ((async function* () { })());
+export const { constructor: GeneratorCons } = ((function* () { })());
+export const PARENT = Symbol('PARENT');
+
+export type Callable<X> = (...args: any[]) => X;
+export type AsyncAware<X> = { $: AsyncGenerator<X> };
+export type AsyncStream<X> = Iterable<X> | AsyncIterable<X> | AsyncAware<X>;
+export type IOType = 'text' | 'line' | 'binary';
+
+export type PromFunc<T, U> = (item: T) => U | Promise<U>;
+export type PromFunc2<A, B, U> = (a: A, b: B) => U | Promise<U>;
+export type OrCallable<X> = X | Callable<X>;
+export type OrAsyncStream<X> = X | AsyncStream<X>;

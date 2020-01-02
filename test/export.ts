@@ -17,8 +17,7 @@ export class ExportSuite {
   @Test()
   async testStream() {
     const temp = StreamUtil.memoryWritable();
-    '1\n2\n3\n'
-      .async
+    '1\n2\n3\n'.$
       .stream()
       .pipe(temp);
 
@@ -30,8 +29,7 @@ export class ExportSuite {
   @Test()
   async testWrite() {
     const temp = StreamUtil.memoryWritable();
-    '1\n2\n3\n'
-      .async
+    '1\n2\n3\n'.$
       .write(temp);
 
     await new Promise(r => temp.once('finish', r));
@@ -44,17 +42,15 @@ export class ExportSuite {
     const uuid = crypto.randomBytes(16).toString('hex');
     const temp = path.join(os.tmpdir(), uuid);
 
-    await '1\n2\n3\n'
-      .async
+    await '1\n2\n3\n'.$
       .writeFinal(temp);
 
-    assert(await temp.async.read('text') === ['1\n2\n3\n']);
+    assert(await temp.$.read('text') === ['1\n2\n3\n']);
   }
 
   @Test()
   async testValues() {
-    const ret = await [[1], [2], [3]]
-      .async
+    const ret = await [[1], [2], [3]].$
       .flatten();
 
     assert(ret === [1, 2, 3]);
@@ -62,8 +58,7 @@ export class ExportSuite {
 
   @Test()
   async testValue() {
-    const ret = await [[1], [2], [3]]
-      .async
+    const ret = await [[1], [2], [3]].$
       .flatten()
       .value;
 

@@ -1,7 +1,8 @@
 import * as http from 'http';
 import * as https from 'https';
 
-import { IOType, StreamUtil } from './stream';
+import { StreamUtil } from './stream';
+import { IOType } from '../types';
 
 export type HttpOpts = http.RequestOptions & { output?: IOType };
 

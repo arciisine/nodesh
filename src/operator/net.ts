@@ -1,5 +1,5 @@
 import { HttpOpts, NetUtil } from '../util/net';
-import { IOType } from '../util/stream';
+import { IOType } from '../types';
 
 /**
  * Support for network based activities
@@ -9,10 +9,9 @@ export class NetOperators {
    * This is meant as a simple equivalent of `curl`.  Will fetch a single page (and follow redirects).  By default,
    * it will return lines from the response. Optionally, can return the entire page as a single string, or a sequence
    * of `Buffer`s depending on the options passed in.
-   * 
+   *
    * @example
-   * `https://en.wikipedia.org/wiki/Special:Random`
-   *   .async
+   * `https://en.wikipedia.org/wiki/Special:Random`.$
    *   .fetch() // Request URL
    *   .match('URL', 'extract') // Pull out URLs
    */

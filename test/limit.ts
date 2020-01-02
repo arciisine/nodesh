@@ -11,11 +11,11 @@ export class LimitSuite {
   async testFirst() {
     const badGen = function* () {
       yield 1;
-      while (true) { }
+      while (true as any) { }
       yield 2;
     };
 
-    const [val] = await badGen().async.first();
+    const [val] = await badGen().$.first();
     assert(val === 1);
   }
 

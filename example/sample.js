@@ -2,11 +2,11 @@
 
 const path = require('path');
 
-/.[jt]s$/.async
+/.[jt]s$/.$
   .dir({ base: path.resolve(process.cwd(), '../tim-resume/src') })
   .read()
   .match('URL', 'extract')
-  .flatMap(url => url.async
+  .flatMap(url => url.$
     .fetch()
     .match('URL', 'extract')
   )
