@@ -14,5 +14,5 @@ if (process.argv.length >= 3) {
   setImmediate(() => require(script));
 } else {
   // eslint-disable-next-line no-eval
-  stdin.join('\n').forEach(eval).value;
+  $stdin.$join('\n').$forEach(eval).value;
 }

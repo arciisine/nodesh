@@ -45,7 +45,12 @@ export class TimeUtil {
   /**
    * Sleep for a specified amount of time
    */
-  static sleep(ms: number) {
-    return new Promise<any>(res => setTimeout(res, ms).unref());
+  static sleep(ms: number, unref: boolean = true) {
+    return new Promise<any>(res => {
+      const timeout = setTimeout(res, ms);
+      if (unref) {
+        timeout.unref();
+      }
+    });
   }
 }

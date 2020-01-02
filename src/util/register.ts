@@ -1,16 +1,24 @@
 import { AsyncUtil } from './async';
-import { PARENT } from '../types';
 
 export class RegisterUtil {
 
   /**
-   * Register new type as asyncable
+   * Track a promise, prevent process termination until promise is resolved
+   * @param p
+   */
+  static trackPromise<T>(p: Promise<T>): Promise<T> {
+    const timer = setTimeout(() => { }, 10 ** 8) as NodeJS.Timeout;
+    return p.finally(() => timer.unref());
+  }
+
+  /**
+   * Register new type as async iterable
    * @param t
    */
   static registerAsyncable(t: Function) {
     RegisterUtil.properties({
-      $(this: any) {
-        return AsyncUtil.toGenerator(this);
+      $iter(this: any) {
+        return AsyncUtil.toIterable(this);
       }
     }, t.prototype);
   }
@@ -24,7 +32,7 @@ export class RegisterUtil {
         get() {
           return (fn: (data: Promise<any[]>) => void) => {
             Promise.resolve().then(() => {
-              fn((this as AsyncGenerator).values);
+              fn(RegisterUtil.trackPromise((this as AsyncIterable<any>).$values));
             });
 
             return this;
@@ -44,24 +52,25 @@ export class RegisterUtil {
     proto: Record<string, any>
   ) {
     for (const key of Object.keys(props)) {
-      try {
-        let val = props[key];
-        if ('apply' in val) {
-          val = { get: val } as any;
-        }
-        (val as any).configurable = true;
-        Object.defineProperty(proto, key, val);
-      } catch (err) {
-        // Do nothing
+      let val = props[key];
+      if ('apply' in val) {
+        val = { get: val } as any;
       }
+      (val as any).configurable = true;
+      Object.defineProperty(proto, key, val);
     }
   }
 
-  static createOperator<T = any>(target: (...args: any[]) => AsyncGenerator<T>) {
-    return function (this: AsyncGenerator<T>, ...args: any[]) {
-      const ret = target.call(this, ...args);
-      ret[PARENT] = this; // Track heritage
-      return ret;
+  static createOperator<T = any>(target: (...args: any[]) => AsyncIterator<T>) {
+    return function (this: AsyncIterable<T>, ...args: any[]) {
+      const src = this.$iter ?? this;
+
+      const ret = target.call(src, ...args);
+      if (ret instanceof Promise) {
+        return RegisterUtil.trackPromise(ret);
+      } else {
+        return ret;
+      }
     };
   }
 
@@ -89,22 +98,5 @@ export class RegisterUtil {
         Object.defineProperty(target.prototype, key, prop);
       }
     }
-  }
-
-  /**
-   * Get parent of sequence
-   */
-  static getParent<T>(gen: AsyncGenerator<T>) {
-    while (!!gen[PARENT]) {
-      gen = gen[PARENT]!;
-    }
-    return gen;
-  }
-
-  /**
-   * Terminate sequence by targeting parent
-   */
-  static kill(gen: AsyncGenerator) {
-    RegisterUtil.getParent(gen).return(null);
   }
 }

@@ -70,40 +70,44 @@ function extractAllDocs(all) {
  * @param {string} file
  */
 function processTyping(file) {
-  return `dist/${file}.d.ts`.$
-    .read()
-    .trim()
-    .match(/(^[/][/])|(export [{])|(^\s*[}]\s*$)/, 'negate') // Remove comments and close braces
-    .reduce(groupDocs, [])
-    .flatten()
-    .filter(x => x.length > 0)
-    .map(extractDoc);
+  return `dist/${file}.d.ts`
+    .$read()
+    .$trim()
+    .$match(/(^[/][/])|(export [{])|(^\s*[}]\s*$)/, 'negate') // Remove comments and close braces
+    .$reduce(groupDocs, [])
+    .$flatten()
+    .$filter(x => x.length > 0)
+    .$map(extractDoc);
 }
 
 async function processDocs() {
+  const [OPERATORS] = await [
+    'operator/core',
+    'operator/file',
+    'operator/transform',
+    'operator/text',
+    'operator/limit',
+    'operator/exec',
+    'operator/export'
+  ]
+    .$map(processTyping)
+    .$map(extractAllDocs)
+    .$join('\n\n');
+
+  const [HELPERS] = await 'helper'
+    .$map(processTyping)
+    .$map(extractAllDocs);
+
+  /** @type {Record<string, string>} */
   const context = {
-    OPERATORS: await [
-      'operator/core',
-      'operator/file',
-      'operator/transform',
-      'operator/text',
-      'operator/limit',
-      'operator/exec',
-      'operator/export'
-    ].$
-      .map(processTyping)
-      .map(extractAllDocs)
-      .join('\n\n'),
-    HELPERS: await 'helper'.$
-      .map(processTyping)
-      .map(extractAllDocs)
-      .value
+    OPERATORS,
+    HELPERS
   };
 
-  await 'README.tpl.md'.$
-    .read('text')
-    .replace(/%%([^%]+)?%%/g, (all, token) => context[token])
-    .write('README.md');
+  await 'README.tpl.md'
+    .$read('text')
+    .$replace(/%%([^%]+)?%%/g, (all, token) => context[token])
+    .$write('README.md');
 }
 
 processDocs();

@@ -1,52 +1,39 @@
 import * as stream from 'stream';
 
-import { AsyncStream, AsyncGeneratorCons, OrAsyncStream } from '../types';
+import { AsyncGeneratorCons, OrAsyncStream, $AsyncIterable } from '../types';
 import { StreamUtil } from './stream';
 
 
 export class AsyncUtil {
-  static async * ofOne<T>(e: T) {
-    yield e;
-  }
-
-  static async * ofAll<T>(e: Iterable<T> | AsyncIterable<T>) {
-    yield* e;
+  static async * yield<T>(itr: Iterable<T>): $AsyncIterable<T> {
+    yield* itr;
   }
 
   /**
    * Produce an async generator from any value
    */
-  static toGenerator<T>(val: AsyncGenerator<T>): AsyncGenerator<T>; // eslint-disable-line
-  static toGenerator<T>(val: AsyncIterable<T>): AsyncGenerator<T>; // eslint-disable-line
-  static toGenerator<T>(val: Iterable<T>): AsyncGenerator<T>; // eslint-disable-line
-  static toGenerator<T>(val: T): AsyncGenerator<T>; // eslint-disable-line
-  static toGenerator<T extends object>(val: OrAsyncStream<T>): AsyncGenerator<T> {
+  static toIterable<T>(val: stream.Readable): $AsyncIterable<string>; // eslint-disable-line
+  static toIterable<T>(val: AsyncGenerator<T>): $AsyncIterable<T>; // eslint-disable-line
+  static toIterable<T>(val: AsyncIterable<T>): $AsyncIterable<T>; // eslint-disable-line
+  static toIterable<T>(val: Iterable<T>): $AsyncIterable<T>; // eslint-disable-line
+  static toIterable<T>(val: T): $AsyncIterable<T>; // eslint-disable-line
+  static toIterable<T>(val: OrAsyncStream<T>): $AsyncIterable<T> {
     if (val === null || val === undefined || typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') {
-      return AsyncUtil.ofOne(val);
-    } else if (val.constructor === AsyncGeneratorCons) {
-      return val as AsyncGenerator<T>;
+      return AsyncUtil.yield([val]);
+    } else if ((val as AsyncGenerator).constructor === AsyncGeneratorCons) {
+      return val as $AsyncIterable<T>;
     } else if (val instanceof stream.Readable) {
-      return StreamUtil.readStream(val) as AsyncGenerator<any>;
-    } else if (Symbol.iterator in val || Symbol.asyncIterator in val) {
-      return AsyncUtil.ofAll(AsyncUtil.asIterable(val as AsyncStream<T>));
+      return StreamUtil.readStream(val) as $AsyncIterable<any>;
+    } else if (Symbol.asyncIterator in val) {
+      return val as $AsyncIterable<T>;
+    } else if (Symbol.iterator in val) {
+      return AsyncUtil.yield(val as Iterable<T>);
     } else {
-      return AsyncUtil.ofOne(val as T);
+      return AsyncUtil.yield([val as T]);
     }
   }
 
-  /**
-   * Ensure AsyncStream object returns as AsyncIterable
-   * @param val
-   */
-  static asIterable<T>(val: AsyncStream<T>): AsyncIterable<T> | Iterable<T> {
-    if (Symbol.asyncIterator in val) {
-      return val as AsyncIterable<T>;
-    } else if (Symbol.iterator in val) {
-      return val as Iterable<T>;
-    } else if ('$' in val) {
-      return AsyncUtil.asIterable(val.$);
-    } else {
-      throw new Error('Unknown iterable type');
-    }
+  static toIterator<T>(val: AsyncIterable<T>): AsyncIterator<T> {
+    return val[Symbol.asyncIterator]();
   }
 }

@@ -6,16 +6,16 @@ Node shell is an npm package aimed at providing bash-like operations/simplicity 
 ```javascript
 #!/bin/npx @arcsine/nodesh
 
-stdin // Automatically pipe from stdin
-  .match('URL', 'extract')  // Retain only URL patterns and emit as single values
-  .fetch() // Request each url that comes through
-  .tokens(/[^A-Za-z0-9_]+/) // Break down returned webpage into tokens
-  .trim() 
-  .filter(x => 
+$stdin // Automatically pipe from stdin
+  .$match('URL', 'extract')  // Retain only URL patterns and emit as single values
+  .$fetch() // Request each url that comes through
+  .$tokens(/[^A-Za-z0-9_]+/) // Break down returned webpage into tokens
+  .$trim() 
+  .$filter(x => 
     x.length >= 6 &&  // Retain words that are 6 chars or more
     x.charAt(0) === x.charAt(0).toUpperCase() // And that start with an uppercase letter
   )  
-  .stdout; // Pipe the token stream to stdout
+  .$stdout; // Pipe the token stream to stdout
 
 ```
 
@@ -53,7 +53,7 @@ When solving simple problems involving file systems, file contents, and even htt
 Usually at this point, is when I would switch over to something like Python given it's "batteries included" mentality, as it's a perfectly fine language in it's own right.  That being said, I find it more and more desirable to be able to leverage common tools/libraries from the node ecosystem in these tasks.  
 
 ## Architecture
-The tool revolves around the use of `async` generators, as denoted by `async function *`.  This allows for the iterative operation, as well as support for asynchronous operations.  This means everything within the framework is non-blocking.  This means the primary way of using the framework is by accessing your data as an async generator.  The library has built in support for converting basic data types into async generators, as well as built-in support for common patterns.
+The tool revolves around the use of `async` generators, as denoted by `async function *`.  This allows for the iterative operation, as well as support for asynchronous operations.  This means everything within the framework is non-blocking.  This also means the primary way of using the framework is by accessing your data as an async generator.  The library has built in support for converting basic data types into async generators, as well as built-in support for common patterns.
 
 **Example of simple async generator**
 
@@ -67,17 +67,24 @@ async function * asyncWorker() {
 ```
 
 ### Sources
-Out of the box, the following types support an `.$` property that returns an async generator for the supported type.  Currently the supported types are:
+Out of the box, the following types support the async iterator symbol (`AsyncIterable`):
 
 #### Iterables
 * Generator - This will return the generator, but as an async generator
 * `Set` - This will return an async generator over the set contents
 * `Map` - This will return an async generator over the map's entries [key, value]
+* `Array` - This will return an async generator over the array contents
 * `NodeJS:ReadStream` - This will return a line-oriented async generator over the read stream
 
 **Example of read stream**
 ```typescript
-const lineGenerator = fs.createReadStream('data.txt').$;
+const lineGenerator = $of(fs.createReadStream('data.txt'));
+
+... or ...
+
+const lineGenerator = fs.createReadStream('data.txt').$map(x => ...);
+
+
 ```
 
 #### Primitives
@@ -86,18 +93,13 @@ a single value, that of the primitive
 * `String`
 * `Number`
 * `RegExp`
+* `Boolean`
 
-In addition to the built-in functionality, a global function `of` is declared that will allow any value passed in to be converted to an async generator.  If the item is iterable or is a stream, it will return the iteration as a generator, otherwise return the value as a single-valued generator.
+In addition to the built-in functionality, a global function `$of` is declared that will allow any value passed in to be converted to an async iterable.  If the item is iterable or is a stream, it will return the iteration as a generator, otherwise return the value as a single-valued generator.
 
 **Example of simple value**
 ```typescript
-const bigIntGen = of(10000n);
-
-...
-
-const numberGen = (100000).$;
-const numberGen2 = of(10000);
-
+const bigIntGen = $of(10000n);
 ```
 
 %%HELPERS%%

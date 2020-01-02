@@ -1,3 +1,5 @@
+import { $AsyncIterable } from '../types';
+
 /**
  * Support for limiting sequence values based on ordering
  */
@@ -5,16 +7,16 @@ export class LimitOperators {
   /**
    * This will return the first `n` elements with a default of a single element.
    * @example
-   * '<file>'.$
-   *   .read()
-   *   .first(10) // Read first 10 lines
+   * '<file>'
+   *   .$read()
+   *   .$first(10) // Read first 10 lines
 
    * @example
-   * '<file>'.$
-   *   .read()
-   *   .first() // Read first line
+   * '<file>'
+   *   .$read()
+   *   .$first() // Read first line
    */
-  async * first<T>(this: AsyncGenerator<T>, n: number = 1) {
+  async * $first<T>(this: AsyncIterable<T>, n: number = 1): $AsyncIterable<T> {
     if (!(n >= 1)) {
       throw new Error('Invalid amount for first(). Must be >= 1');
     }
@@ -32,11 +34,11 @@ export class LimitOperators {
    * This will return all but the first `n` elements.
    *
    * @example
-   * '<file>.csv'.$
-   *   .read()
-   *   .skip(1) // Skip header
+   * '<file>.csv'
+   *   .$read()
+   *   .$skip(1) // Skip header
    */
-  async * skip<T>(this: AsyncGenerator<T>, n: number): AsyncGenerator<T> {
+  async * $skip<T>(this: AsyncIterable<T>, n: number): $AsyncIterable<T> {
     if (Number.isNaN(n) || n === 0) {
       throw new Error('Invalid amount for skip(). Must be >= 1 or <= -1');
     }
@@ -67,16 +69,16 @@ export class LimitOperators {
    * work properly, this now becomes a blocking operator.
    *
    * @example
-   * '<file>'.$
-   *   .read()
-   *   .last(7) // Read last 7 lines of file
+   * '<file>'
+   *   .$read()
+   *   .$last(7) // Read last 7 lines of file
    *
    * @example
-   * '<file>'.$
-   *   .read()
-   *   .last() // Read last line of file
+   * '<file>'
+   *   .$read()
+   *   .$last() // Read last line of file
    */
-  async * last<T>(this: AsyncGenerator<T, any, any>, n: number = 1): AsyncGenerator<T, any, any> {
+  async * $last<T>(this: AsyncIterable<T>, n: number = 1): $AsyncIterable<T> {
     if (!(n >= 1)) {
       throw new Error('Invalid amount for last(). Must be >= 1');
     }
@@ -95,11 +97,11 @@ export class LimitOperators {
    * This will repeat the first `n` elements with a default of all elements.
    *
    * @example
-   * '<file>'.$
-   *   .read()
-   *   .first(10) // Read first 10 lines
+   * '<file>'
+   *   .$read()
+   *   .$first(10) // Read first 10 lines
    */
-  async * repeat<T>(this: AsyncGenerator<T>, n: number = -1): AsyncGenerator<T> {
+  async * $repeat<T>(this: AsyncIterable<T>, n: number = -1): $AsyncIterable<T> {
     const buffer = [];
     let readCount = 0;
 

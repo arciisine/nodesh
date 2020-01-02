@@ -1,3 +1,5 @@
+import { $AsyncIterable } from '../types';
+
 type Replacer = Parameters<string['replace']>[1];
 
 export type MatchMode = 'extract' | 'negate';
@@ -15,31 +17,31 @@ const REGEX_SUPPORT = {
  */
 export class TextOperators {
   /**
-   * `columns` is similar to the unix `awk` in that it allows for production of
+   * `$columns` is similar to the unix `awk` in that it allows for production of
    * columns from a single line of text. This is useful for dealing with column
    * oriented output.  The separator defaults to all whitespace but can tailored
    * as needed by regex or string.
    *
    * @example
-   * '<file>.tsv' // Tab-separated file.$
-   *   .read() // Read as lines
-   *   .columns('\t') // Separate on tabs
+   * '<file>.tsv' // Tab-separated file
+   *   .$read() // Read as lines
+   *   .$columns('\t') // Separate on tabs
    *   // Now an array of tuples (as defined by tabs in the tsv)
    */
-  columns(this: AsyncGenerator<string>, sep?: RegExp | string): AsyncGenerator<string[]>;
+  $columns(this: AsyncIterable<string>, sep?: RegExp | string): $AsyncIterable<string[]>;
   /**
    * Supports passing in column names to produce objects instead of tuples.  These values will be
    * matched with the columns produced by the separator. Any row that is shorter than the names
    * array will have undefined for the associated keys.
    *
    * @example
-   * '<file>.tsv' // Tab-separated file.$
-   *   .read() // Read as lines
-   *   .columns(['Name', 'Age', 'Major'], '\t') // Separate on tabs
+   * '<file>.tsv' // Tab-separated file
+   *   .$read() // Read as lines
+   *   .$columns(['Name', 'Age', 'Major'], '\t') // Separate on tabs
    *   // Now an array of objects { Name: string, Age: string, Major: string } (as defined by tabs in the tsv)
    */
-  columns<V extends readonly string[]>(this: AsyncGenerator<string>, names: V, sep?: RegExp | string): AsyncGenerator<Record<V[number], string>>
-  async * columns(this: AsyncGenerator<string>, columnsOrSep?: RegExp | string | string[], sep?: RegExp | string) {
+  $columns<V extends readonly string[]>(this: AsyncIterable<string>, names: V, sep?: RegExp | string): $AsyncIterable<Record<V[number], string>>
+  async * $columns(this: AsyncIterable<string>, columnsOrSep?: RegExp | string | string[], sep?: RegExp | string) {
     let columns: string[] | undefined;
 
     if (Array.isArray(columnsOrSep)) {
@@ -70,19 +72,19 @@ export class TextOperators {
    *
    * @example
    *
-   * '<file>'.$
-   *   .read() // Read file as lines
-   *   .tokens() // Convert to words
-   *   .filter(x => x.length > 5) // Retain only words 6-chars or longer
+   * '<file>'
+   *   .$read() // Read file as lines
+   *   .$tokens() // Convert to words
+   *   .$filter(x => x.length > 5) // Retain only words 6-chars or longer
    */
-  async * tokens(this: AsyncGenerator<string>, sep: RegExp | string = /\s+/g): AsyncGenerator<string, any, any> {
+  async * $tokens(this: AsyncIterable<string>, sep: RegExp | string = /\s+/g): $AsyncIterable<string> {
     for await (const line of this) {
       yield* line.split(sep);
     }
   }
 
   /**
-   * `match` is similar to tokens, but will emit based on a pattern instead of
+   * `$match` is similar to tokens, but will emit based on a pattern instead of
    * just word boundaries.
    *
    * In addition to simple regex or string patterns, there is built in support for some common use cases (`RegexType`)
@@ -95,18 +97,18 @@ export class TextOperators {
    * * `'negate'` - Return only lines that do not match
    *
    * @example
-   * '<file>'.$
-   *   .read()
-   *   .match(/(FIXME|TODO)/, 'negate')
+   * '<file>'
+   *   .$read()
+   *   .$match(/(FIXME|TODO)/, 'negate')
    *   // Exclude all lines that include FIXME or TODO
    *
    * @example
-   * '<file>'.$
-   *   .read()
-   *   .match(/\d{3}(-)?\d{3}(-)?\d{4}/, 'extract)
+   * '<file>'
+   *   .$read()
+   *   .$match(/\d{3}(-)?\d{3}(-)?\d{4}/, 'extract)
    *   // Return all phone numbers in the sequence
    */
-  async * match(this: AsyncGenerator<string>, regex: RegExp | string, mode?: MatchMode): AsyncGenerator<string> {
+  async * $match(this: AsyncIterable<string>, regex: RegExp | string, mode?: MatchMode): $AsyncIterable<string> {
     if (typeof regex === 'string') {
       regex = regex in REGEX_SUPPORT ? REGEX_SUPPORT[regex as 'URL'] : new RegExp(regex);
     }
@@ -131,64 +133,64 @@ export class TextOperators {
   }
 
   /**
-   * `replace` behaves identically to `String.prototype.replace`, but will only operate
+   * `$replace` behaves identically to `String.prototype.replace`, but will only operate
    * on a single sequence value at a time.
    *
    * @example
-   *  '<file>'.$
-   *   .read()
-   *   .replace(/TODO/, 'FIXME')
+   *  '<file>'
+   *   .$read()
+   *   .$replace(/TODO/, 'FIXME')
    *   // All occurrences replaced
    */
-  replace(this: AsyncGenerator<string>, pattern: RegExp | string, sub: string | Replacer): AsyncGenerator<string> {
-    return this.map((x: string) => x.replace(pattern, sub as any));
+  $replace(this: AsyncIterable<string>, pattern: RegExp | string, sub: string | Replacer): $AsyncIterable<string> {
+    return this.$map((x: string) => x.replace(pattern, sub as any));
   }
 
   /**
-   * `trim` behaves identically to `String.prototype.trim`, but will only operate on a single sequence value at a time
+   * `$trim` behaves identically to `String.prototype.trim`, but will only operate on a single sequence value at a time
    *
    * @example
-   * '<file>'.$
-   *   .read()
-   *   .trim()
+   * '<file>'
+   *   .$read()
+   *   .$trim()
    *   // Cleans leading/trailing whitespace per line
    */
-  trim(this: AsyncGenerator<string>): AsyncGenerator<string> {
-    return this.map(x => x.trim());
-  }
-
-  /**
-   * `singleLine` is a convenience method for converting an entire block of
-   * text into a single line.  This is useful when looking for patterns that
-   * may span multiple lines.
-   *
-   * @example
-   * '<file>.html'.$
-   *   .read()
-   *   .singleLine() // Convert to a single line
-   *   .replace(/<[^>]+?>/) // Remove all HTML tags
-   */
-  singleLine(this: AsyncGenerator<string>): AsyncGenerator<string> {
-    return this.join(' ').replace(/\n/g, ' ');
+  $trim(this: AsyncIterable<string>): $AsyncIterable<string> {
+    return this.$map(x => x.trim());
   }
 
   /**
    * This operator allows for combining a sequence of strings into a single value similar to `String.prototype.join`.
    *
    * @example
-   * '<file>'.$
-   *   .read() // Read as a series of lines
-   *   .join('\n')
+   * '<file>'
+   *   .$read() // Read as a series of lines
+   *   .$join('\n')
    *   // Produces a single value of the entire file
    */
-  join(this: AsyncGenerator<string>, joiner?: string | ((a: string[]) => string)): AsyncGenerator<string> {
+  $join(this: AsyncIterable<string>, joiner?: string | ((a: string[]) => string)): $AsyncIterable<string> {
     if (!joiner) {
       joiner = (x: string[]) => x.join('');
     } else if (typeof joiner === 'string') {
       const val = joiner;
       joiner = (x: string[]) => x.join(val);
     }
-    return this.collect().map(joiner);
+    return this.$collect().$map(joiner);
+  }
+
+  /**
+   * `$singleLine` is a convenience method for converting an entire block of
+   * text into a single line.  This is useful when looking for patterns that
+   * may span multiple lines.
+   *
+   * @example
+   * '<file>.html'
+   *   .$read()
+   *   .$singleLine() // Convert to a single line
+   *   .$replace(/<[^>]+?>/) // Remove all HTML tags
+   */
+  $singleLine(this: AsyncIterable<string>): $AsyncIterable<string> {
+    return this.$join(' ').$replace(/\n/g, ' ');
   }
 }
 

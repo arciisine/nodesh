@@ -3,7 +3,7 @@ import * as path from 'path';
 import { StreamUtil } from '../util/stream';
 import { FileUtil, ScanEntry } from '../util/file';
 
-import { IOType } from '../types';
+import { IOType, $AsyncIterable } from '../types';
 
 type DirConfig = { base?: string, full?: boolean };
 
@@ -12,7 +12,7 @@ type DirConfig = { base?: string, full?: boolean };
  * and operating upon those files.  To support this, the framework supports
  * producing files as a sequence of file objects or filenames, given a file
  * extension or a regex pattern. With `String`s and `RegExp`s supporting the
- * `.$` property, these are the most common way of finding files.
+ * `Symbol.asyncIterator` property, these are the most common way of finding files.
  */
 export class FileOperators {
   /**
@@ -22,22 +22,22 @@ export class FileOperators {
    * * `binary` - The sequence will produce a series of `Buffer` objects
    *
    * @example
-   * '<file>'.$ //  Now a sequence of a single value, a file name
-   *   .read('binary') // Read as a series of buffers
-   *   .reduce((acc, buffer) => {
+   * '<file>' //  Now a sequence of a single value, a file name
+   *   .$read('binary') // Read as a series of buffers
+   *   .$reduce((acc, buffer) => {
    *     return acc  + buffer.length;
    *   }, 0); // Count number of bytes in file
    *
    * @example
-   * '<file>'.$ //  Now a sequence of a single value, a file name
-   *   .read('text') // Read as a single string
-   *   .map(text => text.length); // Count number of characters in file
+   * '<file>' //  Now a sequence of a single value, a file name
+   *   .$read('text') // Read as a single string
+   *   .$map(text => text.length); // Count number of characters in file
    *
    */
-  read(this: AsyncGenerator<string>, type: 'binary'): AsyncGenerator<Buffer>;
-  read(this: AsyncGenerator<string>, type?: IOType): AsyncGenerator<string>;
-  read(this: AsyncGenerator<string>, type: 'line' | 'text'): AsyncGenerator<string>;
-  async * read(this: AsyncGenerator<string>, type: IOType = 'line'): AsyncGenerator<string | Buffer> {
+  $read(this: AsyncIterable<string>, type: 'binary'): $AsyncIterable<Buffer>;
+  $read(this: AsyncIterable<string>, type?: IOType): $AsyncIterable<string>;
+  $read(this: AsyncIterable<string>, type: 'line' | 'text'): $AsyncIterable<string>;
+  async * $read(this: AsyncIterable<string>, type: IOType = 'line'): $AsyncIterable<string | Buffer> {
     for await (const file of this) {
       yield* StreamUtil.readStream(file, type);
     }
@@ -54,18 +54,18 @@ export class FileOperators {
    * that will be eligible for reading or any other file operation.
    *
    * @example
-   * '.csv'.$
-   *   .dir({ full: true }) // List all '.csv' files, recursively
-   *   .forEach(f => {
+   * '.csv'
+   *   .$dir({ full: true }) // List all '.csv' files, recursively
+   *   .$forEach(f => {
    *     // Display the filename, and it's modification time
    *     console.log(f.file, f.stats.mtime);
    *   });
    */
-  dir(this: AsyncGenerator<string | RegExp>, config: Omit<DirConfig, 'full'> & { full: true }): AsyncGenerator<ScanEntry>;
-  dir(this: AsyncGenerator<string | RegExp>, config: DirConfig): AsyncGenerator<string>;
-  dir(this: AsyncGenerator<string | RegExp>): AsyncGenerator<string>;
-  dir(this: AsyncGenerator<string | RegExp>, config?: DirConfig): AsyncGenerator<string | ScanEntry>;
-  async * dir(this: AsyncGenerator<string | RegExp>, config: DirConfig = { base: process.cwd() }) {
+  $dir(this: AsyncIterable<string | RegExp>, config: Omit<DirConfig, 'full'> & { full: true }): $AsyncIterable<ScanEntry>;
+  $dir(this: AsyncIterable<string | RegExp>, config: DirConfig): $AsyncIterable<string>;
+  $dir(this: AsyncIterable<string | RegExp>): $AsyncIterable<string>;
+  $dir(this: AsyncIterable<string | RegExp>, config?: DirConfig): $AsyncIterable<string | ScanEntry>;
+  async * $dir(this: AsyncIterable<string | RegExp>, config: DirConfig = { base: process.cwd() }): $AsyncIterable<ScanEntry | string> {
     config.base = path.resolve(process.cwd(), config.base! || ''); // relative to working directory, but pull path
 
     for await (const pattern of this) {
@@ -74,7 +74,7 @@ export class FileOperators {
           (x: string) => x.endsWith(pattern) :
           (x: string) => pattern.test(x);
 
-      yield* FileUtil.scanDir({ testFile }, config.base!).map(x => config.full ? x : x.file);
+      yield* FileUtil.scanDir({ testFile }, config.base!).$map(x => config.full ? x : x.file);
     }
   }
 }

@@ -9,8 +9,8 @@ export class DataSuite {
 
   @Test()
   async testJSON() {
-    const val = await ['{"a":5}', '{"c": null}'].$
-      .json();
+    const val = await ['{"a":5}', '{"c": null}']
+      .$json();
 
     assert(val === [{ a: 5 }, { c: null }]);
   }
@@ -23,8 +23,8 @@ export class DataSuite {
       'g,h,i',
       'j',
       'k,,'
-    ].$
-      .csv(['1', '2', '3']);
+    ]
+      .$csv(['1', '2', '3']);
 
     assert(val === [
       { 1: 'a', 2: 'b', 3: 'c' },
@@ -37,11 +37,11 @@ export class DataSuite {
 
   @Test()
   async testPrompt() {
-    const input = 'hello\n'.$.stream();
+    const input = 'hello\n'.$stream();
 
-    const result = await 'What do you say?'.$
-      .prompt(input)
-      .value;
+    const result = await 'What do you say?'
+      .$prompt(input)
+      .$value;
 
     assert(result === 'hello');
   }
