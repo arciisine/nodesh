@@ -4,13 +4,12 @@ module.exports = {
         "node": true
     },
     "globals": {
-        "stdin": "readonly",
-        "stdout": "readonly",
-        "of": "readonly",
-        "range": "readonly",
-        "argv": "readonly",
-        "ask": "readonly",
-        "env": "readonly"
+        "$stdin": "readonly",
+        "$of": "readonly",
+        "$range": "readonly",
+        "$argv": "readonly",
+        "$ask": "readonly",
+        "$env": "readonly"
     },
     "parser": "@typescript-eslint/parser",
     "extends": [

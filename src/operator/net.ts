@@ -1,5 +1,5 @@
 import { HttpOpts, NetUtil } from '../util/net';
-import { IOType } from '../types';
+import { IOType, $AsyncIterable } from '../types';
 
 /**
  * Support for network based activities
@@ -11,14 +11,14 @@ export class NetOperators {
    * of `Buffer`s depending on the options passed in.
    *
    * @example
-   * `https://en.wikipedia.org/wiki/Special:Random`.$
-   *   .fetch() // Request URL
-   *   .match('URL', 'extract') // Pull out URLs
+   * `https://en.wikipedia.org/wiki/Special:Random`
+   *   .$fetch() // Request URL
+   *   .$match('URL', 'extract') // Pull out URLs
    */
-  fetch(this: AsyncGenerator<string>, output: 'binary', opts?: HttpOpts): AsyncGenerator<Buffer>;
-  fetch(this: AsyncGenerator<string>, output: 'line' | 'text', opts?: HttpOpts): AsyncGenerator<string>;
-  fetch(this: AsyncGenerator<string>): AsyncGenerator<string>;
-  async *fetch(this: AsyncGenerator<string>, output?: IOType, opts?: HttpOpts): AsyncGenerator<string | Buffer, any, any> {
+  $fetch(this: AsyncIterable<string>, output: 'binary', opts?: HttpOpts): $AsyncIterable<Buffer>;
+  $fetch(this: AsyncIterable<string>, output: 'line' | 'text', opts?: HttpOpts): $AsyncIterable<string>;
+  $fetch(this: AsyncIterable<string>): $AsyncIterable<string>;
+  async * $fetch(this: AsyncIterable<string>, output?: IOType, opts?: HttpOpts): $AsyncIterable<string | Buffer> {
     for await (const url of this) {
       yield* (await NetUtil.fetch(url, output, opts));
     }

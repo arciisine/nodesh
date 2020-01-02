@@ -10,54 +10,49 @@ import { LimitOperators } from './operator/limit';
 import { NetOperators } from './operator/net';
 import { TimeOperators } from './operator/time';
 import { TransformOperators } from './operator/transform';
-import { AsyncAware, PARENT } from './types';
 
-declare module 'fs' {
-  interface ReadStream extends AsyncAware<string> { }
-}
-
-declare module 'stream' {
-  namespace ReadableConstructor {
-    const $: AsyncGenerator<string>;
-  }
-}
+type AllOps<T> =
+  FileOperators &
+  TextOperators &
+  NetOperators &
+  DataOperators &
+  ExecOperators &
+  CoreOperators &
+  ExportOperators &
+  ExportPropOperators<T> &
+  LimitOperators &
+  TimeOperators &
+  TransformOperators &
+  { $iter?: AsyncIterable<T> };
 
 declare global {
   namespace globalThis {
-    const of: GlobalHelpers['of'];
-    const stdin: GlobalHelpers['stdin'];
-    const registerOperator: GlobalHelpers['registerOperator'];
-    const argv: GlobalHelpers['argv'];
-    const env: GlobalHelpers['env'];
-    const range: GlobalHelpers['range'];
-  }
-  interface AsyncGenerator<T = unknown, TReturn = any, TNext = unknown>
-    extends
-    CoreOperators,
-    DataOperators,
-    ExecOperators,
-    ExportOperators,
-    ExportPropOperators<T>,
-    FileOperators,
-    TextOperators,
-    LimitOperators,
-    NetOperators,
-    TimeOperators,
-    Promise<T[]>,
-    TransformOperators,
-    AsyncAware<T> {
-    [PARENT]?: AsyncGenerator<T, TReturn, TNext>;
+    const $of: GlobalHelpers['$of'];
+    const $stdin: GlobalHelpers['$stdin'];
+    const $registerOperator: GlobalHelpers['$registerOperator'];
+    const $argv: GlobalHelpers['$argv'];
+    const $env: GlobalHelpers['$env'];
+    const $range: GlobalHelpers['$range'];
   }
 
-  interface Generator<T> extends AsyncAware<T> { }
-  interface Array<T> extends AsyncAware<T> { }
-  interface String extends AsyncAware<string> { }
-  interface Number extends AsyncAware<number> { }
-  interface Boolean extends AsyncAware<boolean> { }
-  interface RegExp extends AsyncAware<RegExp> { }
-  interface Set<T> extends AsyncAware<T> { }
-  interface Map<K, V> extends AsyncAware<[K, V]> { }
+  interface AsyncGenerator<T = unknown, TReturn = any, TNext = unknown> extends AllOps<T>, Promise<T[]> { }
+
+  interface AsyncIterable<T> extends AllOps<T> { }
+  interface String extends AsyncIterable<string> { }
+  interface Number extends AsyncIterable<number> { }
+  interface Boolean extends AsyncIterable<boolean> { }
+  interface RegExp extends AsyncIterable<RegExp> { }
+  interface Array<T> extends AsyncIterable<T> { }
+  interface Set<T> extends AsyncIterable<T> { }
+  interface Generator<T> extends AsyncIterable<T> { }
+  interface Map<K, V> extends AsyncIterable<[K, V]> { }
+  interface URLSearchParams extends AsyncIterable<[string, string]> { }
+
   namespace NodeJS {
-    interface ReadStream extends AsyncAware<string> { }
+    interface ReadStream extends Omit<AsyncIterable<string>, 'asyncIterator'> { }
   }
+}
+
+declare module 'fs' {
+  interface ReadStream extends Omit<AsyncIterable<string>, 'asyncIterator'> { }
 }

@@ -15,30 +15,30 @@ export class GlobalHelpers {
    * * Everything else - Returns a sequence of a single element
    *
    * @example
-   * of([1,2,3])
-   *    .map(x => x ** 2)
+   * $of([1,2,3])
+   *    .$map(x => x ** 2)
    *
    *  // Should be identical
    *
    *  [1,2,3].$
-   *    .map(x => x ** 2)
+   *    .$map(x => x ** 2)
    */
-  get of() {
-    return AsyncUtil.toGenerator;
+  get $of() {
+    return AsyncUtil.toIterable;
   }
 
   /**
    * In the process of using the tool, there may be a need for encapsulating common
-   * operations.  By default, `wrap` provides an easy path for re-using functionality,
+   * operations.  By default, `$wrap` provides an easy path for re-using functionality,
    * but it lacks the clarity of intent enjoyed by the built in operators.
    *
    * @example (reverse.js)
    * class Custom {
-   *   reverse() {
+   *   $reverse() {
    *     return this
-   *       .collect() // Gather the entire sequence as an array
-   *       .map(x => x.reverse()) // Reverse it
-   *       .flatten(); // Flatten it back into a single sequence
+   *       .$collect() // Gather the entire sequence as an array
+   *       .$map(x => x.reverse()) // Reverse it
+   *       .$flatten(); // Flatten it back into a single sequence
    *   }
    * }
    *
@@ -51,10 +51,10 @@ export class GlobalHelpers {
    * @example
    * require('./reverse')
    *
-   * [1,2,3].$
-   *   .reverse() // Reverse is now available
+   * [1,2,3]
+   *   .$reverse() // Reverse is now available
    */
-  get registerOperator() {
+  get $registerOperator() {
     return (op: Function) => RegisterUtil.registerOperators(
       [op], AsyncGeneratorCons
     );
@@ -70,35 +70,33 @@ export class GlobalHelpers {
    * use `process.argv` as normal.
    *
    * @example
-   * (argv[0] ?? 'Enter a file name:'.prompt())
+   * (argv[0] ?? 'Enter a file name:'.$prompt())
    *   // Pull in name from argv[0] or prompt if missing
-   *   .$
-   *   .read() // Read file
+   *   .$read() // Read file
    */
-  get argv(): string[] {
+  get $argv(): string[] {
     return process.argv.slice(3);
   }
   /**
    * Provides direct access to stdin as sequence of lines
    *
    * @example
-   * stdin // Stream stdin, one line at a time
-   *  .map(line => line.split('').reverse().join('')) // Reverse each line
-   *  .stdout // Pipe to stdout
+   * $stdin // Stream stdin, one line at a time
+   *  .$map(line => line.split('').reverse().join('')) // Reverse each line
+   *  .$stdout // Pipe to stdout
    */
-  get stdin(): AsyncGenerator<string> {
-    return process.stdin.$;
+  get $stdin(): AsyncIterable<string> {
+    return process.stdin.$iter!;
   }
   /**
    * A case insensitive map for accessing environment variables. Like `process.env`, but
    * doesn't require knowledge of the case.  Useful for simplifying script interactions.
    *
    * @example
-   * (env.user_name ?? ask('Enter a user name')) // Prompt user name if there
-   *   .$ // Can call async on sequences and it will return the same value
-   *   .map(userName => ... )
+   * ($env.user_name ?? ask('Enter a user name')) // Prompt user name if there
+   *   .$map(userName => ... )
    */
-  get env(): Record<string, string> {
+  get $env(): Record<string, string> {
     return new Proxy({}, {
       get(obj, key: string) {
         return process.env[key] ??
@@ -112,14 +110,14 @@ export class GlobalHelpers {
    * parameter can be defined to specify the distance between iterated numbers.
    *
    * @example
-   * range(1, 3)
-   *   .map(x => x**2)
+   * $range(1, 3)
+   *   .$map(x => x**2)
    *   // sequence of 1, 4, 9
    *
-   * range(10, 1, 2)
+   * $range(10, 1, 2)
    *   // sequence of 1, 3, 5, 7, 9
    */
-  async * range(stop: number, start = 1, step = 1) {
+  async * $range(stop: number, start = 1, step = 1): AsyncIterable<number> {
     if (step > 0 && stop < start) {
       const temp = start;
       start = stop;

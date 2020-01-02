@@ -1,4 +1,5 @@
 import { TimeUtil } from '../util/time';
+import { $AsyncIterable } from '../types';
 
 function log(name: string, all: boolean, phase: 'start' | 'end', ...extra: any[]) {
   if (all || TimeUtil.timingCounts.has(name)) {
@@ -14,8 +15,8 @@ export class TimeOperators {
   /**
    * Pause for a specified number of milliseconds
    */
-  wait<T>(this: AsyncGenerator<T>, ms: number): AsyncGenerator<T> {
-    return this.tap(() => TimeUtil.sleep(ms));
+  $wait<T>(this: AsyncIterable<T>, ms: number): $AsyncIterable<T> {
+    return this.$tap(() => TimeUtil.sleep(ms));
   }
 
   /**
@@ -23,8 +24,8 @@ export class TimeOperators {
    * the timing process should be per sequence element or for the entire
    * sequence.
    */
-  startTime<T>(this: AsyncGenerator<T>, name: string, count: boolean = true): AsyncGenerator<T> {
-    return this.tap(() => {
+  $startTime<T>(this: AsyncIterable<T>, name: string, count: boolean = true): $AsyncIterable<T> {
+    return this.$tap(() => {
       if (TimeUtil.startTime(name, count)) {
         log(name, !count, 'start');
       }
@@ -34,7 +35,7 @@ export class TimeOperators {
   /**
    * Track completion of a timing operation
    */
-  stopTime<T>(this: AsyncGenerator<T>, name: string, count: boolean = true): AsyncGenerator<T> {
+  $stopTime<T>(this: AsyncIterable<T>, name: string, count: boolean = true): $AsyncIterable<T> {
     const tap = () => {
       const res = TimeUtil.stopTime(name);
       if (res) {
@@ -43,7 +44,7 @@ export class TimeOperators {
       }
     };
     return !count ?
-      this.collect().tap(tap).flatten() :
-      this.tap(tap);
+      this.$collect().$tap(tap).$flatten() :
+      this.$tap(tap);
   }
 }

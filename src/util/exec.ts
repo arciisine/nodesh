@@ -12,7 +12,7 @@ export class ExecUtil {
       stdio: ['pipe', 'pipe', 'pipe'],
       ...props
     });
-    const err = StreamUtil.readStream(proc.stderr!, 'text').value;
+    const err = StreamUtil.readStream(proc.stderr!, 'text').$value;
     const retCode = new Promise(res => proc.on('exit', res));
     const result = async function () {
       if ((await retCode) !== 0) {

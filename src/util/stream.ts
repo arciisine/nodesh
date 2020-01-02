@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { Readable, Writable } from 'stream';
 
 import { EventEmitter } from 'events';
-import { IOType } from '../types';
+import { IOType, $AsyncIterable } from '../types';
 import { TimeUtil } from './time';
 
 class MemoryStream extends Writable {
@@ -61,10 +61,10 @@ export class StreamUtil {
   /**
    * Convert read stream into a sequence
    */
-  static readStream(file: Readable | string, mode: 'binary'): AsyncGenerator<Buffer>;
-  static readStream(file: Readable | string, mode: 'line' | 'text'): AsyncGenerator<string>;
-  static readStream(file: Readable | string, mode?: IOType): AsyncGenerator<string>;
-  static async * readStream(file: Readable | string, mode: IOType = 'line'): AsyncGenerator<Buffer | string> {
+  static readStream(file: Readable | string, mode: 'binary'): $AsyncIterable<Buffer>;
+  static readStream(file: Readable | string, mode: 'line' | 'text'): $AsyncIterable<string>;
+  static readStream(file: Readable | string, mode?: IOType): $AsyncIterable<string>;
+  static async * readStream(file: Readable | string, mode: IOType = 'line'): $AsyncIterable<Buffer | string> {
     const strm = typeof file === 'string' ? fs.createReadStream(file, { encoding: 'utf8' }) : file;
     const src: EventEmitter = mode === 'line' ? readline.createInterface(strm) : strm;
     const destroyed = new Promise(r => strm.once('close', r));
