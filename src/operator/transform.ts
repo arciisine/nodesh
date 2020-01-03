@@ -1,5 +1,4 @@
-import { OrCallable, OrAsyncStream, PromFunc, PromFunc2, $AsyncIterable } from '../types';
-import { AsyncUtil } from '../util/async';
+import { OrCallable, PromFunc, PromFunc2, $AsyncIterable } from '../types';
 
 export type PairMode = 'empty' | 'repeat' | 'exact';
 
@@ -120,18 +119,18 @@ export class TransformOperators {
    *   )
    *   // Generator of file lines with, file name attached
    */
-  async * $pair<T, U>(this: AsyncIterable<T>, value: OrCallable<OrAsyncStream<U>>, mode?: PairMode): $AsyncIterable<[T, U]> {
+  async * $pair<T, U>(this: AsyncIterable<T>, value: OrCallable<U | Iterable<U> | AsyncIterable<U>>, mode?: PairMode): $AsyncIterable<[T, U]> {
     if (['function', 'object'].includes(typeof value) && 'apply' in value) {
       value = value();
     }
 
     mode = mode ?? (typeof value === 'string' ? 'repeat' : 'empty');
 
-    let suppl = AsyncUtil.toIterable(value);
+    let suppl = (value as any as AsyncIterable<T>).$iterable;
     if (mode === 'repeat') {
       suppl = suppl.$repeat();
     }
-    let itr = AsyncUtil.toIterator(suppl);
+    let itr = suppl[Symbol.asyncIterator]();
 
     for await (const el of this) {
       const res = await itr.next();
@@ -139,7 +138,7 @@ export class TransformOperators {
         if (mode === 'exact') {
           break;
         } else if (mode === 'empty') {
-          itr = AsyncUtil.toIterator([undefined!].$repeat());
+          itr = [undefined!].$repeat()[Symbol.asyncIterator]();
           res.value = undefined;
         }
       }

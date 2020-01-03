@@ -1,6 +1,7 @@
 import { GlobalHelpers } from './helper';
 
 import { CoreOperators } from './operator/core';
+import { AdvancedOperators } from './operator/advanced';
 import { ExecOperators } from './operator/exec';
 import { DataOperators } from './operator/data';
 import { ExportOperators, ExportPropOperators } from './operator/export';
@@ -10,6 +11,7 @@ import { LimitOperators } from './operator/limit';
 import { NetOperators } from './operator/net';
 import { TimeOperators } from './operator/time';
 import { TransformOperators } from './operator/transform';
+import { $AsyncIterable } from './types';
 
 type AllOps<T> =
   FileOperators &
@@ -23,7 +25,8 @@ type AllOps<T> =
   LimitOperators &
   TimeOperators &
   TransformOperators &
-  { $iter?: AsyncIterable<T> };
+  AdvancedOperators &
+  { $iterable: $AsyncIterable<T> };
 
 declare global {
   namespace globalThis {

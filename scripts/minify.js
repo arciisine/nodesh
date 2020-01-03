@@ -2,9 +2,9 @@
 
 '.js'
   .$dir({ base: 'dist' })
-  .$forEach(file => file
+  .$parallel(file => file
     .$read('text')
-    .$replace(/\n/g, '')
-    .$replace(/[ ]+/g, ' ')
+    .$exec('npx', ['babel-minify'])
     .$writeFinal(file)
-  );
+  )
+  .$value;

@@ -88,7 +88,7 @@ const lineGenerator = fs.createReadStream('data.txt').$map(x => ...);
 ```
 
 #### Primitives
-The following primitives also support `.$`, but will return a generator that only has 
+The following primitives are also supported, but will return a generator that only has 
 a single value, that of the primitive
 * `String`
 * `Number`

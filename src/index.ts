@@ -1,10 +1,11 @@
 import './global';
 import * as path from 'path';
 import * as fs from 'fs';
+import { Readable } from 'stream';
 
-import { AsyncGeneratorCons } from './types';
 import { RegisterUtil } from './util/register';
 import { GlobalHelpers } from './helper';
+import { StreamUtil } from './util/stream';
 
 function initialize() {
 
@@ -20,7 +21,18 @@ function initialize() {
   RegisterUtil.registerOperators(operators, Object);
   RegisterUtil.registerAsyncable(Object);
 
+  // Special cases
+  RegisterUtil.properties({
+    $iterable(this: Readable) { return StreamUtil.readStream(this); }
+  }, Readable.prototype);
+
+  RegisterUtil.properties({
+    async * $iterable(this: string) { yield this; }
+  }, String.prototype);
+
+
   // Finish out Thenable
+  const { constructor: AsyncGeneratorCons } = ((async function* () { })());
   RegisterUtil.registerThenable(AsyncGeneratorCons);
 
   // Register globals

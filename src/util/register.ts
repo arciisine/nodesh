@@ -7,11 +7,16 @@ export class RegisterUtil {
    * @param t
    */
   static registerAsyncable(t: Function) {
-    RegisterUtil.properties({
-      $iter(this: any) {
-        return AsyncUtil.toIterable(this);
-      }
-    }, t.prototype);
+    const $iterable =
+      function (this: any) {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        const self = this;
+        return this?.[Symbol.asyncIterator] ? this :
+          this?.[Symbol.iterator] ?
+            (async function* () { yield* self; })() :
+            (async function* () { yield self; })();
+      };
+    RegisterUtil.properties({ $iterable }, t.prototype);
   }
 
   /**
@@ -30,7 +35,8 @@ export class RegisterUtil {
 
             return this;
           };
-        }
+        },
+        configurable: true
       }
     }, t.prototype);
   }
@@ -56,21 +62,21 @@ export class RegisterUtil {
 
   static createOperator<T = any>(target: (...args: any[]) => AsyncIterator<T>) {
     return function (this: AsyncIterable<T>, ...args: any[]) {
-      const src = this.$iter ?? this;
-
-      const ret = target.call(src, ...args);
+      const ret = target.call(this.$iterable, ...args);
       if (ret instanceof Promise) {
-        return AsyncUtil.trackWithTimer(ret);
-      } else {
-        return ret;
+        AsyncUtil.trackWithTimer(ret);
       }
+      return ret;
     };
   }
 
   /**
    * Registers global async operators
    */
-  static registerOperators(cons: Function[], target: Record<string, any>) {
+  static registerOperators(cons: Function | Function[], target: Record<string, any> = Object) {
+    if (!Array.isArray(cons)) {
+      cons = [cons];
+    }
     for (const { name, prototype } of cons) {
       if (!name) {
         continue;

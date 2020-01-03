@@ -17,10 +17,10 @@ export class ExecOperators {
    *   .$dir() // Get all files
    *   .$execEach('wc', '-l') // Execute word count for each line
    */
-  async * $execEach<T>(this: AsyncIterable<T>, cmd: string, args: string[]): $AsyncIterable<string> {
+  async * $execEach<T>(this: AsyncIterable<T>, cmd: string, args?: string[]): $AsyncIterable<string> {
     for await (const item of this) {
       const finalArgs = [
-        ...args,
+        ...(args ?? []),
         ...(!Array.isArray(item) ? [item] : item as any[])
       ];
       const { proc, result } = ExecUtil.exec(cmd, finalArgs);

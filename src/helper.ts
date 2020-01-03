@@ -1,6 +1,5 @@
+import { Readable } from 'stream';
 import { RegisterUtil } from './util/register';
-import { AsyncGeneratorCons } from './types';
-import { AsyncUtil } from './util/async';
 
 /**
  * Within the framework there are some common enough patterns that
@@ -20,11 +19,17 @@ export class GlobalHelpers {
    *
    *  // Should be identical
    *
-   *  [1,2,3].$
+   *  [1,2,3]
    *    .$map(x => x ** 2)
    */
-  get $of() {
-    return AsyncUtil.toIterable;
+  $of(el: Readable): AsyncGenerator<string>;
+  $of(el: string): AsyncGenerator<string>;
+  $of<T>(el: AsyncIterable<T>): AsyncGenerator<T>;
+  $of<T>(el: Iterable<T>): AsyncGenerator<T>;
+  $of<T>(el: AsyncIterable<T>): AsyncGenerator<T>;
+  $of<T>(el: T[]): AsyncGenerator<T>;
+  $of<T>(el: T): AsyncGenerator<T> {
+    return (el as any)?.$iterable ?? [el].$iterable;
   }
 
   /**
@@ -45,20 +50,20 @@ export class GlobalHelpers {
    * registerOperator(Custom);
    *
    * module global { // Typescript only
-   *   interface AsyncGenerator<T = unknown, TReturn = any, TNext = unknown> extends Custom;
+   *   interface AsyncIterable<T> extends Custom;
    * }
    *
    * @example
    * require('./reverse')
    *
    * [1,2,3]
+   *   .$iterable
    *   .$reverse() // Reverse is now available
    */
-  get $registerOperator() {
-    return (op: Function) => RegisterUtil.registerOperators(
-      [op], AsyncGeneratorCons
-    );
+  get $registerOperator(): (op: Function) => void {
+    return RegisterUtil.registerOperators;
   }
+
   /**
    * The cleaned argv parameters for the running script. Starting at index 0,
    * is the first meaning parameter for the script.  This differs from `process.argv`
@@ -77,6 +82,7 @@ export class GlobalHelpers {
   get $argv(): string[] {
     return process.argv.slice(3);
   }
+
   /**
    * Provides direct access to stdin as sequence of lines
    *
@@ -86,8 +92,9 @@ export class GlobalHelpers {
    *  .$stdout // Pipe to stdout
    */
   get $stdin(): AsyncIterable<string> {
-    return process.stdin.$iter!;
+    return process.stdin.$iterable;
   }
+
   /**
    * A case insensitive map for accessing environment variables. Like `process.env`, but
    * doesn't require knowledge of the case.  Useful for simplifying script interactions.
@@ -105,6 +112,7 @@ export class GlobalHelpers {
       }
     });
   }
+
   /**
    * Produces a numeric range, between start (1 by default) and stop (inclusive).  A step
    * parameter can be defined to specify the distance between iterated numbers.

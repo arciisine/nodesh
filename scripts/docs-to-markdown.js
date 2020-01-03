@@ -88,7 +88,8 @@ async function processDocs() {
     'operator/text',
     'operator/limit',
     'operator/exec',
-    'operator/export'
+    'operator/export',
+    'operator/advanced'
   ]
     .$map(processTyping)
     .$map(extractAllDocs)

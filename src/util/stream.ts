@@ -58,10 +58,6 @@ export class StreamUtil {
       }
     })());
 
-    const finished = new Promise(r => readable.on('end', r));
-
-    AsyncUtil.trackWithTimer(finished);
-
     return readable;
   }
 
@@ -120,7 +116,16 @@ export class StreamUtil {
    * @param writable
    */
   static getWritable(writable: Writable | string) {
-    return typeof writable !== 'string' && 'write' in writable ? writable :
+    const stream = typeof writable !== 'string' && 'write' in writable ? writable :
       fs.createWriteStream(writable, { flags: 'w', autoClose: true });
+
+    const finished = new Promise(r => {
+      stream.on('close', r);
+      stream.on('finish', r);
+    });
+
+    AsyncUtil.trackWithTimer(finished);
+
+    return stream;
   }
 }

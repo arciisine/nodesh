@@ -88,7 +88,7 @@ const lineGenerator = fs.createReadStream('data.txt').$map(x => ...);
 ```
 
 #### Primitives
-The following primitives also support `.$`, but will return a generator that only has 
+The following primitives are also supported, but will return a generator that only has 
 a single value, that of the primitive
 * `String`
 * `Number`
@@ -119,7 +119,12 @@ Will turn any value into a sequence. If the input value is of type:
 * Everything else - Returns a sequence of a single element
 
 ```typescript
-get $of(): typeof AsyncUtil.toIterable;
+$of(el: Readable): AsyncGenerator<string>;
+$of(el: string): AsyncGenerator<string>;
+$of<T>(el: AsyncIterable<T>): AsyncGenerator<T>;
+$of<T>(el: Iterable<T>): AsyncGenerator<T>;
+$of<T>(el: AsyncIterable<T>): AsyncGenerator<T>;
+$of<T>(el: T[]): AsyncGenerator<T>;
 ```
 Example
 ```javascript
@@ -128,7 +133,7 @@ $of([1,2,3])
 
  // Should be identical
 
- [1,2,3].$
+ [1,2,3]
    .$map(x => x ** 2)
 
 ```
@@ -157,7 +162,7 @@ class Custom {
 registerOperator(Custom);
 
 module global { // Typescript only
-  interface AsyncGenerator<T = unknown, TReturn = any, TNext = unknown> extends Custom;
+  interface AsyncIterable<T> extends Custom;
 }
 
 ```
@@ -166,6 +171,7 @@ module global { // Typescript only
 require('./reverse')
 
 [1,2,3]
+  .$iterable
   .$reverse() // Reverse is now available
 
 ```
@@ -402,24 +408,6 @@ Example
 
 ```
 
-#### $parallel
-
-Run iterator in parallel, returning values in order of first completion.  If the passed in function produces
-an async generator, only the first value will be used.  This is because the method needs an array of promises
-and an AsyncIterable cannot produce an array of promises as it's length is unknown until all promises are
-resolved.
-
-```typescript
-$parallel<T, U = T>(this: AsyncIterable<T>, op: (item: T) => AsyncIterable<U> | Promise<U>): $AsyncIterable<U>;
-```
-Example
-```javascript
-[10, 9, 8, 7, 6, 5, 4, 2, 1].$
- .$parallel(x => (x).$.wait(x * 1000))
- .$console
-
-```
-
 
 ### File
 
@@ -592,7 +580,7 @@ iterator runs out, the remaining values can be affected by the mode parameter:
 * `'exact'`  - Stop the emitting values once the secondary iterator is exhausted.
 
 ```typescript
-$pair<T, U>(this: AsyncIterable<T>, value: OrCallable<OrAsyncStream<U>>, mode?: PairMode): $AsyncIterable<[T, U]>;
+$pair<T, U>(this: AsyncIterable<T>, value: OrCallable<U | Iterable<U> | AsyncIterable<U>>, mode?: PairMode): $AsyncIterable<[T, U]>;
 ```
 Example
 ```javascript
@@ -868,7 +856,7 @@ to prepend to the command execution.  The command's stdout is returned as indivi
 lines.
 
 ```typescript
-$execEach<T>(this: AsyncIterable<T>, cmd: string, args: string[]): $AsyncIterable<string>;
+$execEach<T>(this: AsyncIterable<T>, cmd: string, args?: string[]): $AsyncIterable<string>;
 ```
 Example
 ```javascript
@@ -1027,5 +1015,33 @@ Example
  .$read() // Read file
  .$json()
  .$console // Log out objects
+
+```
+
+
+### Advanced
+
+Advanced operators represent more complex use cases.
+
+
+
+#### $parallel
+
+Run iterator in parallel, returning values in order of first completion.  If the passed in function produces
+an async generator, only the first value will be used.  This is because the method needs an array of promises
+and an AsyncIterable cannot produce an array of promises as it's length is unknown until all promises are
+resolved.
+
+The default concurrency limit is number of processors minus one. This means the operator will process the sequence in order
+until there are `concurrent` pending tasks, and will only fetch the next item once there is capacity.
+
+```typescript
+$parallel<T, U = T>(this: AsyncIterable<T>, op: (item: T) => AsyncIterable<U> | Promise<U>, concurrent?: number): $AsyncIterable<U>;
+```
+Example
+```javascript
+[10, 9, 8, 7, 6, 5, 4, 2, 1]
+ .$parallel(x => (x).$wait(x * 1000))
+ .$console
 
 ```
