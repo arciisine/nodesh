@@ -1,5 +1,6 @@
 import * as os from 'os';
 import { $AsyncIterable } from '../types';
+import { AsyncUtil } from '../util/async';
 
 /**
  * Advanced operators represent more complex use cases.
@@ -26,7 +27,8 @@ export class AdvancedOperators {
 
     // Grab first to finish in current batch
     const getNext = function () {
-      return Promise.race(items.map(e => e.p!));
+      const prom = Promise.race(items.map(e => e.p!));
+      return AsyncUtil.trackWithTimer(prom);
     };
 
     for await (const el of this) {
