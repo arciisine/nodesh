@@ -3,15 +3,6 @@ import { AsyncUtil } from './async';
 export class RegisterUtil {
 
   /**
-   * Track a promise, prevent process termination until promise is resolved
-   * @param p
-   */
-  static trackPromise<T>(p: Promise<T>): Promise<T> {
-    const timer = setTimeout(() => { }, 10 ** 8) as NodeJS.Timeout;
-    return p.finally(() => timer.unref());
-  }
-
-  /**
    * Register new type as async iterable
    * @param t
    */
@@ -32,7 +23,9 @@ export class RegisterUtil {
         get() {
           return (fn: (data: Promise<any[]>) => void) => {
             Promise.resolve().then(() => {
-              fn(RegisterUtil.trackPromise((this as AsyncIterable<any>).$values));
+              const ret = (this as AsyncIterable<any>).$values;
+              AsyncUtil.trackWithTimer(ret);
+              fn(ret);
             });
 
             return this;
@@ -67,7 +60,7 @@ export class RegisterUtil {
 
       const ret = target.call(src, ...args);
       if (ret instanceof Promise) {
-        return RegisterUtil.trackPromise(ret);
+        return AsyncUtil.trackWithTimer(ret);
       } else {
         return ret;
       }

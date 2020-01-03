@@ -5,6 +5,7 @@ import { Readable, Writable } from 'stream';
 import { EventEmitter } from 'events';
 import { IOType, $AsyncIterable } from '../types';
 import { TimeUtil } from './time';
+import { AsyncUtil } from './async';
 
 class MemoryStream extends Writable {
   store: Buffer[] = [];
@@ -44,7 +45,7 @@ export class StreamUtil {
    * Otherwise, send as text, and if mode is line, append with newline.
    */
   static toStream(gen: AsyncIterable<any>, mode: IOType = 'line'): Readable {
-    return Readable.from((async function* () {
+    const readable = Readable.from((async function* () {
       for await (const value of gen) {
         if (value === undefined) {
           continue;
@@ -56,6 +57,12 @@ export class StreamUtil {
         }
       }
     })());
+
+    const finished = new Promise(r => readable.on('end', r));
+
+    AsyncUtil.trackWithTimer(finished);
+
+    return readable;
   }
 
   /**
@@ -68,6 +75,8 @@ export class StreamUtil {
     const strm = typeof file === 'string' ? fs.createReadStream(file, { encoding: 'utf8' }) : file;
     const src: EventEmitter = mode === 'line' ? readline.createInterface(strm) : strm;
     const destroyed = new Promise(r => strm.once('close', r));
+
+    AsyncUtil.trackWithTimer(destroyed);
 
     let done = false;
     let buffer: (string | Buffer)[] = [];
