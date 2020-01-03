@@ -1,5 +1,4 @@
-/// <reference path="./global.d.ts" />
-
+import './global';
 import * as path from 'path';
 import * as fs from 'fs';
 
