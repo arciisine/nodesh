@@ -166,41 +166,4 @@ export class CoreOperators {
       yield* val;
     }
   }
-
-  /**
-   * Run iterator in parallel, returning values in order of first completion.  If the passed in function produces
-   * an async generator, only the first value will be used.  This is because the method needs an array of promises
-   * and an AsyncIterable cannot produce an array of promises as it's length is unknown until all promises are
-   * resolved.
-   *
-   * @example
-   * [10, 9, 8, 7, 6, 5, 4, 2, 1].$
-   *  .$parallel(x => (x).$.wait(x * 1000))
-   *  .$console
-   */
-  async * $parallel<T, U = T>(this: AsyncIterable<T>, op: (item: T) => AsyncIterable<U> | Promise<U>): $AsyncIterable<U> {
-    type Itr = IteratorResult<Promise<U>, Promise<U>>;
-    const items: Itr[] = [];
-
-    for await (const el of this) {
-      const elm = { done: false } as Itr;
-      items.push(elm);
-
-      const value = op(el);
-      elm.value = value as Promise<U>;
-      if ('$value' in elm.value) {
-        elm.value = (value as AsyncIterable<U>).$value;
-      }
-      elm.value = (async () => await elm.value)().finally(() => elm.done = true);
-    }
-
-    while (true) {
-      const remaining = items.filter(x => !x.done);
-      if (!remaining.length) {
-        break;
-      }
-      const next = await Promise.race(remaining.map(x => x.value)); // Grab first;
-      yield next;
-    }
-  }
 }

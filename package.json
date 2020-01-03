@@ -4,11 +4,13 @@
   "description": "",
   "scripts": {
     "clean": "rm -rf dist/",
-    "docs": "./bin/nodesh ./bin/docs-to-markdown.js",
+    "docs": "./bin/nodesh ./scripts/docs-to-markdown",
+    "minify": "./bin/nodesh ./scripts/minify",
     "build": "npx tsc",
+    "build:publish": "npm run build && npm run minify",
     "test": "npx trv test",
     "build:dev": "npm run clean && npx tsc -w",
-    "prepublish": "npm run clean && npm run build && npm run docs"
+    "prepublish": "npm run clean && npm run build:publish && npm run docs"
   },
   "bin": "./bin/nodesh",
   "types": "./dist/index.d.ts",
@@ -28,10 +30,11 @@
   "devDependencies": {
     "@travetto/cli": "^1.0.0-beta.1",
     "@travetto/test": "^1.0.0-beta.1",
-    "comment-parser": "^0.7.2",
     "@types/node": "^13.1.1",
     "@typescript-eslint/eslint-plugin": "^2.13.0",
     "@typescript-eslint/parser": "^2.13.0",
+    "babel-minify": "^0.5.1",
+    "comment-parser": "^0.7.2",
     "eslint": "^6.8.0",
     "typescript": "^3.7.4"
   },

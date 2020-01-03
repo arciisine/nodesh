@@ -2,7 +2,6 @@ import * as fs from 'fs';
 import { Readable, Writable } from 'stream';
 
 import { StreamUtil } from '../util/stream';
-import { RegisterUtil } from '../util/register';
 
 import { IOType } from '../types';
 
@@ -24,7 +23,7 @@ export class ExportOperators {
    * stream.pipe(fs.createWriteStream('out.png')); // Write out
    */
   $stream<T>(this: AsyncIterable<T>, mode: IOType = 'text'): Readable {
-    return StreamUtil.toStream(this as AsyncIterable<T>, mode);
+    return StreamUtil.toStream(this, mode);
   }
 
   /**
