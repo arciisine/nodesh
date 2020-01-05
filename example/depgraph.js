@@ -1,4 +1,5 @@
-#!/bin/npx @arcsine/nodesh
+#!/usr/bin/env -S npx @arcsine/nodesh
+/* @npx-scripts */ /** @typedef {import('/tmp/npx-scripts/arcsine.nodesh')} */ // @ts-check
 
 /[.]ts$/
   .$dir({ base: $argv[0], full: true })

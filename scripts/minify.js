@@ -1,4 +1,5 @@
-#!/usr/bin/npx @arcsine/nodesh
+#!/usr/bin/env -S npx @arcsine/nodesh
+/* @npx-scripts */ /** @typedef {import('/tmp/npx-scripts/arcsine.nodesh')} */ // @ts-check
 
 '.js'
   .$dir({ base: 'dist' })
@@ -6,6 +7,6 @@
     .$read()
     .$exec('npx', ['babel-minify'])
     .$writeFinal(file)
-    .$tap(() => console.log(`Wrote ${file}`))
+    .then(() => console.log(`Wrote ${file}`))
   )
   .$values;

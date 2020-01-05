@@ -2,6 +2,10 @@
   "include": [
     "src",
   ],
+  "exclude": [
+    "example",
+    "bin"
+  ],
   "compilerOptions": {
     "outDir": "dist",
     "target": "ES2020",

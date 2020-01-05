@@ -4,7 +4,7 @@ Node shell is an npm package aimed at providing bash-like operations/simplicity 
 **(remote-tokens.js) Example of processing URLs from the input stream** 
 
 ```javascript
-#!/bin/npx @arcsine/nodesh
+#!/usr/bin/env -S npx @arcsine/nodesh
 
 $stdin // Automatically pipe from stdin
   .$match('URL', 'extract')  // Retain only URL patterns and emit as single values
@@ -16,8 +16,9 @@ $stdin // Automatically pipe from stdin
     x.charAt(0) === x.charAt(0).toUpperCase() // And that start with an uppercase letter
   )  
   .$stdout; // Pipe the token stream to stdout
-
 ```
+
+**NOTE:** The shebang defined here is using `env`'s `-S` flag which will allow for the passing of arguments in the shebang.
 
 As you can see above, the library's aim is to mimic the pattern of command piping, as well as integrate with stdin/stdout seamlessly.  With the shebang applied appropriately, this script can be used just like any other cli command.  
 

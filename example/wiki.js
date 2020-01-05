@@ -1,4 +1,5 @@
-#!/bin/npx @arcsine/nodesh
+#!/usr/bin/env -S npx @arcsine/nodesh
+/* @npx-scripts */ /** @typedef {import('/tmp/npx-scripts/arcsine.nodesh')} */ // @ts-check
 
 `https://en.wikipedia.org/wiki/${$env.page || 'Special:Random'}`
   .$fetch() // Request URL
