@@ -70,9 +70,8 @@ export class StreamUtil {
   static async * readStream(file: Readable | string, mode: IOType = 'line'): $AsyncIterable<Buffer | string> {
     const strm = typeof file === 'string' ? fs.createReadStream(file, { encoding: 'utf8' }) : file;
     const src: EventEmitter = mode === 'line' ? readline.createInterface(strm) : strm;
-    const destroyed = new Promise(r => strm.once('close', r));
 
-    AsyncUtil.trackWithTimer(destroyed);
+    const completed = this.trackStream(strm);
 
     let done = false;
     let buffer: (string | Buffer)[] = [];
@@ -108,7 +107,22 @@ export class StreamUtil {
       strm.destroy();
     }
 
-    await destroyed;
+    await completed;
+  }
+
+  /**
+   * Track a stream to wait until finished
+   */
+  static trackStream<T extends Readable | Writable>(stream: T) {
+    return AsyncUtil.trackWithTimer(new Promise((res, rej) => {
+      if ('writable' in stream) {
+        stream.on('finish', res);
+      } else {
+        stream.on('end', res);
+      }
+      stream.on('close', res);
+      stream.on('error', rej);
+    }));
   }
 
   /**
@@ -119,13 +133,7 @@ export class StreamUtil {
     const stream = typeof writable !== 'string' && 'write' in writable ? writable :
       fs.createWriteStream(writable, { flags: 'w', autoClose: true });
 
-    const finished = new Promise(r => {
-      stream.on('close', r);
-      stream.on('finish', r);
-    });
-
-    AsyncUtil.trackWithTimer(finished);
-
+    this.trackStream(stream);
     return stream;
   }
 }

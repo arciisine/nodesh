@@ -6,7 +6,9 @@ export class AsyncUtil {
    */
   static trackWithTimer(prom: Promise<any>) {
     const timer = setTimeout(() => { }, 10 ** 8) as NodeJS.Timeout;
-    prom.finally(() => timer.unref());
+    prom.finally(() => {
+      timer.unref();
+    });
     return prom;
   }
 }

@@ -1,9 +1,10 @@
-import * as fs from 'fs';
 import { Readable, Writable } from 'stream';
 
 import { StreamUtil } from '../util/stream';
 
 import { IOType } from '../types';
+import { TimeUtil } from '../util/time';
+import { AsyncUtil } from '../util/async';
 
 /**
  * Support for exporting data from a sequence
@@ -53,9 +54,9 @@ export class ExportOperators {
    */
   async $writeFinal(this: AsyncIterable<string>, file: string): Promise<void> {
     const [text] = await this.$join();
-    const str = fs.createWriteStream(file);
+    const str = StreamUtil.getWritable(file);
     await new Promise(r => str.write(text, r));
-    str.close();
+    str.end();
   }
 }
 
@@ -106,7 +107,13 @@ export class ExportPropOperators<T> {
    *   .$stdout // Pipe to stdout
    */
   get $stdout(this: AsyncIterable<T>): Writable {
-    return this.$stream('line').pipe(process.stdout);
+    const src = this.$stream('line');
+
+    // Track completion by input stream, not output as
+    // stdout should never close
+    StreamUtil.trackStream(src);
+
+    return src.pipe(process.stdout);
   }
 
   /**
