@@ -1,5 +1,4 @@
 #!/usr/bin/env -S npx @arcsine/nodesh
-/* @npx-scripts */ /** @typedef {import('/tmp/npx-scripts/arcsine.nodesh')} */ // @ts-check
 
 /**
  * @param {Map<string, number>} acc

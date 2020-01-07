@@ -1,5 +1,5 @@
-#!/usr/bin/env -S npx @arcsine/nodesh
-/* @npx-scripts */ /** @typedef {import('/tmp/npx-scripts/arcsine.nodesh')} */ // @ts-check
+// #!/usr/bin/env -S npx @arcsine/nodesh
+/// <reference path="../dist/index.d.ts" /> # npx-scripts
 
 '.js'
   .$dir({ base: 'dist' })

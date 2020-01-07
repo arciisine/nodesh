@@ -38,4 +38,10 @@ export class GlobalSuite {
     assert(await $of($range(1, 3)) === [1, 2, 3]);
     assert(await $of((function* () { yield 1; yield 2; yield 3; })()) === [1, 2, 3]);
   }
+
+  @Test()
+  async testPatterns() {
+    assert($pattern.URL !== undefined);
+    assert($pattern.URL instanceof RegExp);
+  }
 }

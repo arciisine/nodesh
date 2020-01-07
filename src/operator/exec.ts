@@ -30,9 +30,9 @@ export class ExecOperators {
   }
 
   /**
-   * Pipe the entire sequence as input into the command to be executed.  Allow for args to be
-   * prepended to the command as needed.  If the output is specified as 'binary', the generator
-   * will return a sequence of Buffers, otherwise will return strings
+   * Pipe the entire sequence as input into the command to be executed.  Allow for args and flags to be
+   * appended to the command as needed.  If the output is specified as 'binary', the generator
+   * will return a sequence of `Buffer`s, otherwise will return `string`s
    *
    * @example
    * '.ts'
@@ -43,8 +43,7 @@ export class ExecOperators {
    */
   $exec(cmd: string, args: string[], output: 'line' | 'text'): $AsyncIterable<string>;
   $exec(cmd: string, args: string[], output: 'binary'): $AsyncIterable<Buffer>;
-  $exec(cmd: string, args: string[]): $AsyncIterable<string>;
-  $exec(cmd: string): $AsyncIterable<string>;
+  $exec(cmd: string, args?: string[]): $AsyncIterable<string>;
   async * $exec<T>(this: AsyncIterable<T>,
     cmd: string, args: string[] = [], outMode: IOType = 'line', inMode: IOType = outMode): $AsyncIterable<Buffer | string> {
     const { proc, result } = ExecUtil.exec(cmd, [...args]);

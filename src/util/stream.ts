@@ -2,10 +2,10 @@ import * as readline from 'readline';
 import * as fs from 'fs';
 import { Readable, Writable } from 'stream';
 
-import { EventEmitter } from 'events';
 import { IOType, $AsyncIterable } from '../types';
 import { TimeUtil } from './time';
 import { AsyncUtil } from './async';
+import { TextUtil } from './text';
 
 class MemoryStream extends Writable {
   store: Buffer[] = [];
@@ -31,16 +31,6 @@ export class StreamUtil {
   }
 
   /**
-   * Gets the textual representation of a value
-   */
-  static toText(val: any) {
-    if (val === undefined || val === null) {
-      return '';
-    }
-    return typeof val === 'string' ? val : JSON.stringify(val);
-  }
-
-  /**
    * Convert sequence to stream. If the input stream are buffers, send directly.
    * Otherwise, send as text, and if mode is line, append with newline.
    */
@@ -52,7 +42,7 @@ export class StreamUtil {
         } else if (value instanceof Buffer) {
           yield value;
         } else {
-          const text = StreamUtil.toText(value);
+          const text = TextUtil.toText(value);
           yield mode === 'line' ? `${text}\n` : text;
         }
       }
@@ -69,7 +59,7 @@ export class StreamUtil {
   static readStream(file: Readable | string, mode?: IOType): $AsyncIterable<string>;
   static async * readStream(file: Readable | string, mode: IOType = 'line'): $AsyncIterable<Buffer | string> {
     const strm = typeof file === 'string' ? fs.createReadStream(file, { encoding: 'utf8' }) : file;
-    const src: EventEmitter = mode === 'line' ? readline.createInterface(strm) : strm;
+    const src = mode === 'line' ? readline.createInterface(strm) : strm;
 
     const completed = this.trackStream(strm);
 

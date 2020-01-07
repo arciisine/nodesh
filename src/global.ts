@@ -35,6 +35,7 @@ declare global {
     const $registerOperator: GlobalHelpers['$registerOperator'];
     const $argv: GlobalHelpers['$argv'];
     const $env: GlobalHelpers['$env'];
+    const $pattern: GlobalHelpers['$pattern'];
     const $range: GlobalHelpers['$range'];
   }
 

@@ -229,6 +229,23 @@ Example
 
 ```
 
+#### $pattern
+
+Common patterns that can be used where regular expressions are supported
+
+```typescript
+get $pattern(): {
+URL: RegExp;EMAIL: RegExp;};
+```
+Example
+```javascript
+<file>
+ .$read() // Read a file
+ .$match($pattern.URL, 'extract') // Extract URLs
+ .$filter(url => url.endsWith('.com'))
+
+```
+
 #### $range
 
 Produces a numeric range, between start (1 by default) and stop (inclusive).  A step
@@ -665,17 +682,13 @@ Example
 `$match` is similar to tokens, but will emit based on a pattern instead of
 just word boundaries.
 
-In addition to simple regex or string patterns, there is built in support for some common use cases (`RegexType`)
-* `'URL'` - Will match on all URLs
-* `'EMAIL'` - Will match on all emails
-
 Additionally, mode will determine what is emitted when a match is found (within a single line):
 * `undefined` - (default) Return entire line
 * `'extract'` - Return only matched element
 * `'negate'` - Return only lines that do not match
 
 ```typescript
-$match(this: AsyncIterable<string>, regex: RegExp | string, mode?: MatchMode): $AsyncIterable<string>;
+$match(this: AsyncIterable<string>, regex: RegExp | string | string[], mode?: MatchMode): $AsyncIterable<string>;
 ```
 Example
 ```javascript
@@ -708,6 +721,27 @@ Example
   .$read()
   .$replace(/TODO/, 'FIXME')
   // All occurrences replaced
+
+```
+
+#### $replace
+
+`$replace` also supports a mode where you can pass in a series of tokens, and replacements, and will apply all
+consistently. The largest token will win if there is any overlap.
+
+```typescript
+$replace(this: AsyncIterable<string>, pattern: Record<string, string>): $AsyncIterable<string>;
+```
+Example
+```javascript
+ '<file>.html'
+  .$read()
+  .$replace({
+     '<': '&lt;',
+     '>': '&gt;',
+     '"': '&quot;'
+  })
+  // Html special chars escaped
 
 ```
 
@@ -869,15 +903,14 @@ Example
 
 #### $exec
 
-Pipe the entire sequence as input into the command to be executed.  Allow for args to be
-prepended to the command as needed.  If the output is specified as 'binary', the generator
-will return a sequence of Buffers, otherwise will return strings
+Pipe the entire sequence as input into the command to be executed.  Allow for args and flags to be
+appended to the command as needed.  If the output is specified as 'binary', the generator
+will return a sequence of `Buffer`s, otherwise will return `string`s
 
 ```typescript
 $exec(cmd: string, args: string[], output: 'line' | 'text'): $AsyncIterable<string>;
 $exec(cmd: string, args: string[], output: 'binary'): $AsyncIterable<Buffer>;
-$exec(cmd: string, args: string[]): $AsyncIterable<string>;
-$exec(cmd: string): $AsyncIterable<string>;
+$exec(cmd: string, args?: string[]): $AsyncIterable<string>;
 ```
 Example
 ```javascript

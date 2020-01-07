@@ -1,5 +1,4 @@
 #!/usr/bin/env -S npx @arcsine/nodesh
-/* @npx-scripts */ /** @typedef {import('/tmp/npx-scripts/arcsine.nodesh')} */ // @ts-check
 
 $range(10000)
   .$sort((a, b) => Math.random() - .5)

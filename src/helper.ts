@@ -114,6 +114,22 @@ export class GlobalHelpers {
   }
 
   /**
+   * Common patterns that can be used where regular expressions are supported
+   *
+   * @example
+   * <file>
+   *  .$read() // Read a file
+   *  .$match($pattern.URL, 'extract') // Extract URLs
+   *  .$filter(url => url.endsWith('.com'))
+   */
+  get $pattern() {
+    return {
+      URL: /https?:\/\/[\/A-Za-z0-9:=?\-&.%]+/g,
+      EMAIL: /[A-Za-z0-9_]+@[A-Za-z0-9_.]+[.][A-Za-z]+/g
+    };
+  }
+
+  /**
    * Produces a numeric range, between start (1 by default) and stop (inclusive).  A step
    * parameter can be defined to specify the distance between iterated numbers.
    *

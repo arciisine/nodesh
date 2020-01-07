@@ -1,13 +1,9 @@
 import { $AsyncIterable } from '../types';
+import { TextUtil } from '../util/text';
 
 type Replacer = Parameters<string['replace']>[1];
 
 export type MatchMode = 'extract' | 'negate';
-
-const REGEX_SUPPORT = {
-  URL: /https?:\/\/[\/A-Za-z0-9:=?\-&.%]+/g,
-  EMAIL: /[A-Za-z0-9_]+@[A-Za-z0-9_.]+[.][A-Za-z]+/g
-};
 
 /**
  * Support for common textual operations.
@@ -87,10 +83,6 @@ export class TextOperators {
    * `$match` is similar to tokens, but will emit based on a pattern instead of
    * just word boundaries.
    *
-   * In addition to simple regex or string patterns, there is built in support for some common use cases (`RegexType`)
-   * * `'URL'` - Will match on all URLs
-   * * `'EMAIL'` - Will match on all emails
-   *
    * Additionally, mode will determine what is emitted when a match is found (within a single line):
    * * `undefined` - (default) Return entire line
    * * `'extract'` - Return only matched element
@@ -108,9 +100,9 @@ export class TextOperators {
    *   .$match(/\d{3}(-)?\d{3}(-)?\d{4}/, 'extract)
    *   // Return all phone numbers in the sequence
    */
-  async * $match(this: AsyncIterable<string>, regex: RegExp | string, mode?: MatchMode): $AsyncIterable<string> {
-    if (typeof regex === 'string') {
-      regex = regex in REGEX_SUPPORT ? REGEX_SUPPORT[regex as 'URL'] : new RegExp(regex);
+  async * $match(this: AsyncIterable<string>, regex: RegExp | string | string[], mode?: MatchMode): $AsyncIterable<string> {
+    if (!(regex instanceof RegExp)) {
+      regex = TextUtil.createRegExp(regex);
     }
     if (!regex.global && mode === 'extract') {
       regex = new RegExp(regex.source, `${regex.flags}g`);
@@ -142,8 +134,30 @@ export class TextOperators {
    *   .$replace(/TODO/, 'FIXME')
    *   // All occurrences replaced
    */
-  $replace(this: AsyncIterable<string>, pattern: RegExp | string, sub: string | Replacer): $AsyncIterable<string> {
-    return this.$map((x: string) => x.replace(pattern, sub as any));
+  $replace(this: AsyncIterable<string>, pattern: RegExp | string, sub: string | Replacer): $AsyncIterable<string>;
+
+  /**
+   * `$replace` also supports a mode where you can pass in a series of tokens, and replacements, and will apply all
+   * consistently. The largest token will win if there is any overlap.
+   *
+   * @example
+   *  '<file>.html'
+   *   .$read()
+   *   .$replace({
+   *      '<': '&lt;',
+   *      '>': '&gt;',
+   *      '"': '&quot;'
+   *   })
+   *   // Html special chars escaped
+   */
+  $replace(this: AsyncIterable<string>, pattern: Record<string, string>): $AsyncIterable<string>;
+  $replace(this: AsyncIterable<string>, pattern: RegExp | string | Record<string, string>, sub?: string | Replacer): $AsyncIterable<string> {
+    if (typeof pattern === 'string' || pattern instanceof RegExp) {
+      return this.$map(x => x.replace(pattern, sub as any));
+    } else {
+      const re = TextUtil.createRegExp(Object.keys(pattern));
+      return this.$map(x => x.replace(re, v => pattern[v]));
+    }
   }
 
   /**

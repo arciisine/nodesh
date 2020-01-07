@@ -85,6 +85,22 @@ export class TextSuite {
   }
 
   @Test()
+  async testReplaceObject() {
+    const res = await 'test/files/book.txt'
+      .$read()
+      .$replace({
+        Chapter: 'Woops',
+        'Chapter 1': 'Ch. Uno',
+        'Chapter 2': 'Ch. Deux'
+      })
+      .$match(/^Ch[.]/);
+
+    assert(res[0] === 'Ch. Uno');
+    assert(res[1] === 'Ch. Deux');
+  }
+
+
+  @Test()
   async testTrim() {
     const res = await '  a  \nb         \n        c'
       .split(/\n/g)
