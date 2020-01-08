@@ -45,7 +45,7 @@ export class ExportSuite {
     await '1\n2\n3\n'
       .$writeFinal(temp);
 
-    assert(await temp.$read('text') === ['1\n2\n3\n']);
+    assert(await temp.$read({ singleValue: true }) === ['1\n2\n3\n']);
   }
 
   @Test()

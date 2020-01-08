@@ -1,14 +1,16 @@
 #!/usr/bin/env -S npx @arcsine/nodesh
+/// @ts-check # npx-scripts - found
+/// <reference types="/tmp/npx-scripts/arcsine.nodesh" /> # npx-scripts
 
 const path = require('path');
 
 /.[jt]s$/
   .$dir({ base: path.resolve(process.cwd(), '../tim-resume/src') })
   .$read()
-  .$match('URL', 'extract')
+  .$match($pattern.URL, 'extract')
   .$flatMap(url => url
     .$fetch()
-    .$match('URL', 'extract')
+    .$match($pattern.URL, 'extract')
   )
   .$map(x => new URL(x).host)
   .$tap(console.log)

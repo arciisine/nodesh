@@ -1,9 +1,12 @@
-import { $AsyncIterable } from '../types';
+import { $AsyncIterable, Pattern } from '../types';
 import { TextUtil } from '../util/text';
 
 type Replacer = Parameters<string['replace']>[1];
+type ColumnsConfig<V extends readonly string[]> = { sep?: Pattern, names: V };
 
-export type MatchMode = 'extract' | 'negate';
+function isIter<T>(x: any): x is Iterable<T> {
+  return !!x[Symbol.iterator];
+}
 
 /**
  * Support for common textual operations.
@@ -24,7 +27,7 @@ export class TextOperators {
    *   .$columns('\t') // Separate on tabs
    *   // Now an array of tuples (as defined by tabs in the tsv)
    */
-  $columns(this: AsyncIterable<string>, sep?: RegExp | string): $AsyncIterable<string[]>;
+  $columns(this: AsyncIterable<string>, sep?: string | RegExp): $AsyncIterable<string[]>;
   /**
    * Supports passing in column names to produce objects instead of tuples.  These values will be
    * matched with the columns produced by the separator. Any row that is shorter than the names
@@ -33,28 +36,29 @@ export class TextOperators {
    * @example
    * '<file>.tsv' // Tab-separated file
    *   .$read() // Read as lines
-   *   .$columns(['Name', 'Age', 'Major'], '\t') // Separate on tabs
+   *   .$columns({names: ['Name', 'Age', 'Major'], sep: '\t'}) // Separate on tabs
    *   // Now an array of objects { Name: string, Age: string, Major: string } (as defined by tabs in the tsv)
    */
-  $columns<V extends readonly string[]>(this: AsyncIterable<string>, names: V, sep?: RegExp | string): $AsyncIterable<Record<V[number], string>>
-  async * $columns(this: AsyncIterable<string>, columnsOrSep?: RegExp | string | string[], sep?: RegExp | string) {
-    let columns: string[] | undefined;
+  $columns<V extends readonly string[]>(this: AsyncIterable<string>, config: V | ColumnsConfig<V>): $AsyncIterable<Record<V[number], string>>
+  async * $columns(this: AsyncIterable<string>, sepOrConfig?: string | RegExp | string[] | ColumnsConfig<string[]>) {
+    let config: ColumnsConfig<string[]>;
 
-    if (Array.isArray(columnsOrSep)) {
-      columns = columnsOrSep;
+    if (!sepOrConfig || typeof sepOrConfig === 'string' || sepOrConfig instanceof RegExp) {
+      config = { sep: sepOrConfig } as ColumnsConfig<string[]>;
     } else {
-      sep = columnsOrSep;
+      config = Array.isArray(sepOrConfig) ? { names: sepOrConfig } : sepOrConfig as ColumnsConfig<string[]>;
     }
 
-    sep = sep ?? /\s+/g;
+    const sep = TextUtil.createRegExp(config.sep ?? /\s+/, '');
 
     for await (const line of this) {
       const row = line.split(sep);
-      if (columns !== undefined) {
-        const upper = Math.min(row.length, columns.length);
+      const { names } = config;
+      if (names) {
+        const upper = Math.min(row.length, names.length);
         const out: any = {};
         for (let i = 0; i < upper; i++) {
-          out[columns![i]] = row[i];
+          out[names![i]] = row[i];
         }
         yield out;
       } else {
@@ -73,7 +77,8 @@ export class TextOperators {
    *   .$tokens() // Convert to words
    *   .$filter(x => x.length > 5) // Retain only words 6-chars or longer
    */
-  async * $tokens(this: AsyncIterable<string>, sep: RegExp | string = /\s+/g): $AsyncIterable<string> {
+  async * $tokens(this: AsyncIterable<string>, sep: Pattern = /\s+/): $AsyncIterable<string> {
+    sep = TextUtil.createRegExp(sep, '');
     for await (const line of this) {
       yield* line.split(sep);
     }
@@ -100,13 +105,9 @@ export class TextOperators {
    *   .$match(/\d{3}(-)?\d{3}(-)?\d{4}/, 'extract)
    *   // Return all phone numbers in the sequence
    */
-  async * $match(this: AsyncIterable<string>, regex: RegExp | string | string[], mode?: MatchMode): $AsyncIterable<string> {
-    if (!(regex instanceof RegExp)) {
-      regex = TextUtil.createRegExp(regex);
-    }
-    if (!regex.global && mode === 'extract') {
-      regex = new RegExp(regex.source, `${regex.flags}g`);
-    }
+  async * $match(this: AsyncIterable<string>, regex: Pattern, mode?: 'extract' | 'negate'): $AsyncIterable<string> {
+    regex = TextUtil.createRegExp(regex, mode === 'extract' ? 'g' : '');
+
     for await (const el of this) {
       if (mode === 'extract') {
         const out: string[] = [];
@@ -134,7 +135,7 @@ export class TextOperators {
    *   .$replace(/TODO/, 'FIXME')
    *   // All occurrences replaced
    */
-  $replace(this: AsyncIterable<string>, pattern: RegExp | string, sub: string | Replacer): $AsyncIterable<string>;
+  $replace(this: AsyncIterable<string>, pattern: Pattern, sub: string | Replacer): $AsyncIterable<string>;
 
   /**
    * `$replace` also supports a mode where you can pass in a series of tokens, and replacements, and will apply all
@@ -151,9 +152,10 @@ export class TextOperators {
    *   // Html special chars escaped
    */
   $replace(this: AsyncIterable<string>, pattern: Record<string, string>): $AsyncIterable<string>;
-  $replace(this: AsyncIterable<string>, pattern: RegExp | string | Record<string, string>, sub?: string | Replacer): $AsyncIterable<string> {
-    if (typeof pattern === 'string' || pattern instanceof RegExp) {
-      return this.$map(x => x.replace(pattern, sub as any));
+  $replace(this: AsyncIterable<string>, pattern: Pattern | Record<string, string>, sub?: string | Replacer): $AsyncIterable<string> {
+    if (typeof pattern === 'string' || pattern instanceof RegExp || isIter<string>(pattern)) {
+      const re = TextUtil.createRegExp(pattern, 'g');
+      return this.$map(x => x.replace(re, sub as any));
     } else {
       const re = TextUtil.createRegExp(Object.keys(pattern));
       return this.$map(x => x.replace(re, v => pattern[v]));
@@ -207,4 +209,3 @@ export class TextOperators {
     return this.$join(' ').$replace(/\n/g, ' ');
   }
 }
-

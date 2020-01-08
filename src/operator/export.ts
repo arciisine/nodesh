@@ -1,10 +1,7 @@
 import { Readable, Writable } from 'stream';
 
 import { StreamUtil } from '../util/stream';
-
 import { IOType } from '../types';
-import { TimeUtil } from '../util/time';
-import { AsyncUtil } from '../util/async';
 
 /**
  * Support for exporting data from a sequence
@@ -107,7 +104,7 @@ export class ExportPropOperators<T> {
    *   .$stdout // Pipe to stdout
    */
   get $stdout(this: AsyncIterable<T>): Writable {
-    const src = this.$stream('line');
+    const src = this.$stream();
 
     // Track completion by input stream, not output as
     // stdout should never close

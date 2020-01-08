@@ -1,34 +1,12 @@
 
 import { StreamUtil } from '../util/stream';
 import { ExecUtil } from '../util/exec';
-import { IOType, $AsyncIterable } from '../types';
+import { $AsyncIterable, ExecConfig, ReadStreamConfig } from '../types';
 
 /**
  * Support for dealing with execution of external programs
  */
 export class ExecOperators {
-  /**
-   * Execute the command against each item in the sequence. Allow for a list of args
-   * to prepend to the command execution.  The command's stdout is returned as individual
-   * lines.
-   *
-   * @example
-   * '.ts'
-   *   .$dir() // Get all files
-   *   .$execEach('wc', '-l') // Execute word count for each line
-   */
-  async * $execEach<T>(this: AsyncIterable<T>, cmd: string, args?: string[]): $AsyncIterable<string> {
-    for await (const item of this) {
-      const finalArgs = [
-        ...(args ?? []),
-        ...(!Array.isArray(item) ? [item] : item as any[])
-      ];
-      const { proc, result } = ExecUtil.exec(cmd, finalArgs);
-      yield* StreamUtil.readStream(proc.stdout!);
-      await result;
-    }
-  }
-
   /**
    * Pipe the entire sequence as input into the command to be executed.  Allow for args and flags to be
    * appended to the command as needed.  If the output is specified as 'binary', the generator
@@ -41,14 +19,13 @@ export class ExecOperators {
    *   .$exec('wc', ['-l']) // Execute word count for all files
    *   // Run in a single operation
    */
-  $exec(cmd: string, args: string[], output: 'line' | 'text'): $AsyncIterable<string>;
-  $exec(cmd: string, args: string[], output: 'binary'): $AsyncIterable<Buffer>;
-  $exec(cmd: string, args?: string[]): $AsyncIterable<string>;
-  async * $exec<T>(this: AsyncIterable<T>,
-    cmd: string, args: string[] = [], outMode: IOType = 'line', inMode: IOType = outMode): $AsyncIterable<Buffer | string> {
-    const { proc, result } = ExecUtil.exec(cmd, [...args]);
-    this.$stream(inMode).pipe(proc.stdin!);
-    yield* StreamUtil.readStream(proc.stdout!, outMode);
+  $exec(cmd: string, config: ExecConfig<'text'>): $AsyncIterable<string>;
+  $exec(cmd: string, config: ExecConfig<'binary'>): $AsyncIterable<Buffer>;
+  $exec(cmd: string, config?: Omit<ExecConfig, 'mode'>): $AsyncIterable<string>;
+  async * $exec<T>(this: AsyncIterable<T>, cmd: string, config: ExecConfig = {}): $AsyncIterable<string | Buffer> {
+    const { proc, result } = ExecUtil.exec(cmd, config);
+    StreamUtil.toStream(this, config.input).pipe(proc.stdin!);
+    yield* StreamUtil.readStream(proc.stdout!, config);
     await result;
   }
 }

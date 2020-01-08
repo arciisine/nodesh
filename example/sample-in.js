@@ -1,4 +1,6 @@
 #!/usr/bin/env -S npx @arcsine/nodesh
+/// @ts-check # npx-scripts - found
+/// <reference types="/tmp/npx-scripts/arcsine.nodesh" /> # npx-scripts
 
 /**
  * @param {Map<string, number>} acc
@@ -12,7 +14,7 @@ function count(acc, item) {
 count.init = () => new Map();
 
 $stdin
-  .$match('URL', 'extract')
+  .$match($pattern.URL, 'extract')
   .$fetch()
   .$tokens(/[^A-Za-z0-9_]+/)
   .$trim()

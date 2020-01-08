@@ -7,7 +7,7 @@ Node shell is an npm package aimed at providing bash-like operations/simplicity 
 #!/usr/bin/env -S npx @arcsine/nodesh
 
 $stdin // Automatically pipe from stdin
-  .$match('URL', 'extract')  // Retain only URL patterns and emit as single values
+  .$match($pattern.URL, 'extract')  // Retain only URL patterns and emit as single values
   .$fetch() // Request each url that comes through
   .$tokens(/[^A-Za-z0-9_]+/) // Break down returned webpage into tokens
   .$trim() 

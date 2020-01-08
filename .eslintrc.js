@@ -9,6 +9,7 @@ module.exports = {
         "$range": "readonly",
         "$argv": "readonly",
         "$ask": "readonly",
+        "$pattern": "readonly",
         "$env": "readonly"
     },
     "parser": "@typescript-eslint/parser",

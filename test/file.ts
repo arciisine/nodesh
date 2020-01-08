@@ -13,24 +13,24 @@ export class FileSuite {
       .$read();
 
     assert(content.length === 7);
-    assert(content[0] === 'Chapter 1');
+    assert(content[0] === 'Chapter 1\n');
   }
 
   @Test()
   async testReadText() {
     const [content] = await `${__dirname}/files/book.txt`
-      .$read('text');
+      .$read({ singleValue: true });
 
     assert(content.length > 40);
     assert(content.includes('Chapter 1'));
     assert(content.includes('Chapter 2'));
-    assert(content.split(/\n/g).length === 7);
+    assert(content.split(/\n/g).length === 8);
   }
 
   @Test()
   async testReadData() {
     const buffers = await `${__dirname}/files/book.txt`
-      .$read('binary');
+      .$read({ mode: 'binary' });
 
     const content = Buffer.concat(buffers).toString('utf8');
 
@@ -39,7 +39,6 @@ export class FileSuite {
     assert(content.includes('Chapter 2'));
     assert(content.split(/\n/g).length === 7);
   }
-
 
   @Test()
   async testDir() {
