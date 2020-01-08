@@ -3,9 +3,8 @@ import * as path from 'path';
 import { StreamUtil } from '../util/stream';
 import { FileUtil, ScanEntry } from '../util/file';
 
-import { IOType, $AsyncIterable } from '../types';
+import { $AsyncIterable, ReadDirConfig, ReadStreamConfig, IOType } from '../types';
 
-type DirConfig = { base?: string, full?: boolean };
 
 /**
  * Some of the most common shell operations are iterating through files,
@@ -17,29 +16,31 @@ type DirConfig = { base?: string, full?: boolean };
 export class FileOperators {
   /**
    * This operator will treat the inbound string sequence as file names, and will convert the filename (based on IOType)
-   * * `line` (default) - The sequence will produce as series of lines of text
-   * * `text` - The sequence will produce the entire file contents as a single text string
+   * * `text` (default) - The sequence will produce as series of lines of text
    * * `binary` - The sequence will produce a series of `Buffer` objects
    *
+   * If singleValue is set to true, this produce a single value for the whole stream instead of chunk by chunk.  This
+   * mode can be easier to work with for certain operations, but is much more memory intensive.
+   *
    * @example
-   * '<file>' //  Now a sequence of a single value, a file name
+   * '<file>'
    *   .$read('binary') // Read as a series of buffers
    *   .$reduce((acc, buffer) => {
    *     return acc  + buffer.length;
    *   }, 0); // Count number of bytes in file
    *
    * @example
-   * '<file>' //  Now a sequence of a single value, a file name
-   *   .$read('text') // Read as a single string
-   *   .$map(text => text.length); // Count number of characters in file
+   * '<file>'
+   *   .$read('binary', true) // Read as a single buffer
+   *   .$map(buffer => buffer.length) // Count number of bytes in file
    *
    */
-  $read(this: AsyncIterable<string>, type: 'binary'): $AsyncIterable<Buffer>;
-  $read(this: AsyncIterable<string>, type?: IOType): $AsyncIterable<string>;
-  $read(this: AsyncIterable<string>, type: 'line' | 'text'): $AsyncIterable<string>;
-  async * $read(this: AsyncIterable<string>, type: IOType = 'line'): $AsyncIterable<string | Buffer> {
+  $read(this: AsyncIterable<string>, config: ReadStreamConfig<'text'>): $AsyncIterable<string>
+  $read(this: AsyncIterable<string>, config: ReadStreamConfig<'binary'>): $AsyncIterable<Buffer>;
+  $read(this: AsyncIterable<string>, config?: Omit<ReadStreamConfig, 'mode'>): $AsyncIterable<string>
+  async * $read(this: AsyncIterable<string>, config: ReadStreamConfig<IOType> = {}): $AsyncIterable<string | Buffer> {
     for await (const file of this) {
-      yield* StreamUtil.readStream(file, type);
+      yield* StreamUtil.readStream(file, config);
     }
   }
 
@@ -61,11 +62,9 @@ export class FileOperators {
    *     console.log(f.file, f.stats.mtime);
    *   });
    */
-  $dir(this: AsyncIterable<string | RegExp>, config: Omit<DirConfig, 'full'> & { full: true }): $AsyncIterable<ScanEntry>;
-  $dir(this: AsyncIterable<string | RegExp>, config: DirConfig): $AsyncIterable<string>;
-  $dir(this: AsyncIterable<string | RegExp>): $AsyncIterable<string>;
-  $dir(this: AsyncIterable<string | RegExp>, config?: DirConfig): $AsyncIterable<string | ScanEntry>;
-  async * $dir(this: AsyncIterable<string | RegExp>, config: DirConfig = { base: process.cwd() }): $AsyncIterable<ScanEntry | string> {
+  $dir(this: AsyncIterable<string | RegExp>, config: ReadDirConfig & { full: true }): $AsyncIterable<ScanEntry>;
+  $dir(this: AsyncIterable<string | RegExp>, config?: Omit<ReadDirConfig, 'full'>): $AsyncIterable<string>;
+  async * $dir(this: AsyncIterable<string | RegExp>, config: ReadDirConfig = { base: process.cwd() }): $AsyncIterable<ScanEntry | string> {
     config.base = path.resolve(process.cwd(), config.base! || ''); // relative to working directory, but pull path
 
     for await (const pattern of this) {

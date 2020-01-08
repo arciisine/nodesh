@@ -2,7 +2,7 @@ import * as readline from 'readline';
 import * as fs from 'fs';
 import { Readable, Writable } from 'stream';
 
-import { IOType, $AsyncIterable } from '../types';
+import { IOType, $AsyncIterable, ReadStreamConfig } from '../types';
 import { TimeUtil } from './time';
 import { AsyncUtil } from './async';
 import { TextUtil } from './text';
@@ -32,18 +32,27 @@ export class StreamUtil {
 
   /**
    * Convert sequence to stream. If the input stream are buffers, send directly.
-   * Otherwise, send as text, and if mode is line, append with newline.
+   * Otherwise, send as text as lines.
    */
-  static toStream(gen: AsyncIterable<any>, mode: IOType = 'line'): Readable {
+  static toStream(gen: AsyncIterable<any>, mode?: IOType): Readable {
     const readable = Readable.from((async function* () {
       for await (const value of gen) {
         if (value === undefined) {
           continue;
-        } else if (value instanceof Buffer) {
-          yield value;
+        }
+        if (value instanceof Buffer) {
+          if (!mode || mode === 'binary') {
+            yield value;
+          } else {
+            yield value.toString('utf8');
+          }
         } else {
           const text = TextUtil.toText(value);
-          yield mode === 'line' ? `${text}\n` : text;
+          if (!mode || mode === 'text') {
+            yield text;
+          } else {
+            yield Buffer.from(text, 'utf8');
+          }
         }
       }
     })());
@@ -54,12 +63,13 @@ export class StreamUtil {
   /**
    * Convert read stream into a sequence
    */
-  static readStream(file: Readable | string, mode: 'binary'): $AsyncIterable<Buffer>;
-  static readStream(file: Readable | string, mode: 'line' | 'text'): $AsyncIterable<string>;
-  static readStream(file: Readable | string, mode?: IOType): $AsyncIterable<string>;
-  static async * readStream(file: Readable | string, mode: IOType = 'line'): $AsyncIterable<Buffer | string> {
-    const strm = typeof file === 'string' ? fs.createReadStream(file, { encoding: 'utf8' }) : file;
-    const src = mode === 'line' ? readline.createInterface(strm) : strm;
+  static readStream(input: Readable | string, config: ReadStreamConfig<'text'>): $AsyncIterable<string>;
+  static readStream(input: Readable | string, config: ReadStreamConfig<'binary'>): $AsyncIterable<Buffer>;
+  static readStream(input: Readable | string, config?: Omit<ReadStreamConfig, 'mode'>): $AsyncIterable<string>;
+  static async * readStream(input: Readable | string, config: ReadStreamConfig<IOType> = {}): $AsyncIterable<string | Buffer> {
+    const mode = config.mode ?? 'text';
+    const strm = typeof input === 'string' ? fs.createReadStream(input, { encoding: 'utf8' }) : input;
+    const src = mode === 'text' ? readline.createInterface(strm) : strm;
 
     const completed = this.trackStream(strm);
 
@@ -68,9 +78,10 @@ export class StreamUtil {
 
     src.on('close', () => done = true);
 
-    if (mode === 'line') {
+    if (mode === 'text') {
       src.on('line', v => {
-        buffer.push(typeof v === 'string' ? v : v.toString('utf8'));
+        const line = typeof v === 'string' ? v : v.toString('utf8');
+        buffer.push(`${line}\n`); // Retain newline
       });
     } else {
       src.on('data', v => {
@@ -81,18 +92,23 @@ export class StreamUtil {
     while (!done) {
       await TimeUtil.sleep(50);
 
-      if (buffer.length && mode !== 'text') {
+      if (!config.singleValue && buffer.length) {
         yield* (buffer as any);
         buffer = [];
       }
     }
-    if (buffer.length) {
-      if (mode === 'text') {
-        yield Buffer.concat(buffer as Buffer[]).toString('utf-8');
-      } else {
-        yield* (buffer as any);
-      }
+
+    // Set buffer to single value
+    if (config.singleValue) {
+      buffer = mode === 'text' ?
+        [(buffer as string[]).join('')] :
+        [Buffer.concat((buffer as Buffer[]))];
     }
+
+    if (buffer.length) {
+      yield* (buffer as any);
+    }
+
     if (!strm.destroyed) {
       strm.destroy();
     }

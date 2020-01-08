@@ -12,7 +12,9 @@ export class ExecSuite {
   async testExecEach() {
     const res = await ['a.txt', 'b.txt', 'c.txt']
       .$map(x => path.resolve(__dirname, 'files', x))
-      .$execEach('wc', ['-c'])
+      .$flatMap(args =>
+        ''.$exec('wc', { args: ['-c', args] })
+      )
       .$columns(['count'])
       .$map(({ count }) => parseInt(count, 10));
 
@@ -21,16 +23,15 @@ export class ExecSuite {
 
   @Test()
   async testExec() {
-    const data = [
-      'a,b,c',
-      'd,e,f',
-      'g,h,i',
-      'j',
-      'k,,'
-    ];
+    const data = `
+a,b,c
+d,e,f
+g,h,i
+j,
+k,,`;
 
-    const [val] = await data
-      .$exec('wc', ['-c'])
+    const [val] = await data.trim()
+      .$exec('wc', { args: ['-c'] })
       .$columns(['count'])
       .$map(({ count }) => parseInt(count, 10));
 

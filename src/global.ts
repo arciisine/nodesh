@@ -42,6 +42,7 @@ declare global {
   interface AsyncGenerator<T = unknown, TReturn = any, TNext = unknown> extends AllOps<T>, Promise<T[]> { }
 
   interface AsyncIterable<T> extends AllOps<T> { }
+  interface Buffer extends AsyncIterable<Buffer> { }
   interface String extends AsyncIterable<string> { }
   interface Number extends AsyncIterable<number> { }
   interface Boolean extends AsyncIterable<boolean> { }

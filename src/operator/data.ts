@@ -32,7 +32,7 @@ export class DataOperators {
    *   // Convert to objects from CSV
    */
   $csv<V extends readonly string[]>(this: AsyncIterable<string>, columns: V): $AsyncIterable<Record<V[number], string>> {
-    return this.$columns(columns, /,/);
+    return this.$columns({ names: columns, sep: /,/ });
   }
 
   /**
