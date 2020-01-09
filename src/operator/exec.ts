@@ -1,7 +1,7 @@
 
 import { StreamUtil } from '../util/stream';
 import { ExecUtil } from '../util/exec';
-import { $AsyncIterable, ExecConfig, ReadStreamConfig, IOType } from '../types';
+import { $AsyncIterable, ExecConfig } from '../types';
 import { Readable } from 'stream';
 
 /**
@@ -19,20 +19,28 @@ export class ExecOperators {
    *   .$read() // Read all files
    *   .$exec('wc', ['-l']) // Execute word count for all files
    *   // Run in a single operation
+   *
+   * @example
+   * '.ts'
+   *   .$dir() // Get all files
+   *   .$read() // Read all files
+   *   .$exec('npx', {
+   *      args: ['tslint'],
+   *      spawn : {
+   *        env : { NO_COLOR: '1' }
+   *      }
+   *   }) // Tslint every file
+   *   // Run in a single operation
    */
-  $exec(cmd: string, config?: Omit<ExecConfig, 'mode'>): $AsyncIterable<string>;
+  $exec(cmd: string, config?: string[] | Omit<ExecConfig, 'mode'>): $AsyncIterable<string>;
   $exec(cmd: string, config: ExecConfig<'text'>): $AsyncIterable<string>;
   $exec(cmd: string, config: ExecConfig<'binary'>): $AsyncIterable<Buffer>;
   $exec(cmd: string, config: ExecConfig<'raw'>): $AsyncIterable<Readable>;
-  async * $exec<T>(this: AsyncIterable<T>, cmd: string, config: ExecConfig = {}): $AsyncIterable<string | Buffer | Readable> {
+  async * $exec<T>(this: AsyncIterable<T>, cmd: string, configOrArgs: string[] | ExecConfig = {}): $AsyncIterable<string | Buffer | Readable> {
+    const config = Array.isArray(configOrArgs) ? { args: configOrArgs } : configOrArgs;
     const { proc, result } = ExecUtil.exec(cmd, config);
     StreamUtil.toStream(this, config.input).pipe(proc.stdin!);
-    const res = StreamUtil.readStream(proc.stdout!, config) as $AsyncIterable<string | Buffer> | Readable;
-    if (res instanceof Readable) {
-      yield res;
-    } else {
-      yield* res;
-    }
+    yield* await StreamUtil.readStream(proc.stdout!, config);
     await result;
   }
 }

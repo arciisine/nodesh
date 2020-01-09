@@ -6,11 +6,10 @@ Node shell is an npm package aimed at providing bash-like operations/simplicity 
 ```javascript
 #!/usr/bin/env -S npx @arcsine/nodesh
 
-$stdin // Automatically pipe from stdin
+$stdin // Automatically pipe from stdin 
   .$match($pattern.URL, 'extract')  // Retain only URL patterns and emit as single values
   .$fetch() // Request each url that comes through
-  .$tokens(/[^A-Za-z0-9_]+/) // Break down returned webpage into tokens
-  .$trim() 
+  .$tokens() // Break down returned webpage into tokens
   .$filter(x => 
     x.length >= 6 &&  // Retain words that are 6 chars or more
     x.charAt(0) === x.charAt(0).toUpperCase() // And that start with an uppercase letter
@@ -75,7 +74,11 @@ Out of the box, the following types support the async iterator symbol (`AsyncIte
 * `Set` - This will return an async generator over the set contents
 * `Map` - This will return an async generator over the map's entries [key, value]
 * `Array` - This will return an async generator over the array contents
+* `URLSearchParams` - This will generate over the key/value pairs
 * `NodeJS:ReadStream` - This will return a line-oriented async generator over the read stream
+  - `stream.Readable`
+  - `http.IncomingMessage`
+  - `fs.ReadStream`
 
 **Example of read stream**
 ```typescript
@@ -95,6 +98,7 @@ a single value, that of the primitive
 * `Number`
 * `RegExp`
 * `Boolean`
+* `Buffer`
 
 In addition to the built-in functionality, a global function `$of` is declared that will allow any value passed in to be converted to an async iterable.  If the item is iterable or is a stream, it will return the iteration as a generator, otherwise return the value as a single-valued generator.
 
@@ -107,5 +111,7 @@ const bigIntGen = $of(10000n);
 
 ## Operators
 The entirety of this project centers on the set of available operators.  These operators can be broken into the following groups
+
+%%OPERATORS_TOC%%
 
 %%OPERATORS%%

@@ -13,11 +13,14 @@ export class ExecUtil {
       stdio: ['pipe', 'pipe', 'pipe'],
       ...(config.spawn || {})
     });
-    const err = StreamUtil.readStream(proc.stderr!, { mode: 'text' }).$value;
+    const mem = StreamUtil.memoryWritable();
+    proc.stderr!.pipe(mem);
+
     const retCode = new Promise(res => proc.on('exit', res));
     const result = async function () {
       if ((await retCode) !== 0) {
-        throw new Error(await err);
+        const msg = Buffer.concat(mem.store).toString('utf8');
+        throw new Error(msg);
       }
     }();
     return { proc, result };

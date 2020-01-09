@@ -22,13 +22,13 @@ export class GlobalHelpers {
    *  [1,2,3]
    *    .$map(x => x ** 2)
    */
-  $of(el: Readable): AsyncGenerator<string>;
-  $of(el: string): AsyncGenerator<string>;
-  $of<T>(el: AsyncIterable<T>): AsyncGenerator<T>;
-  $of<T>(el: Iterable<T>): AsyncGenerator<T>;
-  $of<T>(el: AsyncIterable<T>): AsyncGenerator<T>;
-  $of<T>(el: T[]): AsyncGenerator<T>;
-  $of<T>(el: T): AsyncGenerator<T> {
+  static $of(el: Readable): AsyncGenerator<string>;
+  static $of(el: string): AsyncGenerator<string>;
+  static $of<T>(el: AsyncIterable<T>): AsyncGenerator<T>;
+  static $of<T>(el: Iterable<T>): AsyncGenerator<T>;
+  static $of<T>(el: AsyncIterable<T>): AsyncGenerator<T>;
+  static $of<T>(el: T[]): AsyncGenerator<T>;
+  static $of<T>(el: T): AsyncGenerator<T> {
     return (el as any)?.$iterable ?? [el].$iterable;
   }
 
@@ -60,7 +60,7 @@ export class GlobalHelpers {
    *   .$iterable
    *   .$reverse() // Reverse is now available
    */
-  get $registerOperator(): (op: Function) => void {
+  static get $registerOperator(): (op: Function) => void {
     return RegisterUtil.registerOperators;
   }
 
@@ -79,7 +79,7 @@ export class GlobalHelpers {
    *   // Pull in name from argv[0] or prompt if missing
    *   .$read() // Read file
    */
-  get $argv(): string[] {
+  static get $argv(): string[] {
     return process.argv.slice(3);
   }
 
@@ -91,7 +91,7 @@ export class GlobalHelpers {
    *  .$map(line => line.split('').reverse().join('')) // Reverse each line
    *  .$stdout // Pipe to stdout
    */
-  get $stdin(): AsyncIterable<string> {
+  static get $stdin(): AsyncIterable<string> {
     return process.stdin.$iterable;
   }
 
@@ -103,7 +103,7 @@ export class GlobalHelpers {
    * ($env.user_name ?? ask('Enter a user name')) // Prompt user name if there
    *   .$map(userName => ... )
    */
-  get $env(): Record<string, string> {
+  static get $env(): Record<string, string> {
     return new Proxy({}, {
       get(obj, key: string) {
         return process.env[key] ??
@@ -122,7 +122,7 @@ export class GlobalHelpers {
    *  .$match($pattern.URL, 'extract') // Extract URLs
    *  .$filter(url => url.endsWith('.com'))
    */
-  get $pattern() {
+  static get $pattern() {
     return {
       URL: /https?:\/\/[\/A-Za-z0-9:=?\-&.%]+/g,
       EMAIL: /[A-Za-z0-9_]+@[A-Za-z0-9_.]+[.][A-Za-z]+/g
@@ -141,7 +141,7 @@ export class GlobalHelpers {
    * $range(10, 1, 2)
    *   // sequence of 1, 3, 5, 7, 9
    */
-  async * $range(stop: number, start = 1, step = 1): AsyncIterable<number> {
+  static async * $range(stop: number, start = 1, step = 1): AsyncIterable<number> {
     if (step > 0 && stop < start) {
       const temp = start;
       start = stop;

@@ -30,16 +30,14 @@ function initialize() {
     async * $iterable(this: string) { yield this; }
   }, String.prototype);
 
-
   // Finish out Thenable
   const { constructor: AsyncGeneratorCons } = ((async function* () { })());
   RegisterUtil.registerThenable(AsyncGeneratorCons);
 
   // Register globals
-  Object.defineProperties(globalThis,
-    Object.getOwnPropertyDescriptors(
-      GlobalHelpers.prototype)
-  );
+  const helperProps = Object.getOwnPropertyDescriptors(GlobalHelpers);
+  delete helperProps.prototype;
+  Object.defineProperties(globalThis, helperProps);
 }
 
 initialize();

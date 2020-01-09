@@ -1,4 +1,5 @@
 import { OrCallable, PromFunc, PromFunc2, $AsyncIterable } from '../types';
+import { GlobalHelpers } from '../helper';
 
 export type PairMode = 'empty' | 'repeat' | 'exact';
 
@@ -145,5 +146,30 @@ export class TransformOperators {
       const v = res.value;
       yield [el, v];
     }
+  }
+
+  /**
+   * This operator allows for combining a sequence of elements with a join element
+   *
+   * @example
+   * '<file>'
+   *   .$read() // Read as a series of lines
+   *   .$join('\n')
+   *   // Produces a sequence of lines inter-spliced with new lines
+   */
+  async * $join<T>(this: AsyncIterable<T>, joiner: T | $AsyncIterable<T>): $AsyncIterable<T> {
+    const itr = this[Symbol.asyncIterator]();
+    let result;
+    const joinItr = GlobalHelpers.$of(joiner as any).$repeat()[Symbol.asyncIterator]();
+    let first = true;
+
+    do {
+      result = await itr.next();
+      if (!first && !result.done) {
+        yield (await joinItr.next()).value;
+      }
+      yield result.value;
+      first = false;
+    } while (!result.done);
   }
 }

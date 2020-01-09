@@ -18,7 +18,7 @@ export class DataOperators {
    *   .$json()  // Convert from JSON
    */
   $json<V = any>(this: AsyncIterable<string>, singleValue = true): $AsyncIterable<V> {
-    return (singleValue ? this.$join() : this)
+    return (singleValue ? this.$toString() : this)
       .$map(x => JSON.parse(x));
   }
 

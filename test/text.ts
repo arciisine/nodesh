@@ -113,22 +113,23 @@ export class TextSuite {
   async testSingleLine() {
     const res = await ['  a  \n', 'b         \n', '        c']
       .$trim()
-      .$singleLine();
+      .$toString();
 
-    assert(res === ['a b c']);
+    assert(res === ['abc']);
   }
 
   @Test()
   async testJoin() {
     const res = await $range(5)
       .$map(x => `${x}`)
-      .$join('~');
+      .$join('~')
+      .$toString();
 
     assert(res === ['1~2~3~4~5']);
 
     const res2 = await $range(5)
       .$map(x => `${x}`)
-      .$join();
+      .$toString();
 
     assert(res2 === ['12345']);
   }

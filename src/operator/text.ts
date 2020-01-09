@@ -175,37 +175,19 @@ export class TextOperators {
     return this.$map(x => x.trim());
   }
 
-  /**
-   * This operator allows for combining a sequence of strings into a single value similar to `String.prototype.join`.
-   *
-   * @example
-   * '<file>'
-   *   .$read() // Read as a series of lines
-   *   .$join('\n')
-   *   // Produces a single value of the entire file
-   */
-  $join(this: AsyncIterable<string>, joiner?: string | ((a: string[]) => string)): $AsyncIterable<string> {
-    if (!joiner) {
-      joiner = (x: string[]) => x.join('');
-    } else if (typeof joiner === 'string') {
-      const val = joiner;
-      joiner = (x: string[]) => x.join(val);
-    }
-    return this.$collect().$map(joiner);
-  }
 
   /**
-   * `$singleLine` is a convenience method for converting an entire block of
-   * text into a single line.  This is useful when looking for patterns that
+   * `$toString` is a convenience method for converting an entire block of
+   * text into a single string.  This is useful when looking for patterns that
    * may span multiple lines.
    *
    * @example
    * '<file>.html'
    *   .$read()
-   *   .$singleLine() // Convert to a single line
+   *   .$toString() // Convert to a single string
    *   .$replace(/<[^>]+?>/) // Remove all HTML tags
    */
-  $singleLine(this: AsyncIterable<string>): $AsyncIterable<string> {
-    return this.$join(' ').$replace(/\n/g, ' ');
+  $toString(this: AsyncIterable<string>): $AsyncIterable<string> {
+    return this.$collect().$map(x => x.join(''));
   }
 }

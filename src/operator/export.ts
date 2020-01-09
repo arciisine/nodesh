@@ -35,8 +35,10 @@ export class ExportOperators {
    *   .$exec('convert', ['-size=100x20']) // Pipe to convert function
    *   .$write('out.png') // Write file out
    */
-  $write<T extends string | Buffer | any>(this: AsyncIterable<T>, writable: Writable | string): Writable {
-    return this.$stream().pipe(StreamUtil.getWritable(writable));
+  $write<T extends string | Buffer | any>(this: AsyncIterable<T>, writable: Writable | string): Promise<void> {
+    const stream = StreamUtil.getWritable(writable);
+    this.$stream().pipe(stream);
+    return StreamUtil.trackStream(stream);
   }
 
   /**
@@ -49,11 +51,13 @@ export class ExportOperators {
    *   .$replace(/TEMP/, 'final')
    *   .$writeFinal('<file>');
    */
-  async $writeFinal(this: AsyncIterable<string>, file: string): Promise<void> {
-    const [text] = await this.$join();
-    const str = StreamUtil.getWritable(file);
-    await new Promise(r => str.write(text, r));
-    str.end();
+  async $writeFinal(this: AsyncIterable<Buffer | string>, file: string): Promise<void> {
+    // Stream to memory
+    const mem = StreamUtil.memoryWritable();
+    await this.$write(mem);
+
+    // Stream to file
+    await mem.store.$write(file);
   }
 }
 

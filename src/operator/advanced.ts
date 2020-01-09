@@ -2,6 +2,10 @@ import * as os from 'os';
 import { $AsyncIterable } from '../types';
 import { AsyncUtil } from '../util/async';
 
+type AyIt<T> = $AsyncIterable<T>;
+
+type Wrap<T, U> = (inp: AyIt<T>) => AyIt<U>;
+
 /**
  * Advanced operators represent more complex use cases.
  */
@@ -52,6 +56,5 @@ export class AdvancedOperators {
     while (items.length) {
       yield await getNext();
     }
-
   }
 }
