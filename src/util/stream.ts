@@ -60,24 +60,35 @@ export class StreamUtil {
     return readable;
   }
 
+  static yieldRaw<T>(input: T, mode: 'raw'): $AsyncIterable<T>;
+  static yieldRaw<T>(input: AsyncIterable<T>, mode?: IOType): $AsyncIterable<T>;
+  static async * yieldRaw<T>(input: T | AsyncIterable<T>, mode?: IOType): $AsyncIterable<T | [T]> {
+    if (mode === 'raw') {
+      yield input as T;
+    } else {
+      yield* (input as AsyncIterable<T>);
+    }
+  }
+
   /**
    * Convert read stream into a sequence
    */
   static readStream(input: Readable | string, config?: Omit<ReadStreamConfig, 'mode'>): $AsyncIterable<string>;
   static readStream(input: Readable | string, config: ReadStreamConfig<'text'>): $AsyncIterable<string>;
   static readStream(input: Readable | string, config: ReadStreamConfig<'binary'>): $AsyncIterable<Buffer>;
-  static readStream<T extends Readable>(input: T | string, config: ReadStreamConfig<'raw'>): T;
-  static readStream(input: Readable | string, config: ReadStreamConfig<IOType> = {}): $AsyncIterable<string | Buffer> | Readable {
+  static readStream<T extends Readable>(input: T | string, config: ReadStreamConfig<'raw'>): $AsyncIterable<T>;
+  static async * readStream(input: Readable | string, config: ReadStreamConfig<IOType> = {}): $AsyncIterable<string | Buffer | Readable> {
     const mode = config.mode ?? 'text';
+    const strm = typeof input === 'string' ? fs.createReadStream(input, { encoding: 'utf8' }) : input;
+    const completed = this.trackStream(strm);
 
     if (mode === 'raw') {
-      return input as Readable;
+      const stream = input as Readable;
+      yield* await this.yieldRaw(stream, 'raw');
+      return;
     }
 
-    const strm = typeof input === 'string' ? fs.createReadStream(input, { encoding: 'utf8' }) : input;
     const src = mode === 'text' ? readline.createInterface(strm) : strm;
-
-    const completed = this.trackStream(strm);
 
     let done = false;
     let buffer: (string | Buffer)[] = [];
@@ -95,33 +106,31 @@ export class StreamUtil {
       });
     }
 
-    return (async function* () {
-      while (!done) {
-        await TimeUtil.sleep(50);
+    while (!done) {
+      await TimeUtil.sleep(50);
 
-        if (!config.singleValue && buffer.length) {
-          yield* (buffer as any);
-          buffer = [];
-        }
-      }
-
-      // Set buffer to single value
-      if (config.singleValue) {
-        buffer = mode === 'text' ?
-          [(buffer as string[]).join('')] :
-          [Buffer.concat((buffer as Buffer[]))];
-      }
-
-      if (buffer.length) {
+      if (!config.singleValue && buffer.length) {
         yield* (buffer as any);
+        buffer = [];
       }
+    }
 
-      if (!strm.destroyed) {
-        strm.destroy();
-      }
+    // Set buffer to single value
+    if (config.singleValue) {
+      buffer = mode === 'text' ?
+        [(buffer as string[]).join('')] :
+        [Buffer.concat((buffer as Buffer[]))];
+    }
 
-      await completed;
-    })();
+    if (buffer.length) {
+      yield* (buffer as any);
+    }
+
+    if (!strm.destroyed) {
+      strm.destroy();
+    }
+
+    await completed;
   }
 
   /**
@@ -144,10 +153,7 @@ export class StreamUtil {
    * @param writable
    */
   static getWritable(writable: Writable | string) {
-    const stream = typeof writable !== 'string' && 'write' in writable ? writable :
+    return typeof writable !== 'string' && 'write' in writable ? writable :
       fs.createWriteStream(writable, { flags: 'w', autoClose: true });
-
-    this.trackStream(stream);
-    return stream;
   }
 }

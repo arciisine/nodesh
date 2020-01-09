@@ -4,9 +4,11 @@
 '.js'
   .$dir({ base: 'dist' })
   .$parallel(file => file
+    .$tap(() => console.log(`Minifying ${file}`))
     .$read()
     .$exec('npx', ['babel-minify'])
     .$writeFinal(file)
-    .then(() => console.log(`Wrote ${file}`))
+    .$tap(() => console.log(`Minified ${file}`))
+    .then(() => { })
   )
   .$values;

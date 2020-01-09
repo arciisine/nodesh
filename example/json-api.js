@@ -7,16 +7,9 @@
   .$json()
   .$flatten()
   .$filter(x => !x.completed && x.userId === 10)
-  .$parallel(item =>
-    item.$http(
-      'http://localhost:9200/test-api/todo', // Store each item
-      {
-        mode: 'raw',
-        method: 'POST',
-        data: JSON.stringify(item),
-        contentType: 'application/json'
-      }
-    )
+  .$parallel(data =>
+    'http://localhost:9200/test-api/todo'
+      .$http({ contentType: 'json', data, mode: 'raw' })
       .$flatMap(msg => msg.$json())
       .$map(x => x._id)
   )

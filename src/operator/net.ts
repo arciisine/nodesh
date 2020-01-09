@@ -2,8 +2,6 @@ import * as http from 'http';
 
 import { NetUtil } from '../util/net';
 import { $AsyncIterable, HttpOpts } from '../types';
-import { Readable } from 'stream';
-
 /**
  * Support for network based activities
  */
@@ -40,26 +38,11 @@ export class NetOperators {
   $http(this: AsyncIterable<string | Buffer>, url: URL | string, opts: HttpOpts<'raw'>): $AsyncIterable<http.IncomingMessage>;
   async * $http(this: AsyncIterable<string>, urlOrOpts: string | URL | HttpOpts = {}, defOpts?: HttpOpts): $AsyncIterable<string | Buffer | http.IncomingMessage> {
     if (typeof urlOrOpts === 'string' || urlOrOpts instanceof URL) {
-      const opts = {
-        method: 'POST',
-        data: this,
-        ...(defOpts ?? {})
-      };
-      const res = await NetUtil.httpRequest(urlOrOpts, opts);
-
-      if (res instanceof http.IncomingMessage) {
-        yield res;
-      } else {
-        yield* res;
-      }
+      const opts = { ...(defOpts ?? {}), data: this };
+      yield* await NetUtil.httpRequest(urlOrOpts, opts);
     } else {
       for await (const url of this) {
-        const res = await NetUtil.httpRequest(url, urlOrOpts);
-        if (res instanceof http.IncomingMessage) {
-          yield res;
-        } else {
-          yield* res;
-        }
+        yield* await NetUtil.httpRequest(url, urlOrOpts);
       }
     }
   }

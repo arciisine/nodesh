@@ -1,4 +1,5 @@
 import { GlobalHelpers } from './helper';
+import { $AsyncIterable } from './types';
 
 import { CoreOperators } from './operator/core';
 import { AdvancedOperators } from './operator/advanced';
@@ -11,7 +12,8 @@ import { LimitOperators } from './operator/limit';
 import { NetOperators } from './operator/net';
 import { TimeOperators } from './operator/time';
 import { TransformOperators } from './operator/transform';
-import { $AsyncIterable } from './types';
+
+type GHStatic = typeof GlobalHelpers;
 
 type AllOps<T> =
   FileOperators &
@@ -30,13 +32,13 @@ type AllOps<T> =
 
 declare global {
   namespace globalThis {
-    const $of: GlobalHelpers['$of'];
-    const $stdin: GlobalHelpers['$stdin'];
-    const $registerOperator: GlobalHelpers['$registerOperator'];
-    const $argv: GlobalHelpers['$argv'];
-    const $env: GlobalHelpers['$env'];
-    const $pattern: GlobalHelpers['$pattern'];
-    const $range: GlobalHelpers['$range'];
+    const $of: GHStatic['$of'];
+    const $stdin: GHStatic['$stdin'];
+    const $registerOperator: GHStatic['$registerOperator'];
+    const $argv: GHStatic['$argv'];
+    const $env: GHStatic['$env'];
+    const $pattern: GHStatic['$pattern'];
+    const $range: GHStatic['$range'];
   }
 
   interface AsyncGenerator<T = unknown, TReturn = any, TNext = unknown> extends AllOps<T>, Promise<T[]> { }

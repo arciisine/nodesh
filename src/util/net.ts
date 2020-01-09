@@ -3,7 +3,6 @@ import * as https from 'https';
 
 import { StreamUtil } from './stream';
 import { HttpOpts } from '../types';
-import { Readable } from 'stream';
 
 export class NetUtil {
   static request(url: string, opts: http.RequestOptions = {}, data?: AsyncIterable<string | Buffer>) {
@@ -28,10 +27,17 @@ export class NetUtil {
   static httpRequest(url: string | URL, outs: HttpOpts<'raw'>): AsyncIterable<http.IncomingMessage>;
   static async* httpRequest(url: string, opts: HttpOpts = {}): AsyncIterable<string | Buffer | http.IncomingMessage> {
     let level = 0;
+
+    // Special case for JSON
+    if (opts.contentType === 'json') {
+      opts.contentType = 'application/json';
+      opts.data = typeof opts.data === 'string' ? opts.data : JSON.stringify(opts.data);
+    }
+
     // Compute once
     const reqOpts = {
       timeout: opts.timeout ?? 30000,
-      method: opts.method ?? 'GET',
+      method: opts.method ?? (opts.data ? 'POST' : 'GET'),
       headers: {
         ...opts.headers ?? {},
         [`Content-Type`]: opts.contentType ?? 'application/octet-stream'
@@ -51,12 +57,7 @@ export class NetUtil {
       } else if (msg.statusCode && msg.statusCode > 299) {
         throw new Error(`Error fetching ${url}: ${msg.statusMessage}`);
       } else {
-        const res = StreamUtil.readStream(msg, opts);
-        if (res instanceof http.IncomingMessage) {
-          yield res as http.IncomingMessage;
-        } else {
-          yield* res;
-        }
+        yield* await StreamUtil.yieldRaw(msg, opts.mode);
         return;
       }
     }

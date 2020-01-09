@@ -10,7 +10,7 @@ export class DataSuite {
   @Test()
   async testJSON() {
     const val = await ['{"a":5}', '{"c": null}']
-      .$json();
+      .$json(false);
 
     assert(val === [{ a: 5 }, { c: null }]);
   }

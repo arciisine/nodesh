@@ -49,7 +49,12 @@ function extractAllDocs(all) {
 
   const output = ['', `### ${clsName}`, header.doc.description, ''];
   for (const { doc, sig } of docs) {
-    let method = sig[0].split(/[<>(]/)[0].trim().replace(/^(g|s)et /, '');
+    let method = sig[0]
+      .split(/[<>(]/)[0]
+      .trim()
+      .replace(/\bstatic\b/, '')
+      .replace(/^\s*(g|s)et\s+/, '');
+
     method = method.charAt(0).toUpperCase() + method.substring(1);
 
     const sigs = `${CODE}typescript\n${sig.join('\n')}\n${CODE}`;
@@ -81,7 +86,7 @@ function processTyping(file) {
 }
 
 async function processDocs() {
-  const [OPERATORS] = await [
+  const items = [
     'operator/core',
     'operator/file',
     'operator/transform',
@@ -90,10 +95,19 @@ async function processDocs() {
     'operator/exec',
     'operator/export',
     'operator/advanced'
-  ]
+  ];
+
+  const [OPERATORS] = await items
     .$map(processTyping)
     .$map(extractAllDocs)
     .$join('\n\n');
+
+  const [OPERATORS_TOC] = await OPERATORS
+    .split('\n')
+    .$match(/^### /)
+    .$replace(/^###\s(.*?)\s*$/, (a, name) => name)
+    .$map(name => `* [${name}](#${name.toLowerCase().replace(/ /g, '-')})`)
+    .$join('\n');
 
   const [HELPERS] = await 'helper'
     .$map(processTyping)
@@ -101,12 +115,13 @@ async function processDocs() {
 
   /** @type {Record<string, string>} */
   const context = {
+    OPERATORS_TOC,
     OPERATORS,
     HELPERS
   };
 
   await 'README.tpl.md'
-    .$read('text')
+    .$read()
     .$replace(/%%([^%]+)?%%/g, (all, token) => context[token])
     .$write('README.md');
 }
