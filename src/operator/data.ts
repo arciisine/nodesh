@@ -17,8 +17,9 @@ export class DataOperators {
    *   .$fetch() // request url
    *   .$json()  // Convert from JSON
    */
-  $json<V = any>(this: AsyncIterable<string>): $AsyncIterable<V> {
-    return this.$map(x => JSON.parse(x));
+  $json<V = any>(this: AsyncIterable<string>, singleValue = true): $AsyncIterable<V> {
+    return (singleValue ? this.$join() : this)
+      .$map(x => JSON.parse(x));
   }
 
   /**

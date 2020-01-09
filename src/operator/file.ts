@@ -35,9 +35,9 @@ export class FileOperators {
    *   .$map(buffer => buffer.length) // Count number of bytes in file
    *
    */
+  $read(this: AsyncIterable<string>, config?: Omit<ReadStreamConfig, 'mode'>): $AsyncIterable<string>
   $read(this: AsyncIterable<string>, config: ReadStreamConfig<'text'>): $AsyncIterable<string>
   $read(this: AsyncIterable<string>, config: ReadStreamConfig<'binary'>): $AsyncIterable<Buffer>;
-  $read(this: AsyncIterable<string>, config?: Omit<ReadStreamConfig, 'mode'>): $AsyncIterable<string>
   async * $read(this: AsyncIterable<string>, config: ReadStreamConfig<IOType> = {}): $AsyncIterable<string | Buffer> {
     for await (const file of this) {
       yield* StreamUtil.readStream(file, config);
