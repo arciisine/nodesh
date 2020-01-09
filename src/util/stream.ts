@@ -63,11 +63,17 @@ export class StreamUtil {
   /**
    * Convert read stream into a sequence
    */
+  static readStream(input: Readable | string, config?: Omit<ReadStreamConfig, 'mode'>): $AsyncIterable<string>;
   static readStream(input: Readable | string, config: ReadStreamConfig<'text'>): $AsyncIterable<string>;
   static readStream(input: Readable | string, config: ReadStreamConfig<'binary'>): $AsyncIterable<Buffer>;
-  static readStream(input: Readable | string, config?: Omit<ReadStreamConfig, 'mode'>): $AsyncIterable<string>;
-  static async * readStream(input: Readable | string, config: ReadStreamConfig<IOType> = {}): $AsyncIterable<string | Buffer> {
+  static readStream<T extends Readable>(input: T | string, config: ReadStreamConfig<'raw'>): T;
+  static readStream(input: Readable | string, config: ReadStreamConfig<IOType> = {}): $AsyncIterable<string | Buffer> | Readable {
     const mode = config.mode ?? 'text';
+
+    if (mode === 'raw') {
+      return input as Readable;
+    }
+
     const strm = typeof input === 'string' ? fs.createReadStream(input, { encoding: 'utf8' }) : input;
     const src = mode === 'text' ? readline.createInterface(strm) : strm;
 
@@ -89,31 +95,33 @@ export class StreamUtil {
       });
     }
 
-    while (!done) {
-      await TimeUtil.sleep(50);
+    return (async function* () {
+      while (!done) {
+        await TimeUtil.sleep(50);
 
-      if (!config.singleValue && buffer.length) {
-        yield* (buffer as any);
-        buffer = [];
+        if (!config.singleValue && buffer.length) {
+          yield* (buffer as any);
+          buffer = [];
+        }
       }
-    }
 
-    // Set buffer to single value
-    if (config.singleValue) {
-      buffer = mode === 'text' ?
-        [(buffer as string[]).join('')] :
-        [Buffer.concat((buffer as Buffer[]))];
-    }
+      // Set buffer to single value
+      if (config.singleValue) {
+        buffer = mode === 'text' ?
+          [(buffer as string[]).join('')] :
+          [Buffer.concat((buffer as Buffer[]))];
+      }
 
-    if (buffer.length) {
-      yield* (buffer as any);
-    }
+      if (buffer.length) {
+        yield* (buffer as any);
+      }
 
-    if (!strm.destroyed) {
-      strm.destroy();
-    }
+      if (!strm.destroyed) {
+        strm.destroy();
+      }
 
-    await completed;
+      await completed;
+    })();
   }
 
   /**

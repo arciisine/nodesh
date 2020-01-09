@@ -61,3 +61,8 @@ declare global {
 declare module 'fs' {
   interface ReadStream extends Omit<AsyncIterable<string>, 'asyncIterator'> { }
 }
+
+declare module 'http' {
+  interface ClientRequest extends Omit<AsyncIterable<string>, 'asyncIterator'> { }
+  interface IncomingMessage extends Omit<AsyncIterable<string>, 'asyncIterator'> { }
+}

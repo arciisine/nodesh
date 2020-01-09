@@ -1,7 +1,7 @@
 import * as cp from 'child_process';
 
 export type $AsyncIterable<T> = AsyncIterable<T> & Promise<T[]>;
-export type IOType = 'text' | 'binary';
+export type IOType = 'text' | 'binary' | 'raw';
 
 export type PromFunc<T, U> = (item: T) => U | Promise<U>;
 export type PromFunc2<A, B, U> = (a: A, b: B) => U | Promise<U>;
