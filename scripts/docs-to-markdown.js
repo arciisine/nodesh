@@ -1,4 +1,6 @@
 #!/usr/bin/env -S npx @arcsine/nodesh
+/// @ts-check # npx-scripts - found
+/// <reference types="/tmp/npx-scripts/arcsine.nodesh" /> # npx-scripts
 
 const parse = require('comment-parser');
 
@@ -100,14 +102,16 @@ async function processDocs() {
   const [OPERATORS] = await items
     .$map(processTyping)
     .$map(extractAllDocs)
-    .$join('\n\n');
+    .$join('\n\n')
+    .$toString();
 
   const [OPERATORS_TOC] = await OPERATORS
     .split('\n')
     .$match(/^### /)
     .$replace(/^###\s(.*?)\s*$/, (a, name) => name)
     .$map(name => `* [${name}](#${name.toLowerCase().replace(/ /g, '-')})`)
-    .$join('\n');
+    .$join('\n')
+    .$toString();
 
   const [HELPERS] = await 'helper'
     .$map(processTyping)

@@ -110,7 +110,7 @@ export class TextSuite {
   }
 
   @Test()
-  async testSingleLine() {
+  async testToString() {
     const res = await ['  a  \n', 'b         \n', '        c']
       .$trim()
       .$toString();
@@ -119,18 +119,11 @@ export class TextSuite {
   }
 
   @Test()
-  async testJoin() {
-    const res = await $range(5)
-      .$map(x => `${x}`)
-      .$join('~')
+  async testToStringTwice() {
+    const res = await ['  a  \n', 'b         \n', '        c']
+      .$trim()
       .$toString();
 
-    assert(res === ['1~2~3~4~5']);
-
-    const res2 = await $range(5)
-      .$map(x => `${x}`)
-      .$toString();
-
-    assert(res2 === ['12345']);
+    assert(res === ['abc']);
   }
 }

@@ -93,8 +93,7 @@ export class RegisterUtil {
             }
           };
         }
-        prop.configurable = true;
-        Object.defineProperty(target.prototype, key, prop);
+        Object.defineProperty(target.prototype, key, { ...prop, configurable: true });
       }
     }
   }

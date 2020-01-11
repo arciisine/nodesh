@@ -163,13 +163,17 @@ export class TransformOperators {
     const joinItr = GlobalHelpers.$of(joiner as any).$repeat()[Symbol.asyncIterator]();
     let first = true;
 
-    do {
+    while (true) {
       result = await itr.next();
-      if (!first && !result.done) {
+      if (result.done) {
+        break;
+      }
+      if (!first) {
         yield (await joinItr.next()).value;
+      } else {
+        first = false;
       }
       yield result.value;
-      first = false;
-    } while (!result.done);
+    }
   }
 }

@@ -99,4 +99,18 @@ export class TransformSuite {
 
     assert(res === [[0, 0], [2, 1], [4, 2], [6, undefined], [8, undefined], [10, undefined]]);
   }
+
+  @Test()
+  async testJoin() {
+    const res = await $range(5)
+      .$map(x => `${x}`)
+      .$join('~');
+
+    assert(res === ['1', '~', '2', '~', '3', '~', '4', '~', '5']);
+
+    const res2 = await $range(5)
+      .$join(0);
+
+    assert(res2 === [1, 0, 2, 0, 3, 0, 4, 0, 5]);
+  }
 }
