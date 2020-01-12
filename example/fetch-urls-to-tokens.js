@@ -1,4 +1,4 @@
-#!/usr/bin/env -S npx @arcsine/nodesh
+#!/usr/bin/env -S npx .
 
 /**
  * @param {Map<string, number>} acc
@@ -11,9 +11,12 @@ function count(acc, item) {
 }
 count.init = () => new Map();
 
+/**
+ * Reads urls from domain, and break domains into host names
+ */
 $stdin
   .$match($pattern.URL, 'extract')
-  .$fetch()
+  .$http()
   .$tokens(/[^A-Za-z0-9_]+/)
   .$trim()
   .$filter(x => x.length > 5 && x.charAt(0) === x.charAt(0).toUpperCase())
@@ -22,5 +25,5 @@ $stdin
   .$sort((a, b) => a[1] - b[1])
   .$last(10)
   .$map(([k, c]) => `${k}: ${c}`)
-  .$stdout;
+  .$console;
 

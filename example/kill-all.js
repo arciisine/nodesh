@@ -1,9 +1,8 @@
-#!/usr/bin/env -S npx @arcsine/nodesh
+#!/usr/bin/env -S npx .
 /// @ts-check
-/// <reference types="/tmp/npx-scripts/arcsine.nodesh" lib="npx-scripts" />
+/// <reference types=".." lib="npx-scripts" />
 
-''
-  .$exec('ps', ['aux'])
+$exec('ps', ['aux'])
   .$columns(['user', 'pid'])
   // .$execEach('kill', ['-9'])
   .$console;

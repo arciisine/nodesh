@@ -11,4 +11,11 @@ export class AsyncUtil {
     });
     return prom;
   }
+
+  /**
+   * Combine promises into single, waiting on aux
+   */
+  static combine<T>(primary: Promise<T>, ...aux: Promise<any>[]) {
+    return Promise.all([primary, ...aux]).then(x => primary);
+  }
 }

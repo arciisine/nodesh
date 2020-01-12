@@ -2,5 +2,5 @@
 
 'csv.js'
   .$dir()
-  .$read('binary')
+  .$read()
   .$stdout;

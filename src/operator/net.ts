@@ -1,7 +1,7 @@
 import * as http from 'http';
 
 import { NetUtil } from '../util/net';
-import { $AsyncIterable, HttpOpts } from '../types';
+import { $AsyncIterable, HttpOpts, CompletableStream } from '../types';
 /**
  * Support for network based activities
  */
@@ -19,7 +19,7 @@ export class NetOperators {
   $http(this: AsyncIterable<string>, opts?: Omit<HttpOpts, 'mode'>): $AsyncIterable<string>;
   $http(this: AsyncIterable<string>, opts: HttpOpts<'text'>): $AsyncIterable<string>;
   $http(this: AsyncIterable<string>, opts: HttpOpts<'binary'>): $AsyncIterable<Buffer>;
-  $http(this: AsyncIterable<string>, opts: HttpOpts<'raw'>): $AsyncIterable<http.IncomingMessage>;
+  $http(this: AsyncIterable<string>, opts: HttpOpts<'raw'>): $AsyncIterable<CompletableStream<http.IncomingMessage>>;
 
   /**
    * This is meant as a simple equivalent of `curl`.  Will fetch a single page (and follow redirects).  By default,
@@ -35,14 +35,16 @@ export class NetOperators {
   $http(this: AsyncIterable<string | Buffer>, url: URL | string, opts?: Omit<HttpOpts, 'mode'>): $AsyncIterable<string>;
   $http(this: AsyncIterable<string | Buffer>, url: URL | string, opts: HttpOpts<'text'>): $AsyncIterable<string>;
   $http(this: AsyncIterable<string | Buffer>, url: URL | string, opts: HttpOpts<'binary'>): $AsyncIterable<Buffer>;
-  $http(this: AsyncIterable<string | Buffer>, url: URL | string, opts: HttpOpts<'raw'>): $AsyncIterable<http.IncomingMessage>;
-  async * $http(this: AsyncIterable<string>, urlOrOpts: string | URL | HttpOpts = {}, defOpts?: HttpOpts): $AsyncIterable<string | Buffer | http.IncomingMessage> {
+  $http(this: AsyncIterable<string | Buffer>, url: URL | string, opts: HttpOpts<'raw'>): $AsyncIterable<CompletableStream<http.IncomingMessage>>;
+  async * $http(
+    this: AsyncIterable<string>, urlOrOpts: string | URL | HttpOpts = {}, defOpts?: HttpOpts
+  ): $AsyncIterable<string | Buffer | CompletableStream<http.IncomingMessage>> {
     if (typeof urlOrOpts === 'string' || urlOrOpts instanceof URL) {
-      const opts = { ...(defOpts ?? {}), data: this };
+      const opts = { mode: 'text', ...(defOpts ?? {}), data: this };
       yield* await NetUtil.httpRequest(urlOrOpts, opts);
     } else {
       for await (const url of this) {
-        yield* await NetUtil.httpRequest(url, urlOrOpts);
+        yield* await NetUtil.httpRequest(url, { mode: 'text', ...urlOrOpts });
       }
     }
   }

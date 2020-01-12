@@ -39,6 +39,7 @@ declare global {
     const $env: GHStatic['$env'];
     const $pattern: GHStatic['$pattern'];
     const $range: GHStatic['$range'];
+    const $exec: GHStatic['$exec'];
   }
 
   interface AsyncGenerator<T = unknown, TReturn = any, TNext = unknown> extends AllOps<T>, Promise<T[]> { }

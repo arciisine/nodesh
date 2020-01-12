@@ -1,5 +1,10 @@
 #!/usr/bin/env -S npx @arcsine/nodesh
 
+/**
+ * Produces a dependency graph of imports within
+ * .ts files in the CWD
+ */
+
 /[.]ts$/
   .$dir({ base: $argv[0], full: true })
   .$filter(({ relative }) => !relative.includes('node_modules'))

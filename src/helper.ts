@@ -33,6 +33,19 @@ export class GlobalHelpers {
   }
 
   /**
+   * Top level access to execute a program
+   *
+   * @example
+   * $exec('ls', ['-lsa'])
+   *  .$columns(['blockSize', 'perms', 'size', 'group', 'owner', 'month', 'day', 'time', 'path'])
+   *  .$console
+   */
+  static get $exec(): AsyncIterable<any>['$exec'] {
+    const empty = '';
+    return empty.$exec.bind(empty);
+  }
+
+  /**
    * In the process of using the tool, there may be a need for encapsulating common
    * operations.  By default, `$wrap` provides an easy path for re-using functionality,
    * but it lacks the clarity of intent enjoyed by the built in operators.

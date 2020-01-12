@@ -2,7 +2,7 @@ import * as readline from 'readline';
 import * as fs from 'fs';
 import { Readable, Writable } from 'stream';
 
-import { IOType, $AsyncIterable, ReadStreamConfig } from '../types';
+import { IOType, $AsyncIterable, ReadStreamConfig, CompletableStream } from '../types';
 import { TimeUtil } from './time';
 import { AsyncUtil } from './async';
 import { TextUtil } from './text';
@@ -60,31 +60,21 @@ export class StreamUtil {
     return readable;
   }
 
-  static yieldRaw<T>(input: T, mode: 'raw'): $AsyncIterable<T>;
-  static yieldRaw<T>(input: AsyncIterable<T>, mode?: IOType): $AsyncIterable<T>;
-  static async * yieldRaw<T>(input: T | AsyncIterable<T>, mode?: IOType): $AsyncIterable<T | [T]> {
-    if (mode === 'raw') {
-      yield input as T;
-    } else {
-      yield* (input as AsyncIterable<T>);
-    }
-  }
-
   /**
    * Convert read stream into a sequence
    */
   static readStream(input: Readable | string, config?: Omit<ReadStreamConfig, 'mode'>): $AsyncIterable<string>;
   static readStream(input: Readable | string, config: ReadStreamConfig<'text'>): $AsyncIterable<string>;
   static readStream(input: Readable | string, config: ReadStreamConfig<'binary'>): $AsyncIterable<Buffer>;
-  static readStream<T extends Readable>(input: T | string, config: ReadStreamConfig<'raw'>): $AsyncIterable<T>;
-  static async * readStream(input: Readable | string, config: ReadStreamConfig<IOType> = {}): $AsyncIterable<string | Buffer | Readable> {
+  static readStream<T extends Readable>(input: T | string, config: ReadStreamConfig<'raw'>): $AsyncIterable<CompletableStream<T>>;
+  static async * readStream(input: Readable | string, config: ReadStreamConfig<IOType> = {}): $AsyncIterable<string | Buffer | CompletableStream> {
     const mode = config.mode ?? 'text';
     const strm = typeof input === 'string' ? fs.createReadStream(input, { encoding: 'utf8' }) : input;
     const completed = this.trackStream(strm);
 
     if (mode === 'raw') {
       const stream = input as Readable;
-      yield* await this.yieldRaw(stream, 'raw');
+      yield { stream, completed };
       return;
     }
 

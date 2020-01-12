@@ -147,6 +147,21 @@ $of([1,2,3])
 
 ```
 
+#### $exec
+
+Top level access to execute a program
+
+```typescript
+static get $exec(): AsyncIterable<any>['$exec'];
+```
+Example
+```javascript
+$exec('ls', ['-lsa'])
+ .$columns(['blockSize', 'perms', 'size', 'group', 'owner', 'month', 'day', 'time', 'path'])
+ .$console
+
+```
+
 #### $registerOperator
 
 In the process of using the tool, there may be a need for encapsulating common
@@ -297,6 +312,7 @@ The core functionality provides some very basic support for sequences
 This operator is a terminal action that receives each element of the sequence in sequence,
 but returns no value.  This function produces a promise that should be waited on to ensure the
 sequence is exhausted.
+
 ```typescript
 $forEach<T>(this: AsyncIterable<T>, fn: PromFunc<T, any>): Promise<void>;
 ```
@@ -311,6 +327,7 @@ fs.createReadStream('<file>') //  Now a line-oriented sequence
 
 Converts the sequence of data into another, by applying an operation
 on each element.
+
 ```typescript
 $map<T, U>(this: AsyncIterable<T>, fn: PromFunc<T, U>): $AsyncIterable<U>;
 ```
@@ -326,6 +343,7 @@ fs.createReadStream('<file>') //  Now a line-oriented sequence
 
 Determines if items in the sequence are valid or not. Invalid items
 are discarded, while valid items are retained.
+
 ```typescript
 $filter<T>(this: AsyncIterable<T>, pred: PromFunc<T, boolean>): $AsyncIterable<T>;
 ```
@@ -341,6 +359,7 @@ fs.createReadStream('<file>') //  Now a line-oriented sequence
 
 Flattens a sequence of arrays, or a sequence of sequences.  This allows for operators that
 return arrays/sequences, to be able to be represented as a single sequence.
+
 ```typescript
 $flatten<T, U>(this: AsyncIterable<AsyncIterable<U> | Iterable<U>>): $AsyncIterable<U>;
 ```
@@ -357,6 +376,7 @@ fs.createReadStream('<file>') //  Now a line-oriented sequence
 This is a combination of `$map` and `$flatten` as they are common enough in usage to warrant a
 combined operator.  This will map the the contents of the sequence (which produces an array
 or sequence), and producing a flattened output.
+
 ```typescript
 $flatMap<T, U>(this: AsyncIterable<T>, fn: PromFunc<T, AsyncIterable<U> | Iterable<U>>): $AsyncIterable<U>;
 ```
@@ -467,6 +487,7 @@ mode can be easier to work with for certain operations, but is much more memory 
 $read(this: AsyncIterable<string>, config?: Omit<ReadStreamConfig, 'mode'>): $AsyncIterable<string>;
 $read(this: AsyncIterable<string>, config: ReadStreamConfig<'text'>): $AsyncIterable<string>;
 $read(this: AsyncIterable<string>, config: ReadStreamConfig<'binary'>): $AsyncIterable<Buffer>;
+$read(this: AsyncIterable<string>, config: ReadStreamConfig<'raw'>): $AsyncIterable<fs.ReadStream>;
 ```
 Example
 ```javascript
@@ -911,7 +932,7 @@ will return a sequence of `Buffer`s, otherwise will return `string`s
 $exec(cmd: string, config?: string[] | Omit<ExecConfig, 'mode'>): $AsyncIterable<string>;
 $exec(cmd: string, config: ExecConfig<'text'>): $AsyncIterable<string>;
 $exec(cmd: string, config: ExecConfig<'binary'>): $AsyncIterable<Buffer>;
-$exec(cmd: string, config: ExecConfig<'raw'>): $AsyncIterable<Readable>;
+$exec(cmd: string, config: ExecConfig<'raw'>): $AsyncIterable<CompletableStream>;
 ```
 Example
 ```javascript

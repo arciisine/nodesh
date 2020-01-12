@@ -2,7 +2,7 @@ import * as http from 'http';
 import * as https from 'https';
 
 import { StreamUtil } from './stream';
-import { HttpOpts } from '../types';
+import { HttpOpts, CompletableStream } from '../types';
 
 export class NetUtil {
   static request(url: string, opts: http.RequestOptions = {}, data?: AsyncIterable<string | Buffer>) {
@@ -24,14 +24,15 @@ export class NetUtil {
   static httpRequest(url: string | URL, opts?: Omit<HttpOpts, 'mode'>): AsyncIterable<string>;
   static httpRequest(url: string | URL, opts: HttpOpts<'text'>): AsyncIterable<string>;
   static httpRequest(url: string | URL, outs: HttpOpts<'binary'>): AsyncIterable<Buffer>;
-  static httpRequest(url: string | URL, outs: HttpOpts<'raw'>): AsyncIterable<http.IncomingMessage>;
-  static async* httpRequest(url: string, opts: HttpOpts = {}): AsyncIterable<string | Buffer | http.IncomingMessage> {
+  static httpRequest(url: string | URL, outs: HttpOpts<'raw'>): AsyncIterable<CompletableStream<http.IncomingMessage>>;
+  static async* httpRequest(url: string, opts: HttpOpts = {}): AsyncIterable<string | Buffer | CompletableStream<http.IncomingMessage>> {
     let level = 0;
 
     // Special case for JSON
     if (opts.contentType === 'json') {
       opts.contentType = 'application/json';
-      opts.data = typeof opts.data === 'string' ? opts.data : JSON.stringify(opts.data);
+      opts.data = (typeof opts.data === 'string' || opts.data instanceof Buffer) ?
+        opts.data : JSON.stringify(opts.data);
     }
 
     // Compute once
@@ -57,7 +58,7 @@ export class NetUtil {
       } else if (msg.statusCode && msg.statusCode > 299) {
         throw new Error(`Error fetching ${url}: ${msg.statusMessage}`);
       } else {
-        yield* await StreamUtil.yieldRaw(msg, opts.mode);
+        yield* StreamUtil.readStream(msg, opts);
         return;
       }
     }

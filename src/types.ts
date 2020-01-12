@@ -1,4 +1,5 @@
 import * as cp from 'child_process';
+import { Readable } from 'stream';
 
 export type $AsyncIterable<T> = AsyncIterable<T> & Promise<T[]>;
 export type IOType = 'text' | 'binary' | 'raw';
@@ -30,3 +31,8 @@ export type HttpOpts<M = IOType> = ReadStreamConfig<M> & {
 };
 
 export type Pattern = string | Iterable<string> | RegExp;
+
+export type CompletableStream<T extends Readable = Readable> = {
+  completed: Promise<void>;
+  stream: T;
+};

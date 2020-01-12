@@ -8,7 +8,7 @@ export class ExecUtil {
    * it will read stderr (of the process) and return it as a single
    * value.
    */
-  static exec(cmd: string, config: ExecConfig) {
+  static exec(cmd: string, config: ExecConfig): { proc: cp.ChildProcess, result: Promise<void> } {
     const proc = cp.spawn(cmd, config.args ?? [], {
       stdio: ['pipe', 'pipe', 'pipe'],
       ...(config.spawn || {})

@@ -1,9 +1,11 @@
 import * as assert from 'assert';
 import * as path from 'path';
+import * as stream from 'stream';
 
 import { Suite, Test } from '@travetto/test';
 
 import '../src/index';
+import { StreamUtil } from '../src/util/stream';
 
 @Suite()
 export class ExecSuite {
@@ -36,5 +38,17 @@ k,,`;
       .$map(({ count }) => parseInt(count, 10));
 
     assert(val === 24);
+  }
+
+  @Test()
+  async verifyRaw() {
+    const [{ stream: str, completed }] = await $exec('ls', { mode: 'raw' });
+    assert(str !== undefined);
+
+    assert(str instanceof stream.Readable);
+
+    str.pipe(StreamUtil.memoryWritable()); // Capture
+
+    await completed;
   }
 }

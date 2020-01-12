@@ -1,9 +1,7 @@
 #!/usr/bin/env -S npx @arcsine/nodesh
 
-const path = require('path');
-
 /.[jt]s$/
-  .$dir({ base: path.resolve(process.cwd(), '../tim-resume/src') })
+  .$dir({ base: $argv[0] ?? process.cwd() })
   .$read()
   .$match($pattern.URL, 'extract')
   .$flatMap(url => url

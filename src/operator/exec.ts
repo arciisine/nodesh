@@ -1,8 +1,8 @@
 
 import { StreamUtil } from '../util/stream';
 import { ExecUtil } from '../util/exec';
-import { $AsyncIterable, ExecConfig } from '../types';
-import { Readable } from 'stream';
+import { $AsyncIterable, ExecConfig, CompletableStream } from '../types';
+import { AsyncUtil } from '../util/async';
 
 /**
  * Support for dealing with execution of external programs
@@ -35,12 +35,21 @@ export class ExecOperators {
   $exec(cmd: string, config?: string[] | Omit<ExecConfig, 'mode'>): $AsyncIterable<string>;
   $exec(cmd: string, config: ExecConfig<'text'>): $AsyncIterable<string>;
   $exec(cmd: string, config: ExecConfig<'binary'>): $AsyncIterable<Buffer>;
-  $exec(cmd: string, config: ExecConfig<'raw'>): $AsyncIterable<Readable>;
-  async * $exec<T>(this: AsyncIterable<T>, cmd: string, configOrArgs: string[] | ExecConfig = {}): $AsyncIterable<string | Buffer | Readable> {
+  $exec(cmd: string, config: ExecConfig<'raw'>): $AsyncIterable<CompletableStream>;
+  async * $exec<T>(
+    this: AsyncIterable<T>, cmd: string, configOrArgs: string[] | ExecConfig = {}
+  ): $AsyncIterable<string | Buffer | CompletableStream> {
     const config = Array.isArray(configOrArgs) ? { args: configOrArgs } : configOrArgs;
     const { proc, result } = ExecUtil.exec(cmd, config);
+
     StreamUtil.toStream(this, config.input).pipe(proc.stdin!);
-    yield* await StreamUtil.readStream(proc.stdout!, config);
+
+    if (config.mode === 'raw') {
+      const res = await StreamUtil.readStream(proc.stdout!, config as { mode: 'raw' }).$value;
+      yield { ...res, completed: AsyncUtil.combine(result, res.completed) };
+    } else {
+      yield* await StreamUtil.readStream(proc.stdout!, config);
+    }
     await result;
   }
 }

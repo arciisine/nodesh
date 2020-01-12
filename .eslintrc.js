@@ -10,7 +10,8 @@ module.exports = {
         "$argv": "readonly",
         "$ask": "readonly",
         "$pattern": "readonly",
-        "$env": "readonly"
+        "$env": "readonly",
+	"$exec": "readonly"
     },
     "parser": "@typescript-eslint/parser",
     "extends": [

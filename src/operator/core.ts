@@ -8,7 +8,6 @@ export class CoreOperators {
    * This operator is a terminal action that receives each element of the sequence in sequence,
    * but returns no value.  This function produces a promise that should be waited on to ensure the
    * sequence is exhausted.
-   * @param fn
    *
    * @example
    * fs.createReadStream('<file>') //  Now a line-oriented sequence
@@ -23,7 +22,6 @@ export class CoreOperators {
   /**
    * Converts the sequence of data into another, by applying an operation
    * on each element.
-   * @param fn
    *
    * @example
    * fs.createReadStream('<file>') //  Now a line-oriented sequence
@@ -39,7 +37,6 @@ export class CoreOperators {
   /**
    * Determines if items in the sequence are valid or not. Invalid items
    * are discarded, while valid items are retained.
-   * @param pred
    *
    * @example
    * fs.createReadStream('<file>') //  Now a line-oriented sequence
@@ -57,7 +54,6 @@ export class CoreOperators {
   /**
    * Flattens a sequence of arrays, or a sequence of sequences.  This allows for operators that
    * return arrays/sequences, to be able to be represented as a single sequence.
-   * @param this
    *
    * @example
    * fs.createReadStream('<file>') //  Now a line-oriented sequence
@@ -74,7 +70,6 @@ export class CoreOperators {
    * This is a combination of `$map` and `$flatten` as they are common enough in usage to warrant a
    * combined operator.  This will map the the contents of the sequence (which produces an array
    * or sequence), and producing a flattened output.
-   * @param fn
    *
    * @example
    * fs.createReadStream('<file>') //  Now a line-oriented sequence

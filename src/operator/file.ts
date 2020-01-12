@@ -1,4 +1,5 @@
 import * as path from 'path';
+import * as fs from 'fs';
 
 import { StreamUtil } from '../util/stream';
 import { FileUtil, ScanEntry } from '../util/file';
@@ -38,7 +39,8 @@ export class FileOperators {
   $read(this: AsyncIterable<string>, config?: Omit<ReadStreamConfig, 'mode'>): $AsyncIterable<string>
   $read(this: AsyncIterable<string>, config: ReadStreamConfig<'text'>): $AsyncIterable<string>
   $read(this: AsyncIterable<string>, config: ReadStreamConfig<'binary'>): $AsyncIterable<Buffer>;
-  async * $read(this: AsyncIterable<string>, config: ReadStreamConfig<IOType> = {}): $AsyncIterable<string | Buffer> {
+  $read(this: AsyncIterable<string>, config: ReadStreamConfig<'raw'>): $AsyncIterable<fs.ReadStream>;
+  async * $read(this: AsyncIterable<string>, config: ReadStreamConfig<IOType> = {}): $AsyncIterable<string | Buffer | fs.ReadStream> {
     for await (const file of this) {
       yield* StreamUtil.readStream(file, config);
     }
