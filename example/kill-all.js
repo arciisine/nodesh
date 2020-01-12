@@ -1,10 +1,9 @@
 #!/usr/bin/env -S npx @arcsine/nodesh
+/// @ts-check
+/// <reference types="/tmp/npx-scripts/arcsine.nodesh" lib="npx-scripts" />
 
-'aux'
-  .$execEach('ps')
-  .$match(/node.*travetto/)
-  .$tap(console.log)
+''
+  .$exec('ps', ['aux'])
   .$columns(['user', 'pid'])
-  .$map(({ pid }) => pid)
   // .$execEach('kill', ['-9'])
   .$console;

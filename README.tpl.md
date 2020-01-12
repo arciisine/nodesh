@@ -1,5 +1,9 @@
-# Node Shell
-Node shell is an npm package aimed at providing bash-like operations/simplicity within the node ecosystem.  The goal is to make working with files/folders, http requests, and transformations, as as easy as possible.  The library is built upon the async generation constructs within Ecmascript as well as stream constructs within the node ecosystem.  This means the performance is iterative and real-time, just in the same way piping works in a Unix shell.
+<h1>
+  <sub><img src="https://github.com/arciisine/nodesh/raw/master/images/logo.png" height="40"></sub>
+  Nodesh - The Node Shell
+</h1>
+
+Nodesh is an `npm` package aimed at providing shell-like operations/simplicity within the node ecosystem.  The goal is to make working with files/folders, http requests, and transformations, as easy as possible.  The library is built upon the async generation constructs within ecmascript as well as stream constructs within the node ecosystem.  This means the performance is iterative and real-time, the same way piping works in a Unix shell.
 
 **(remote-tokens.js) Example of processing URLs from the input stream** 
 
@@ -17,7 +21,7 @@ $stdin // Automatically pipe from stdin
   .$stdout; // Pipe the token stream to stdout
 ```
 
-**NOTE:** The shebang defined here is using `env`'s `-S` flag which will allow for the passing of arguments in the shebang.
+**NOTE:** The shebang defined here is using `env`'s `-S` flag which will allow for the passing of multiple arguments in the shebang.
 
 As you can see above, the library's aim is to mimic the pattern of command piping, as well as integrate with stdin/stdout seamlessly.  With the shebang applied appropriately, this script can be used just like any other cli command.  
 

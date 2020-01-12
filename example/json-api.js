@@ -1,6 +1,4 @@
-#!/usr/bin/env -S /home/tim/.npm/lib/node_modules/@arcsine/nodesh/bin/nodesh
-/// @ts-check # npx-scripts - found
-/// <reference types="/home/tim/.npm/lib/node_modules/@arcsine/nodesh" /> # npx-scripts
+#!/usr/bin/env -S npx @arcsine/nodesh
 
 'https://jsonplaceholder.typicode.com/todos'
   .$http()

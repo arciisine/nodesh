@@ -1,5 +1,6 @@
-// #!/usr/bin/env -S npx @arcsine/nodesh
-/// <reference path="../dist/index.d.ts" /> # npx-scripts
+#!/usr/bin/env -S npx @arcsine/nodesh
+/// @ts-check
+/// <reference types="/tmp/npx-scripts/arcsine.nodesh" lib="npx-scripts" />
 
 '.js'
   .$dir({ base: 'dist' })
@@ -8,7 +9,6 @@
     .$read()
     .$exec('npx', ['babel-minify'])
     .$writeFinal(file)
-    .$tap(() => console.log(`Minified ${file}`))
-    .then(() => { })
+    .then(() => console.log(`Minified ${file}`))
   )
   .$values;
