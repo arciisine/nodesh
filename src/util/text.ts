@@ -34,10 +34,19 @@ export class TextUtil {
   /**
    * Gets the textual representation of a value
    */
-  static toText(val: any) {
+  static toText(val: any): string {
     if (val === undefined || val === null) {
       return '';
+    } else if (val instanceof Buffer) {
+      return val.toString('utf8');
+    } else if (typeof val !== 'string') {
+      return JSON.stringify(val);
     }
-    return typeof val === 'string' ? val : JSON.stringify(val);
+    return val;
+  }
+
+  static toLine(val: any) {
+    val = this.toText(val);
+    return val.endsWith('\n') ? val : `${val}\n`;
   }
 }

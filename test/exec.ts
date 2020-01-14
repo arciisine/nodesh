@@ -1,11 +1,11 @@
 import * as assert from 'assert';
 import * as path from 'path';
 import * as stream from 'stream';
-
 import { Suite, Test } from '@travetto/test';
 
-import '../src/index';
 import { StreamUtil } from '../src/util/stream';
+
+import '../src/index';
 
 @Suite()
 export class ExecSuite {
@@ -15,7 +15,7 @@ export class ExecSuite {
     const res = await ['a.txt', 'b.txt', 'c.txt']
       .$map(x => path.resolve(__dirname, 'files', x))
       .$flatMap(args =>
-        ''.$exec('wc', { args: ['-c', args] })
+        $exec('wc', { args: ['-c', args] })
       )
       .$columns(['count'])
       .$map(({ count }) => parseInt(count, 10));
@@ -37,7 +37,7 @@ k,,`;
       .$columns(['count'])
       .$map(({ count }) => parseInt(count, 10));
 
-    assert(val === 24);
+    assert(val === 25);
   }
 
   @Test()

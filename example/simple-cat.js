@@ -1,6 +1,6 @@
 #!/usr/bin/env -S npx @arcsine/nodesh
 
-'csv.js'
+'count-files.js'
   .$dir()
   .$read()
   .$stdout;

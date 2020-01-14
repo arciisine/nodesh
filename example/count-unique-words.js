@@ -1,21 +1,21 @@
-#!/usr/bin/env -S npx @arcsine/nodesh
+#!/usr/bin/env -S npx .
+/// @ts-check
+/// <reference types=".." lib="npx-scripts" />
 
 /.[jt]s$/
-  .$dir({ base: $argv[0] ?? process.cwd() })
+  .$dir({ base: $argv[0] || process.cwd() })
+  .$filter(x => !x.includes('node_modules'))
   .$read()
   .$match($pattern.URL, 'extract')
   .$flatMap(url => url
-    .$fetch()
+    .$http()
     .$match($pattern.URL, 'extract')
+    .$onError([])
   )
+  .$notEmpty()
   .$map(x => new URL(x).host)
-  .$tap(console.log)
-  .$startTime('Counting', true)
   .$trim()
   .$tokens(/[.\/:]+/g)
   .$sort()
-  .$tap(console.log)
   .$exec('uniq', ['-c'])
-  .$tap(console.log)
-  .$stopTime('Counting', true)
-  .$console;
+  .$stdout;

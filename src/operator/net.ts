@@ -41,10 +41,10 @@ export class NetOperators {
   ): $AsyncIterable<string | Buffer | CompletableStream<http.IncomingMessage>> {
     if (typeof urlOrOpts === 'string' || urlOrOpts instanceof URL) {
       const opts = { mode: 'text', ...(defOpts ?? {}), data: this };
-      yield* await NetUtil.httpRequest(urlOrOpts, opts);
+      yield* NetUtil.httpRequest(urlOrOpts, opts);
     } else {
       for await (const url of this) {
-        yield* await NetUtil.httpRequest(url, { mode: 'text', ...urlOrOpts });
+        yield* NetUtil.httpRequest(url, { mode: 'text', ...urlOrOpts });
       }
     }
   }

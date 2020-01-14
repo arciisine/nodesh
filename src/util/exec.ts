@@ -19,8 +19,7 @@ export class ExecUtil {
     const retCode = new Promise(res => proc.on('exit', res));
     const result = async function () {
       if ((await retCode) !== 0) {
-        const msg = Buffer.concat(mem.store).toString('utf8');
-        throw new Error(msg);
+        throw new Error(mem.getText());
       }
     }();
     return { proc, result };

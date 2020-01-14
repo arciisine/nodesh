@@ -99,7 +99,8 @@ export class ExportPropOperators<T> {
   }
 
   /**
-   * Simple method that allows any sequence to be automatically written to stdout
+   * Simple method that allows any sequence to be automatically written to stdout.  This is intended for
+   * binary output as well as line-oriented text output.
    *
    * @example
    * '<file>'
@@ -118,7 +119,8 @@ export class ExportPropOperators<T> {
   }
 
   /**
-   * Simple property that allows any sequence to be automatically called with `console.log`
+   * Simple property that allows any sequence to be automatically called with `console.log`. This is aimed at
+   * outputting data that is not line-oriented text.  Useful for objects being processed in the stream.
    *
    * @example
    * '<file>'

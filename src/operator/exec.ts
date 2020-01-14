@@ -48,7 +48,7 @@ export class ExecOperators {
       const res = await StreamUtil.readStream(proc.stdout!, config as { mode: 'raw' }).$value;
       yield { ...res, completed: AsyncUtil.combine(result, res.completed) };
     } else {
-      yield* await StreamUtil.readStream(proc.stdout!, config);
+      yield* StreamUtil.readStream(proc.stdout!, config);
     }
     await result;
   }

@@ -157,7 +157,7 @@ export class CoreOperators {
     try {
       yield* this;
     } catch (err) {
-      const val = ('apply' in alt ? alt() : alt);
+      const val = await ('apply' in alt ? alt() : alt);
       yield* val;
     }
   }

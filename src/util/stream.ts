@@ -3,9 +3,9 @@ import * as fs from 'fs';
 import { Readable, Writable } from 'stream';
 
 import { IOType, $AsyncIterable, ReadStreamConfig, CompletableStream } from '../types';
-import { TimeUtil } from './time';
 import { AsyncUtil } from './async';
 import { TextUtil } from './text';
+import { TimeUtil } from './time';
 
 class MemoryStream extends Writable {
   store: Buffer[] = [];
@@ -16,7 +16,7 @@ class MemoryStream extends Writable {
   }
 
   getText() {
-    return this.store.map(x => x.toString('utf8')).join('');
+    return Buffer.concat(this.store).toString('utf8');
   }
 }
 
@@ -38,20 +38,20 @@ export class StreamUtil {
     const readable = Readable.from((async function* () {
       for await (const value of gen) {
         if (value === undefined) {
+          yield;
           continue;
         }
         if (value instanceof Buffer) {
           if (!mode || mode === 'binary') {
             yield value;
           } else {
-            yield value.toString('utf8');
+            yield TextUtil.toLine(value);
           }
         } else {
-          const text = TextUtil.toText(value);
           if (!mode || mode === 'text') {
-            yield text;
+            yield TextUtil.toLine(value);
           } else {
-            yield Buffer.from(text, 'utf8');
+            yield Buffer.from(TextUtil.toText(value), 'utf8');
           }
         }
       }
@@ -82,22 +82,25 @@ export class StreamUtil {
 
     let done = false;
     let buffer: (string | Buffer)[] = [];
+    let waiter: ReturnType<typeof AsyncUtil['resolvablePromise']>;
 
-    src.on('close', () => done = true);
+    const tick = async (val?: any) => {
+      if (typeof val === 'string' || val instanceof Buffer) {
+        buffer.push(val);
+      }
+      waiter?.resolve(null);
+    };
+
+    src.on('close', () => tick(done = true));
 
     if (mode === 'text') {
-      src.on('line', v => {
-        const line = typeof v === 'string' ? v : v.toString('utf8');
-        buffer.push(`${line}\n`); // Retain newline
-      });
+      src.on('line', v => tick(TextUtil.toText(v)));
     } else {
-      src.on('data', v => {
-        buffer.push(typeof v === 'string' ? Buffer.from(v, 'utf8') : v);
-      });
+      src.on('data', v => tick(typeof v === 'string' ? Buffer.from(v, 'utf8') : v));
     }
 
     while (!done) {
-      await TimeUtil.sleep(50);
+      await (waiter = AsyncUtil.resolvablePromise());
 
       if (!config.singleValue && buffer.length) {
         yield* (buffer as any);
@@ -108,7 +111,7 @@ export class StreamUtil {
     // Set buffer to single value
     if (config.singleValue) {
       buffer = mode === 'text' ?
-        [(buffer as string[]).join('')] :
+        [(buffer as string[]).join('\n')] :
         [Buffer.concat((buffer as Buffer[]))];
     }
 
@@ -128,11 +131,8 @@ export class StreamUtil {
    */
   static trackStream<T extends Readable | Writable>(stream: T) {
     return AsyncUtil.trackWithTimer(new Promise((res, rej) => {
-      if ('writable' in stream) {
-        stream.on('finish', res);
-      } else {
-        stream.on('end', res);
-      }
+      stream.on('finish', res);
+      stream.on('end', res);
       stream.on('close', res);
       stream.on('error', rej);
     }));

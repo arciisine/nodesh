@@ -13,7 +13,7 @@ export class FileSuite {
       .$read();
 
     assert(content.length === 7);
-    assert(content[0] === 'Chapter 1\n');
+    assert(content[0] === 'Chapter 1');
   }
 
   @Test()
@@ -24,7 +24,7 @@ export class FileSuite {
     assert(content.length > 40);
     assert(content.includes('Chapter 1'));
     assert(content.includes('Chapter 2'));
-    assert(content.split(/\n/g).length === 8);
+    assert(content.split(/\n/g).length === 7);
   }
 
   @Test()

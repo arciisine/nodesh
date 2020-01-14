@@ -59,7 +59,7 @@ export class TextSuite {
       .$read()
       .$match(/Chapter/);
 
-    assert(res === ['Chapter 1\n', 'Chapter 2\n']);
+    assert(res === ['Chapter 1', 'Chapter 2']);
 
     const res2 = await 'test/files/book.txt'
       .$read()
@@ -81,7 +81,7 @@ export class TextSuite {
       .$read()
       .$replace(/Chapter/, 'Ch.');
 
-    assert(res[0] === 'Ch. 1\n');
+    assert(res[0] === 'Ch. 1');
   }
 
   @Test()
@@ -95,8 +95,8 @@ export class TextSuite {
       })
       .$match(/^Ch[.]/);
 
-    assert(res[0] === 'Ch. Uno\n');
-    assert(res[1] === 'Ch. Deux\n');
+    assert(res[0] === 'Ch. Uno');
+    assert(res[1] === 'Ch. Deux');
   }
 
 

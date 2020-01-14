@@ -41,7 +41,7 @@ export class GlobalHelpers {
    *  .$console
    */
   static get $exec(): AsyncIterable<any>['$exec'] {
-    const empty = '';
+    const empty: any[] = [];
     return empty.$exec.bind(empty);
   }
 
