@@ -27,5 +27,5 @@
     }
     yield '}';
   })
-  .$exec('dot', ['-Tpng'], 'binary')
+  .$exec('dot', { args: ['-Tpng'], mode: 'binary' })
   .$stdout;

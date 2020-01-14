@@ -961,15 +961,19 @@ Example
 
 ### Export
 
-Support for exporting data from a sequence
+Support for exporting data from a sequence. For all methods that convert the data to a stream (e.g. $write, $writeFinal, $stdout)
+`Buffer` data implies raw binary data and will be outputted without being processed.
+Otherwise treat data as line oriented output and will have newlines appended to each sequence element..
 
 
 
 #### $stream
 
 Converts a sequence into a node stream.  This readable stream should be
-considered standard, and usable in any place a stream is expected. The mode
-determines if the stream is string or `Buffer` oriented.
+considered standard, and usable in any place a stream is expected.
+If the mode is specified, it determines if the stream is string or `Buffer` oriented.
+If the mode is not specified, then `Buffer` data implies raw binary data with no processing.
+Otherwise treat data as line oriented output (with newlines appended).
 
 ```typescript
 $stream<T>(this: AsyncIterable<T>, mode?: IOType): Readable;
@@ -1058,7 +1062,9 @@ const name = await 'What is your name?'
 
 #### $stdout
 
-Simple method that allows any sequence to be automatically written to stdout
+Simple method that allows any sequence to be automatically written to stdout.
+`Buffer` data will be written as is, and all other data will be treated as line-oriented output
+with newlines appended.
 
 ```typescript
 get $stdout(this: AsyncIterable<T>): Writable;
@@ -1074,7 +1080,8 @@ Example
 
 #### $console
 
-Simple property that allows any sequence to be automatically called with `console.log`
+Simple property that allows any sequence to be automatically called with `console.log`.
+Useful for retaining the structure/formatting (e.g. arrays, objects) of data being processed in the stream.
 
 ```typescript
 get $console(this: AsyncIterable<T>): Promise<void>;
