@@ -5,7 +5,6 @@ import { Readable, Writable } from 'stream';
 import { IOType, $AsyncIterable, ReadStreamConfig, CompletableStream } from '../types';
 import { AsyncUtil } from './async';
 import { TextUtil } from './text';
-import { TimeUtil } from './time';
 
 class MemoryStream extends Writable {
   store: Buffer[] = [];

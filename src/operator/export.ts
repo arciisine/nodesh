@@ -4,13 +4,17 @@ import { StreamUtil } from '../util/stream';
 import { IOType } from '../types';
 
 /**
- * Support for exporting data from a sequence
+ * Support for exporting data from a sequence. For all methods that convert the data to a stream (e.g. $write, $writeFinal, $stdout)
+ * `Buffer` data implies raw binary data and will be outputted without being processed.
+ * Otherwise treat data as line oriented output and will have newlines appended to each sequence element..
  */
 export class ExportOperators {
   /**
    * Converts a sequence into a node stream.  This readable stream should be
-   * considered standard, and usable in any place a stream is expected. The mode
-   * determines if the stream is string or `Buffer` oriented.
+   * considered standard, and usable in any place a stream is expected.
+   * If the mode is specified, it determines if the stream is string or `Buffer` oriented.
+   * If the mode is not specified, then `Buffer` data implies raw binary data with no processing.
+   * Otherwise treat data as line oriented output (with newlines appended).
    *
    * @example
    * const stream = '<file>.png'
@@ -20,7 +24,7 @@ export class ExportOperators {
    *
    * stream.pipe(fs.createWriteStream('out.png')); // Write out
    */
-  $stream<T>(this: AsyncIterable<T>, mode: IOType = 'text'): Readable {
+  $stream<T>(this: AsyncIterable<T>, mode?: IOType): Readable {
     return StreamUtil.toStream(this, mode);
   }
 
@@ -99,8 +103,9 @@ export class ExportPropOperators<T> {
   }
 
   /**
-   * Simple method that allows any sequence to be automatically written to stdout.  This is intended for
-   * binary output as well as line-oriented text output.
+   * Simple method that allows any sequence to be automatically written to stdout.
+   * `Buffer` data will be written as is, and all other data will be treated as line-oriented output
+   * with newlines appended.
    *
    * @example
    * '<file>'
@@ -119,8 +124,8 @@ export class ExportPropOperators<T> {
   }
 
   /**
-   * Simple property that allows any sequence to be automatically called with `console.log`. This is aimed at
-   * outputting data that is not line-oriented text.  Useful for objects being processed in the stream.
+   * Simple property that allows any sequence to be automatically called with `console.log`.
+   * Useful for retaining the structure/formatting (e.g. arrays, objects) of data being processed in the stream.
    *
    * @example
    * '<file>'
