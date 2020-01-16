@@ -2,6 +2,7 @@ import { OrCallable, PromFunc, PromFunc2, $AsyncIterable } from '../types';
 import { GlobalHelpers } from '../helper';
 
 export type PairMode = 'empty' | 'repeat' | 'exact';
+export type AsyncCompare<T> = PromFunc2<T, T, boolean>;
 
 /**
  * Standard operators regarding common patterns for transformations
@@ -49,15 +50,49 @@ export class TransformOperators {
    *   .$unique() // Will produce [1, 2, 3, 4, 5, 1, 7]
    *   // The final 1 repeats as it's not duplicated in sequence
    */
-  async * $unique<T>(this: AsyncIterable<T>, compare: PromFunc2<T, T, boolean> = (x, y) => x === y): $AsyncIterable<T> {
-    let last = undefined;
+  $unique<T>(this: AsyncIterable<T>): $AsyncIterable<T>;
+
+
+  /**
+   * `$unique` also supports configuration for custom comparators, as well as the ability to count the values as they come through.
+   *
+   * @example
+   * [1, 2, 2, 2, 3, 4, 5, 5]
+   *   .$unique({ count: true }) // Will produce [[1, 1], [2, 3], [3, 1], [4, 1], [5, 2]]
+   *
+   * @example
+   * [0, 2, 2, 2, 4, 1, 3, 2]
+   *   .$unique({ count: true, compare: (x,y) => x%2 === y%2 })
+   *   // Will produce [0, 1, 3, 2] as it captures the first even or odd of a run
+   */
+  $unique<T>(this: AsyncIterable<T>, config: { compare?: AsyncCompare<T>, count: true }): $AsyncIterable<[T, number]>;
+  $unique<T>(this: AsyncIterable<T>, config: { compare?: AsyncCompare<T>, count?: false }): $AsyncIterable<T>;
+  async * $unique<T>(this: AsyncIterable<T>, config?: { compare?: AsyncCompare<T>, count?: boolean }): $AsyncIterable<T | [T, number]> {
+    let last: T = Symbol as any;
+    let count = 0;
+    const compare = config?.compare ?? ((x: T, y: T) => x === y);
+    const doCount = !!config?.count;
+
+    function* emit(item: T): Generator<T | [T, number]> {
+      if (last !== Symbol as any) {
+        if (doCount) {
+          yield [last, count];
+        } else {
+          yield last;
+        }
+      }
+      last = item;
+      count = 1;
+    }
 
     for await (const item of this) {
-      if (!(await compare(item, last!))) {
-        last = item;
-        yield item;
+      if (!(await compare(item, last))) {
+        yield* emit(item);
+      } else {
+        count += 1;
       }
     }
+    yield* emit(undefined as any);
   }
 
   /**
@@ -174,6 +209,24 @@ export class TransformOperators {
         first = false;
       }
       yield result.value;
+    }
+  }
+
+  /**
+   * Combine multiple streams, linearly
+   *
+   * @example
+   * $range(1, 10)
+   *  .$concat($range(11, 20), $range(21, 30))
+   *  .$collect()
+   *  .$map(all => all.length)
+   *  .$stdout; // Displays 30
+   */
+  async * $concat<T>(this: AsyncIterable<T>, other: AsyncIterable<T>, ...rest: AsyncIterable<T>[]) {
+    for (const itr of [this, other, ...rest]) {
+      for await (const item of itr) {
+        yield item;
+      }
     }
   }
 }

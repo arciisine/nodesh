@@ -113,14 +113,14 @@ export class ExportPropOperators<T> {
    *   .$map(line => line.length) // Convert each line to it's length
    *   .$stdout // Pipe to stdout
    */
-  get $stdout(this: AsyncIterable<T>): Writable {
+  get $stdout(this: AsyncIterable<T>): Promise<void> {
     const src = this.$stream();
 
     // Track completion by input stream, not output as
     // stdout should never close
-    StreamUtil.trackStream(src);
-
-    return src.pipe(process.stdout);
+    const res = StreamUtil.trackStream(src);
+    src.pipe(process.stdout);
+    return res;
   }
 
   /**

@@ -1,6 +1,6 @@
-#!/usr/bin/env -S npx @arcsine/nodesh
+#!/usr/bin/env -S npx .
 /// @ts-check
-/// <reference types="/tmp/npx-scripts/arcsine.nodesh" lib="npx-scripts" />
+/// <reference types=".." lib="npx-scripts" />
 
 const parse = require('comment-parser');
 
@@ -26,7 +26,7 @@ function groupDocs(acc, line) {
  * @param {string[]} lines
  */
 function extractDoc(lines) {
-  const end = lines.findIndex(x => x.includes('*/')) + 1; // /Find end of comment
+  const end = lines.findIndex(x => /^\s*[*][/]/.test(x)) + 1; // /Find end of comment
   const [doc] = parse(lines.slice(0, end).join('\n'), { trim: false }); // Parse
   const sig = lines.slice(end).reduce((acc, line) => {
     if (!acc[acc.length - 1].includes('): ')) {
@@ -64,7 +64,10 @@ function extractAllDocs(all) {
       .tags
       .filter(x => x.tag === 'example')
       .map(x => x.source)
-      .map(x => x.replace(/@example\n?/, ''))
+      .map(x => x
+        .replace(/@example\n?/, '')
+        .replace(/\/\/\s*(@.*)/g, (a, c) => `/** ${c} */`)
+      )
       .map(t => `${CODE}javascript\n${t}\n${CODE}`).join('\n\n');
 
     output.push(`\n#### ${method}\n${doc.description}\n${sigs}\nExample\n${examples}`);

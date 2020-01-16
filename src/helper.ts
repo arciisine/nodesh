@@ -50,28 +50,22 @@ export class GlobalHelpers {
    * operations.  By default, `$wrap` provides an easy path for re-using functionality,
    * but it lacks the clarity of intent enjoyed by the built in operators.
    *
-   * @example (reverse.js)
-   * class Custom {
+   * @example
+   * // @template T
+   * class AsyncIterable {
+   *   // @returns {AsyncIterable<T>}
    *   $reverse() {
    *     return this
    *       .$collect() // Gather the entire sequence as an array
-   *       .$map(x => x.reverse()) // Reverse it
-   *       .$flatten(); // Flatten it back into a single sequence
+   *       .$flatMap(x => x.reverse()); // Reverse it and flatten
    *   }
    * }
    *
-   * registerOperator(Custom);
+   * $registerOperator(AsyncIterable);
    *
-   * module global { // Typescript only
-   *   interface AsyncIterable<T> extends Custom;
-   * }
-   *
-   * @example
-   * require('./reverse')
-   *
-   * [1,2,3]
-   *   .$iterable
-   *   .$reverse() // Reverse is now available
+   * $stdin
+   *  .$reverse()
+   *  .$stdout;
    */
   static get $registerOperator(): (op: Function) => void {
     return RegisterUtil.registerOperators;
@@ -138,7 +132,8 @@ export class GlobalHelpers {
   static get $pattern() {
     return {
       URL: /https?:\/\/[\/A-Za-z0-9:=?\-&.%]+/g,
-      EMAIL: /[A-Za-z0-9_]+@[A-Za-z0-9_.]+[.][A-Za-z]+/g
+      EMAIL: /[A-Za-z0-9_]+@[A-Za-z0-9_.]+[.][A-Za-z]+/g,
+      PROPER_NAME: /\b[A-Z][a-z]+\b/g
     };
   }
 
