@@ -9,13 +9,11 @@
   .$match($pattern.URL, 'extract')
   .$flatMap(url => url
     .$http()
-    .$match($pattern.URL, 'extract')
+    .$match(/\b[A-Z][a-z]+\b/, 'extract')
     .$onError([])
   )
-  .$notEmpty()
-  .$map(x => new URL(x).host)
-  .$trim()
-  .$tokens(/[.\/:]+/g)
   .$sort()
-  .$exec('uniq', ['-c'])
+  .$unique({ count: true })
+  .$sort((a, b) => b[1] - a[1])
+  .$first(10)
   .$stdout;

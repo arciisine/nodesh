@@ -1,15 +1,19 @@
-#!/usr/bin/env -S npx @arcsine/nodesh
+#!/usr/bin/env -S npx .
+/// @ts-check
+/// <reference types=".." lib="npx-scripts" />
 
-/**
- * @param {AsyncIterable<string>} stream
- */
-function $reverse(stream) {
-  return stream
-    .$map(x => x.split('').reverse().join('')) // Reverse each line
-    .$collect() // Gather the entire sequence as an array
-    .$flatMap(x => x.reverse()); // Reverse it and flatten
+/** @template T */
+class AsyncIterable {
+  /** @returns {AsyncIterable<T>} */
+  $reverse() {
+    return this
+      .$collect() // Gather the entire sequence as an array
+      .$flatMap(x => x.reverse()); // Reverse it and flatten
+  }
 }
 
+$registerOperator(AsyncIterable);
+
 $stdin
-  .$wrap($reverse)
+  .$reverse()
   .$stdout;

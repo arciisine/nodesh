@@ -15,7 +15,7 @@ function initialize() {
     .filter(x => !x.endsWith('.d.ts'))
     .map(x => path.resolve(__dirname, 'operator', x))
     .map(require)
-    .flatMap(Object.values);
+    .reduce((acc, v) => ([...acc, ...Object.values(v)]), []);
 
   // Supported async types
   RegisterUtil.registerOperators(operators, Object);

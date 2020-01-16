@@ -1,7 +1,7 @@
 {
   "name": "@arcsine/nodesh",
-  "version": "1.3.0",
-  "description": "",
+  "version": "1.4.0",
+  "description": "A node-based library, providing Unix shell-like functionality",
   "scripts": {
     "clean": "rm -rf dist/",
     "docs": "./bin/nodesh ./scripts/docs-to-markdown",

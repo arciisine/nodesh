@@ -9,6 +9,7 @@ module.exports = {
         "$range": "readonly",
         "$argv": "readonly",
         "$ask": "readonly",
+        "$registerOperator": "readonly",
         "$pattern": "readonly",
         "$env": "readonly",
 	"$exec": "readonly"

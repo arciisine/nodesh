@@ -128,6 +128,7 @@ Will turn any value into a sequence. If the input value is of type:
 * Everything else - Returns a sequence of a single element
 
 ```typescript
+static $of(el: Writable): AsyncGenerator<void>;
 static $of(el: Readable): AsyncGenerator<string>;
 static $of(el: string): AsyncGenerator<string>;
 static $of<T>(el: AsyncIterable<T>): AsyncGenerator<T>;
@@ -173,30 +174,21 @@ static get $registerOperator(): (op: Function) => void;
 ```
 Example
 ```javascript
- (reverse.js)
-class Custom {
+/** @template T */
+class AsyncIterable {
+  /** @returns {AsyncIterable<T>} */
   $reverse() {
     return this
       .$collect() // Gather the entire sequence as an array
-      .$map(x => x.reverse()) // Reverse it
-      .$flatten(); // Flatten it back into a single sequence
+      .$flatMap(x => x.reverse()); // Reverse it and flatten
   }
 }
 
-registerOperator(Custom);
+$registerOperator(AsyncIterable);
 
-module global { // Typescript only
-  interface AsyncIterable<T> extends Custom;
-}
-
-```
-
-```javascript
-require('./reverse')
-
-[1,2,3]
-  .$iterable
-  .$reverse() // Reverse is now available
+$stdin
+ .$reverse()
+ .$stdout;
 
 ```
 
@@ -258,7 +250,7 @@ Common patterns that can be used where regular expressions are supported
 
 ```typescript
 static get $pattern(): {
-URL: RegExp;EMAIL: RegExp;};
+URL: RegExp;EMAIL: RegExp;PROPER_NAME: RegExp;};
 ```
 Example
 ```javascript
@@ -314,7 +306,7 @@ but returns no value.  This function produces a promise that should be waited on
 sequence is exhausted.
 
 ```typescript
-$forEach<T>(this: AsyncIterable<T>, fn: PromFunc<T, any>): Promise<void>;
+$forEach<T>(this: AsyncIterable<T>, fn: PromFunc<T, any>): $AsyncIterable<void>;
 ```
 Example
 ```javascript
@@ -580,13 +572,35 @@ The uniqueness is only guaranteed linearly, to allow for streaming.  Otherwise t
 for all data before proceeding.  You can also specify a custom equality function as needed.
 
 ```typescript
-$unique<T>(this: AsyncIterable<T>, compare?: PromFunc2<T, T, boolean>): $AsyncIterable<T>;
+$unique<T>(this: AsyncIterable<T>): $AsyncIterable<T>;
 ```
 Example
 ```javascript
 [1, 2, 2, 3, 4, 5, 5, 1, 7]
   .$unique() // Will produce [1, 2, 3, 4, 5, 1, 7]
   // The final 1 repeats as it's not duplicated in sequence
+
+```
+
+#### $unique
+
+`$unique` also supports configuration for custom comparators, as well as the ability to count the values as they come through.
+
+```typescript
+$unique<T>(this: AsyncIterable<T>, config: {compare?: AsyncCompare<T>;count: true;}): $AsyncIterable<[T, number]>;
+$unique<T>(this: AsyncIterable<T>, config: {compare?: AsyncCompare<T>;count?: false;}): $AsyncIterable<T>;
+```
+Example
+```javascript
+[1, 2, 2, 2, 3, 4, 5, 5]
+  .$unique({ count: true }) // Will produce [[1, 1], [2, 3], [3, 1], [4, 1], [5, 2]]
+
+```
+
+```javascript
+[0, 2, 2, 2, 4, 1, 3, 2]
+  .$unique({ count: true, compare: (x,y) => x%2 === y%2 })
+  // Will produce [0, 1, 3, 2] as it captures the first even or odd of a run
 
 ```
 
@@ -664,6 +678,23 @@ Example
   .$read() // Read as a series of lines
   .$join('\n')
   // Produces a sequence of lines inter-spliced with new lines
+
+```
+
+#### $concat
+
+Combine multiple streams, linearly
+
+```typescript
+$concat<T>(this: AsyncIterable<T>, other: AsyncIterable<T>, ...rest: AsyncIterable<T>[]): AsyncGenerator<T, void, unknown>;
+```
+Example
+```javascript
+$range(1, 10)
+ .$concat($range(11, 20), $range(21, 30))
+ .$collect()
+ .$map(all => all.length)
+ .$stdout; // Displays 30
 
 ```
 
@@ -996,7 +1027,7 @@ is considered to be a file name. Buffer contents are written as is.  String cont
 are written as lines.
 
 ```typescript
-$write<T extends string | Buffer | any>(this: AsyncIterable<T>, writable: Writable | string): Promise<void>;
+$write<T extends string | Buffer | any>(this: AsyncIterable<T>, writable: Writable | string): $AsyncIterable<void>;
 ```
 Example
 ```javascript
@@ -1013,7 +1044,7 @@ Writes the entire stream to a file, as a final step. The write stream will not b
 have been emitted.  This is useful for reading and writing the same file.
 
 ```typescript
-$writeFinal(this: AsyncIterable<Buffer | string>, file: string): Promise<void>;
+$writeFinal(this: AsyncIterable<Buffer | string>, file: string): $AsyncIterable<void>;
 export declare class ExportPropOperators<T> {
 ```
 Example
@@ -1067,7 +1098,7 @@ Simple method that allows any sequence to be automatically written to stdout.
 with newlines appended.
 
 ```typescript
-get $stdout(this: AsyncIterable<T>): Writable;
+get $stdout(this: AsyncIterable<T>): $AsyncIterable<void>;
 ```
 Example
 ```javascript
@@ -1084,7 +1115,7 @@ Simple property that allows any sequence to be automatically called with `consol
 Useful for retaining the structure/formatting (e.g. arrays, objects) of data being processed in the stream.
 
 ```typescript
-get $console(this: AsyncIterable<T>): Promise<void>;
+get $console(this: AsyncIterable<T>): $AsyncIterable<void>;
 ```
 Example
 ```javascript
