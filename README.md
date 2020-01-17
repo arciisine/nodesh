@@ -3,6 +3,8 @@
   Nodesh - The Node Shell
 </h1>
 
+![Node Supported Versions](https://img.shields.io/static/v1?label=Node&message=%3E10.x.x&color=green)
+
 Nodesh is an `npm` package aimed at providing shell-like operations/simplicity within the node ecosystem.  The goal is to make working with files/folders, http requests, and transformations, as easy as possible.  The library is built upon the async generation constructs within ecmascript as well as stream constructs within the node ecosystem.  This means the performance is iterative and real-time, the same way piping works in a Unix shell.
 
 **(remote-tokens.js) Example of processing URLs from the input stream** 
@@ -111,6 +113,16 @@ In addition to the built-in functionality, a global function `$of` is declared t
 const bigIntGen = $of(10000n);
 ```
 
+### Promises
+In general, all sequences can be converted to promises by using `.$value` to return the first element or by `.$values` to return the entire sequence as an array.  In addition, in `node` versions `11` and higher, the sequence can be `await`ed directly and will produce the entire sequence as an array.
+
+**Example of awaiting the sequence as a promise**
+```typescript
+const lines = await `<cook-book-file>`
+  .$read()
+  .$match(x => x.includes('potato'))
+```
+
 
 ### GlobalHelpers
 
@@ -128,7 +140,6 @@ Will turn any value into a sequence. If the input value is of type:
 * Everything else - Returns a sequence of a single element
 
 ```typescript
-static $of(el: Writable): AsyncGenerator<void>;
 static $of(el: Readable): AsyncGenerator<string>;
 static $of(el: string): AsyncGenerator<string>;
 static $of<T>(el: AsyncIterable<T>): AsyncGenerator<T>;
@@ -306,7 +317,7 @@ but returns no value.  This function produces a promise that should be waited on
 sequence is exhausted.
 
 ```typescript
-$forEach<T>(this: AsyncIterable<T>, fn: PromFunc<T, any>): $AsyncIterable<void>;
+$forEach<T>(this: AsyncIterable<T>, fn: PromFunc<T, any>): Promise<void>;
 ```
 Example
 ```javascript
@@ -1027,7 +1038,7 @@ is considered to be a file name. Buffer contents are written as is.  String cont
 are written as lines.
 
 ```typescript
-$write<T extends string | Buffer | any>(this: AsyncIterable<T>, writable: Writable | string): $AsyncIterable<void>;
+$write<T extends string | Buffer | any>(this: AsyncIterable<T>, writable: Writable | string): Promise<void>;
 ```
 Example
 ```javascript
@@ -1044,7 +1055,7 @@ Writes the entire stream to a file, as a final step. The write stream will not b
 have been emitted.  This is useful for reading and writing the same file.
 
 ```typescript
-$writeFinal(this: AsyncIterable<Buffer | string>, file: string): $AsyncIterable<void>;
+$writeFinal(this: AsyncIterable<Buffer | string>, file: string): Promise<void>;
 export declare class ExportPropOperators<T> {
 ```
 Example
@@ -1098,7 +1109,7 @@ Simple method that allows any sequence to be automatically written to stdout.
 with newlines appended.
 
 ```typescript
-get $stdout(this: AsyncIterable<T>): $AsyncIterable<void>;
+get $stdout(this: AsyncIterable<T>): Promise<void>;
 ```
 Example
 ```javascript
@@ -1115,7 +1126,7 @@ Simple property that allows any sequence to be automatically called with `consol
 Useful for retaining the structure/formatting (e.g. arrays, objects) of data being processed in the stream.
 
 ```typescript
-get $console(this: AsyncIterable<T>): $AsyncIterable<void>;
+get $console(this: AsyncIterable<T>): Promise<void>;
 ```
 Example
 ```javascript
@@ -1153,3 +1164,4 @@ Example
  .$console
 
 ```
+

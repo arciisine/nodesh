@@ -3,6 +3,8 @@
   Nodesh - The Node Shell
 </h1>
 
+![Node Supported Versions](https://img.shields.io/static/v1?label=Node&message=%3E10.x.x&color=green)
+
 Nodesh is an `npm` package aimed at providing shell-like operations/simplicity within the node ecosystem.  The goal is to make working with files/folders, http requests, and transformations, as easy as possible.  The library is built upon the async generation constructs within ecmascript as well as stream constructs within the node ecosystem.  This means the performance is iterative and real-time, the same way piping works in a Unix shell.
 
 **(remote-tokens.js) Example of processing URLs from the input stream** 
@@ -111,6 +113,16 @@ In addition to the built-in functionality, a global function `$of` is declared t
 const bigIntGen = $of(10000n);
 ```
 
+### Promises
+In general, all sequences can be converted to promises by using `.$value` to return the first element or by `.$values` to return the entire sequence as an array.  In addition, in `node` versions `11` and higher, the sequence can be `await`ed directly and will produce the entire sequence as an array.
+
+**Example of awaiting the sequence as a promise**
+```typescript
+const lines = await `<cook-book-file>`
+  .$read()
+  .$match(x => x.includes('potato'))
+```
+
 %%HELPERS%%
 
 ## Operators
@@ -119,3 +131,4 @@ The entirety of this project centers on the set of available operators.  These o
 %%OPERATORS_TOC%%
 
 %%OPERATORS%%
+

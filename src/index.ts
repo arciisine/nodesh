@@ -1,4 +1,6 @@
 import './global';
+import './patch';
+
 import * as path from 'path';
 import * as fs from 'fs';
 import { Readable } from 'stream';
@@ -30,14 +32,16 @@ function initialize() {
     async * $iterable(this: string) { yield this; }
   }, String.prototype);
 
-  // Finish out Thenable
-  const { constructor: AsyncGeneratorCons } = ((async function* () { })());
-  RegisterUtil.registerThenable(AsyncGeneratorCons);
-
   // Register globals
   const helperProps = Object.getOwnPropertyDescriptors(GlobalHelpers);
   delete helperProps.prototype;
   Object.defineProperties(globalThis, helperProps);
+
+  // Make generators thenable, but only on node 11+
+  if (parseInt(process.version.replace(/^v/i, '').split('.')[0], 10) > 10) {
+    const { constructor: AsyncGeneratorCons } = (async function* () { })();
+    RegisterUtil.registerThenable(AsyncGeneratorCons);
+  }
 }
 
 initialize();

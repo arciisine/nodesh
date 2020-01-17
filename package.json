@@ -1,6 +1,6 @@
 {
   "name": "@arcsine/nodesh",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "A node-based library, providing Unix shell-like functionality",
   "scripts": {
     "clean": "rm -rf dist/",
@@ -23,6 +23,9 @@
     "LISCENSE",
     "README.md"
   ],
+  "engines": {
+    "node": ">=10.0.0"
+  },
   "keywords": [
     "bin",
     "npx",

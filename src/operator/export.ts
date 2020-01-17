@@ -93,12 +93,10 @@ export class ExportPropOperators<T> {
    */
   get $value(this: AsyncIterable<T>): Promise<T> {
     return (async () => {
-      const itr = this[Symbol.asyncIterator]();
-      const out = (await itr.next()).value;
-      if (itr.return) {
-        itr.return(undefined); // End it
+      for await (const item of this) {
+        return item;
       }
-      return out;
+      return undefined as any;
     })();
   }
 

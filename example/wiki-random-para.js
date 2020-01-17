@@ -1,4 +1,4 @@
-#!/usr/bin/env -S npx @arcsine/nodesh
+#!/usr/bin/env -S npx .
 
 `https://en.wikipedia.org/wiki/${$env.page || 'Special:Random'}`
   .$http() // Request URL

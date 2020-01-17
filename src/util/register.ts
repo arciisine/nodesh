@@ -25,16 +25,9 @@ export class RegisterUtil {
   static registerThenable(t: Function) {
     RegisterUtil.properties({
       then: {
-        get() {
-          return (fn: (data: Promise<any[]>) => void) => {
-            Promise.resolve().then(() => {
-              const ret = (this as AsyncIterable<any>).$values;
-              AsyncUtil.trackWithTimer(ret);
-              fn(ret);
-            });
-
-            return this;
-          };
+        get<T>(this: AsyncIterable<T>) {
+          const p = this.$values;
+          return p.then.bind(p);
         },
         configurable: true
       }
@@ -43,8 +36,6 @@ export class RegisterUtil {
 
   /**
    * Define properties on prototype
-   * @param props
-   * @param proto
    */
   static properties(
     props: PropertyDescriptorMap | Record<string, Function>,
