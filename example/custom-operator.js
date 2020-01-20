@@ -2,6 +2,11 @@
 /// @ts-check
 /// <reference types=".." lib="npx-scripts" />
 
+/**
+ * Registers a custom operator, with JSDoc support, to support
+ * typings.
+ */
+
 /** @template T */
 class AsyncIterable {
   /** @returns {AsyncIterable<T>} */
@@ -12,8 +17,9 @@ class AsyncIterable {
   }
 }
 
+// Register
 $registerOperator(AsyncIterable);
 
-$stdin
-  .$reverse()
-  .$stdout;
+$stdin // Read stdin until EOF
+  .$reverse() // Reverse all contents
+  .$stdout; // Return contents to stdout

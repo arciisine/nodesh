@@ -12,18 +12,25 @@ function count(acc, item) {
 count.init = () => new Map();
 
 /**
- * Reads urls from domain, and break domains into host names
+ * Reads urls from stdin, and extracts proper names, with counts
+ * from the resultant http output
  */
 $stdin
+  // Extract URLs from stdin
   .$match($pattern.URL, 'extract')
+  // Request each URL
   .$http()
-  .$tokens(/[^A-Za-z0-9_]+/)
-  .$trim()
-  .$filter(x => x.length > 5 && x.charAt(0) === x.charAt(0).toUpperCase())
+  // Extract proper name tokens from resultant web responses
+  .$match(/\b[A-Z][a-z]{5,100}\b/, 'extract')
+  // Count them all
   .$reduce(count)
+  // Convert to [key, value] array
   .$flatMap(x => x.entries())
+  // Sort by count, ascending
   .$sort((a, b) => a[1] - b[1])
+  // Take last 10
   .$last(10)
+  // Output
   .$map(([k, c]) => `${k}: ${c}`)
-  .$console;
+  .$stdout;
 

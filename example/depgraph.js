@@ -6,26 +6,30 @@
  */
 
 /[.]ts$/
-  .$dir({ base: $argv[0], full: true })
+  // Scan all .ts files, recursively
+  // Return full objects, with stats and file name
+  .$dir({ base: $argv[0] ?? process.cwd(), full: true })
+
+  // Exclude all node_module files
   .$filter(({ relative }) => !relative.includes('node_modules'))
-  .$flatMap(({ file }) =>
-    file
-      .$read()
-      .$match(/^import/)
-      .$columns(['', 'src'], /\s*from\s*/)
-      .$map(p => p.src)
-      .$notEmpty()
-      .$replace(/[';]/g, '')
-      .$pair(file
-        .replace(/[.]ts$/, '')
-      )
+
+  // Process each file
+  .$flatMap(({ file }) => file
+    .$read() // Get file contents
+    .$match(/^import/) // Match on import statements
+    .$columns(['decl', 'src'], /\s*from\s*/) // Convert to object, split on from
+    .$map(p => p.src) // Only care about the source
+    .$notEmpty() // Drop empties
+    .$replace(/[';]/g, '') // Cleanup from sloppy split
+    .$pair(file.replace(/[.]ts$/, '')) // Combine each imports with filename
   )
-  .$wrap(async function* (items) {
-    yield 'digraph {';
+  .$wrap(async function* (items) { // With all items
+    yield 'digraph {'; // Start of dot file output
     for await (const [dep, f] of items) {
-      yield `"${f}" -> "${dep}";`;
+      yield `"${f}" -> "${dep}";`; // Output each import as an edge
     }
-    yield '}';
+    yield '}'; // Close
   })
+  // Pipe stream into 'dot', and produce png output
   .$exec('dot', { args: ['-Tpng'], mode: 'binary' })
-  .$stdout;
+  .$stdout; // Send out;
