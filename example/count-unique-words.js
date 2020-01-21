@@ -16,7 +16,7 @@
   // Read file
   .$read()
   // Extract all CamelCase words
-  .$match(/\b([A-Z][a-z]+)+\b/, 'extract')
+  .$tokens(/\b([A-Z][a-z]+)+\b/)
   // Count unique
   .$sort()
   .$unique({ count: true })

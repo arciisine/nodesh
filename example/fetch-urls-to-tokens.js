@@ -17,11 +17,11 @@ count.init = () => new Map();
  */
 $stdin
   // Extract URLs from stdin
-  .$match($pattern.URL, 'extract')
+  .$tokens($pattern.URL)
   // Request each URL
   .$http()
   // Extract proper name tokens from resultant web responses
-  .$match(/\b[A-Z][a-z]{5,100}\b/, 'extract')
+  .$tokens(/\b[A-Z][a-z]{5,100}\b/)
   // Count them all
   .$reduce(count)
   // Convert to [key, value] array

@@ -14,7 +14,7 @@ export class DataOperators {
    *
    * @example
    * `https://jsonplaceholder.typicode.com/todos/1`
-   *   .$fetch() // request url
+   *   .$http() // request url
    *   .$json()  // Convert from JSON
    */
   $json<V = any>(this: AsyncIterable<string>, singleValue = true): $AsyncIterable<V> {

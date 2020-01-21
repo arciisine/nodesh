@@ -1,6 +1,9 @@
 Changelog
 -----------------------------
 
+## 1.5.0
+$tokens extracts now by pattern, vs separator.
+
 ## 1.4.1
 Fixing support for Node 10
 

@@ -126,7 +126,7 @@ export class GlobalHelpers {
    * @example
    * <file>
    *  .$read() // Read a file
-   *  .$match($pattern.URL, 'extract') // Extract URLs
+   *  .$tokens($pattern.URL) // Extract URLs
    *  .$filter(url => url.endsWith('.com'))
    */
   static get $pattern() {

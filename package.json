@@ -1,6 +1,6 @@
 {
   "name": "@arcsine/nodesh",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "A node-based library, providing Unix shell-like functionality",
   "scripts": {
     "clean": "rm -rf dist/",

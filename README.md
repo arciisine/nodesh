@@ -13,8 +13,8 @@ Nodesh is an `npm` package aimed at providing shell-like operations/simplicity w
 #!/usr/bin/env -S npx @arcsine/nodesh
 
 $stdin // Automatically pipe from stdin 
-  .$match($pattern.URL, 'extract')  // Retain only URL patterns and emit as single values
-  .$fetch() // Request each url that comes through
+  .$tokens($pattern.URL)  // Retain only URL patterns and emit as single values
+  .$http() // Request each url that comes through
   .$tokens() // Break down returned webpage into tokens
   .$filter(x => 
     x.length >= 6 &&  // Retain words that are 6 chars or more
@@ -120,7 +120,7 @@ In general, all sequences can be converted to promises by using `.$value` to ret
 ```typescript
 const lines = await `<cook-book-file>`
   .$read()
-  .$match(x => x.includes('potato'))
+  .$match('potato')
 ```
 
 
@@ -267,7 +267,7 @@ Example
 ```javascript
 <file>
  .$read() // Read a file
- .$match($pattern.URL, 'extract') // Extract URLs
+ .$tokens($pattern.URL) // Extract URLs
  .$filter(url => url.endsWith('.com'))
 
 ```
@@ -758,33 +758,36 @@ Example
 
 #### $tokens
 
-This operator allows for producing a single sequence of tokens out of lines of text.  The default separator is whitespace.
+This operator allows for producing a single sequence of tokens out of lines of text.  The default token is all sequences of non-whitespace.
 
 ```typescript
-$tokens(this: AsyncIterable<string>, sep?: Pattern): $AsyncIterable<string>;
+$tokens(this: AsyncIterable<string>, token?: Pattern): $AsyncIterable<string>;
 ```
 Example
 ```javascript
-
 '<file>'
   .$read() // Read file as lines
-  .$tokens() // Convert to words
-  .$filter(x => x.length > 5) // Retain only words 6-chars or longer
+  .$tokens(/\b[A-Za-z]{6,100}\b/i) // Extract 6+ letter words
+
+```
+
+```javascript
+'<file>'
+  .$read() // Read file as lines
+  .$tokens($pattern.URL) // Extract all URLs
 
 ```
 
 #### $match
 
-`$match` is similar to tokens, but will emit based on a pattern instead of
-just word boundaries.
+`$match` provides the ability to easily retain or exclude lines.
 
 Additionally, mode will determine what is emitted when a match is found (within a single line):
 * `undefined` - (default) Return entire line
-* `'extract'` - Return only matched element
 * `'negate'` - Return only lines that do not match
 
 ```typescript
-$match(this: AsyncIterable<string>, regex: Pattern, mode?: 'extract' | 'negate'): $AsyncIterable<string>;
+$match(this: AsyncIterable<string>, regex: Pattern, mode?: 'negate'): $AsyncIterable<string>;
 ```
 Example
 ```javascript
@@ -798,8 +801,8 @@ Example
 ```javascript
 '<file>'
   .$read()
-  .$match(/\d{3}(-)?\d{3}(-)?\d{4}/, 'extract)
-  // Return all phone numbers in the sequence
+  .$match(/\d{3}(-)?\d{3}(-)?\d{4}/)
+  // Match all lines with phone numbers
 
 ```
 
