@@ -68,29 +68,32 @@ export class TextOperators {
   }
 
   /**
-   * This operator allows for producing a single sequence of tokens out of lines of text.  The default separator is whitespace.
+   * This operator allows for producing a single sequence of tokens out of lines of text.  The default token is all sequences of non-whitespace.
    *
    * @example
-   *
    * '<file>'
    *   .$read() // Read file as lines
-   *   .$tokens() // Convert to words
-   *   .$filter(x => x.length > 5) // Retain only words 6-chars or longer
+   *   .$tokens(/\b[A-Za-z]{6,100}\b/i) // Extract 6+ letter words
+   *
+   * @example
+   * '<file>'
+   *   .$read() // Read file as lines
+   *   .$tokens($pattern.URL) // Extract all URLs
    */
-  async * $tokens(this: AsyncIterable<string>, sep: Pattern = /\s+/): $AsyncIterable<string> {
-    sep = TextUtil.createRegExp(sep, '');
+  async * $tokens(this: AsyncIterable<string>, token: Pattern = /\S+/): $AsyncIterable<string> {
+    token = TextUtil.createRegExp(token, 'g');
     for await (const line of this) {
-      yield* line.split(sep);
+      const matches: string[] = [];
+      line.replace(token, m => matches.push(m) ? '' : '');
+      yield* matches;
     }
   }
 
   /**
-   * `$match` is similar to tokens, but will emit based on a pattern instead of
-   * just word boundaries.
+   * `$match` provides the ability to easily retain or exclude lines.
    *
    * Additionally, mode will determine what is emitted when a match is found (within a single line):
    * * `undefined` - (default) Return entire line
-   * * `'extract'` - Return only matched element
    * * `'negate'` - Return only lines that do not match
    *
    * @example
@@ -102,20 +105,14 @@ export class TextOperators {
    * @example
    * '<file>'
    *   .$read()
-   *   .$match(/\d{3}(-)?\d{3}(-)?\d{4}/, 'extract)
-   *   // Return all phone numbers in the sequence
+   *   .$match(/\d{3}(-)?\d{3}(-)?\d{4}/)
+   *   // Match all lines with phone numbers
    */
-  async * $match(this: AsyncIterable<string>, regex: Pattern, mode?: 'extract' | 'negate'): $AsyncIterable<string> {
-    regex = TextUtil.createRegExp(regex, mode === 'extract' ? 'g' : '');
+  async * $match(this: AsyncIterable<string>, regex: Pattern, mode?: 'negate'): $AsyncIterable<string> {
+    regex = TextUtil.createRegExp(regex, '');
 
     for await (const el of this) {
-      if (mode === 'extract') {
-        const out: string[] = [];
-        el.replace(regex, x => out.push(x) ? '' : '');
-        for (const sub of out) {
-          yield sub;
-        }
-      } else if (mode === 'negate') {
+      if (mode === 'negate') {
         if (!regex.test(el)) {
           yield el;
         }

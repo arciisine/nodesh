@@ -13,8 +13,8 @@ Nodesh is an `npm` package aimed at providing shell-like operations/simplicity w
 #!/usr/bin/env -S npx @arcsine/nodesh
 
 $stdin // Automatically pipe from stdin 
-  .$match($pattern.URL, 'extract')  // Retain only URL patterns and emit as single values
-  .$fetch() // Request each url that comes through
+  .$tokens($pattern.URL)  // Retain only URL patterns and emit as single values
+  .$http() // Request each url that comes through
   .$tokens() // Break down returned webpage into tokens
   .$filter(x => 
     x.length >= 6 &&  // Retain words that are 6 chars or more
@@ -120,7 +120,7 @@ In general, all sequences can be converted to promises by using `.$value` to ret
 ```typescript
 const lines = await `<cook-book-file>`
   .$read()
-  .$match(x => x.includes('potato'))
+  .$match('potato')
 ```
 
 %%HELPERS%%

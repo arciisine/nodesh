@@ -7,7 +7,7 @@
 
 `https://en.wikipedia.org/wiki/Special:Random`
   .$http() // Request URL
-  .$match($pattern.URL, 'extract') // Pull out URLs
+  .$tokens($pattern.URL) // Pull out URLs
   .$map(x => new URL(x).host) // Extract host
   .$match('wiki', 'negate') // Exclude all hosts with 'wiki'
   .$sort()

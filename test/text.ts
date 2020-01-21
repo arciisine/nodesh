@@ -45,7 +45,7 @@ export class TextSuite {
 
     const res3 = await 'test/files/book.txt'
       .$read()
-      .$tokens(/[ 0-9]+/) // Exclude numbers
+      .$tokens(/Chapter \d+/) // Exclude numbers
       .$notEmpty()
       .$sort()
       .$unique();
@@ -60,12 +60,6 @@ export class TextSuite {
       .$match(/Chapter/);
 
     assert(res === ['Chapter 1', 'Chapter 2']);
-
-    const res2 = await 'test/files/book.txt'
-      .$read()
-      .$match(/Chapter/, 'extract');
-
-    assert(res2 === ['Chapter', 'Chapter']);
 
     const res3 = await 'test/files/book.txt'
       .$read()

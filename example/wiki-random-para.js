@@ -10,7 +10,7 @@
 `https://en.wikipedia.org/wiki/${$env.page || 'Special:Random'}`
   .$http() // Request URL
   .$toString() // To single line
-  .$match(/<p[ >].*?<\/p>/smg, 'extract') // Pull out paragraphs
+  .$tokens(/<p[ >].*?<\/p>/smg) // Pull out paragraphs
   .$replace(/<[^>]+>/g, '') // Drop html
   // Replace html entities
   .$replace(/&#(\d+);/g, (a, c) => String.fromCodePoint(c))

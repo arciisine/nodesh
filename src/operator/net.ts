@@ -14,7 +14,7 @@ export class NetOperators {
    * @example
    * `https://en.wikipedia.org/wiki/Special:Random`
    *   .$http() // Request URL
-   *   .$match($pattern.URL, 'extract') // Pull out URLs
+   *   .$tokens($pattern.URL) // Pull out URLs
    */
   $http(this: AsyncIterable<string>, opts?: Omit<HttpOpts, 'mode'>): $AsyncIterable<string>;
   $http(this: AsyncIterable<string>, opts: HttpOpts<'text'>): $AsyncIterable<string>;
@@ -30,7 +30,7 @@ export class NetOperators {
    * `<sample data file>`
    *   .read('binary') // Now a stream
    *   .$http('https://data-store.biz') // Post data
-   *   .$match($pattern.URL, 'extract') // Pull out URLs
+   *   .$tokens($pattern.URL) // Pull out URLs
    */
   $http(this: AsyncIterable<string | Buffer>, url: URL | string, opts?: Omit<HttpOpts, 'mode'>): $AsyncIterable<string>;
   $http(this: AsyncIterable<string | Buffer>, url: URL | string, opts: HttpOpts<'text'>): $AsyncIterable<string>;
