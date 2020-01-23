@@ -3,7 +3,7 @@
   Nodesh - The Node Shell
 </h1>
 
-![Node Supported Versions](https://img.shields.io/static/v1?label=Node&message=%3E10.x.x&color=green)
+![Node Supported Versions](https://img.shields.io/static/v1?label=Node&message=%3E10.0.0&color=green)
 
 Nodesh is an `npm` package aimed at providing shell-like operations/simplicity within the node ecosystem.  The goal is to make working with files/folders, http requests, and transformations, as easy as possible.  The library is built upon the async generation constructs within ecmascript as well as stream constructs within the node ecosystem.  This means the performance is iterative and real-time, the same way piping works in a Unix shell.
 
