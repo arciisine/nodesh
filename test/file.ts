@@ -64,7 +64,7 @@ export class FileSuite {
 
   @Test()
   async testDirObj() {
-    const all = await '.txt'
+    const all = await '**/*.txt'
       .$dir({ base: __dirname, full: true })
       .$sort((a, b) => a.relative.localeCompare(b.relative));
 

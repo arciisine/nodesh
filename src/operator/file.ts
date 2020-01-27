@@ -1,5 +1,6 @@
 import * as path from 'path';
 import * as fs from 'fs';
+const picomatch = require('picomatch');
 
 import { StreamUtil } from '../util/stream';
 import { FileUtil, ScanEntry } from '../util/file';
@@ -49,7 +50,8 @@ export class FileOperators {
   /**
    * `dir` provides the ability to recursively search for files within a file system.  It expects as the
    * input sequence type:
-   * * A `string` which represents a suffix search on file names (e.g. `.csv`)
+   * * A `string` which represents a a file extension (e.g. `.csv`). Will match all files recursively.
+   * * A `string` which represents a glob pattern search on file names (e.g. `**\/*.csv`).
    * * A `RegExp` which represents a file pattern to search on (e.g. `/path\/sub\/.*[.]js/`)
    *
    * In addition to the input sequence type, there is an optional config to affect the output.
@@ -70,12 +72,13 @@ export class FileOperators {
     config.base = path.resolve(process.cwd(), config.base! || ''); // relative to working directory, but pull path
 
     for await (const pattern of this) {
-      const testFile =
-        typeof pattern === 'string' ?
-          (x: string) => x.endsWith(pattern) :
-          (x: string) => pattern.test(x);
+      const matcher = typeof pattern === 'string' ?
+        (/^[.][a-zA-Z0-9]+$/.test(pattern) ?
+          picomatch(`**/*${pattern}`) :
+          picomatch(pattern)) :
+        pattern.test.bind(pattern);
 
-      yield* FileUtil.scanDir({ testFile }, config.base!).$map(x => config.full ? x : x.file);
+      yield* FileUtil.scanDir({ testFile: x => matcher(x) }, config.base!).$map(x => config.full ? x : x.file);
     }
   }
 }
