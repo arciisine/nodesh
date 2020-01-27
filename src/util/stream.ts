@@ -68,16 +68,15 @@ export class StreamUtil {
   static readStream<T extends Readable>(input: T | string, config: ReadStreamConfig<'raw'>): $AsyncIterable<CompletableStream<T>>;
   static async * readStream(input: Readable | string, config: ReadStreamConfig<IOType> = {}): $AsyncIterable<string | Buffer | CompletableStream> {
     const mode = config.mode ?? 'text';
-    const strm = typeof input === 'string' ? fs.createReadStream(input, { encoding: 'utf8' }) : input;
-    const completed = this.trackStream(strm);
+    const stream = typeof input === 'string' ? fs.createReadStream(input, { encoding: 'utf8' }) : input;
+    const completed = this.trackStream(stream);
 
     if (mode === 'raw') {
-      const stream = input as Readable;
       yield { stream, completed };
       return;
     }
 
-    const src = mode === 'text' ? readline.createInterface(strm) : strm;
+    const src = mode === 'text' ? readline.createInterface(stream) : stream;
 
     let done = false;
     let buffer: (string | Buffer)[] = [];
@@ -118,8 +117,8 @@ export class StreamUtil {
       yield* (buffer as any);
     }
 
-    if (!strm.destroyed) {
-      strm.destroy();
+    if (!stream.destroyed) {
+      stream.destroy();
     }
 
     await completed;
