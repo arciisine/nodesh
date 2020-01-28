@@ -32,6 +32,10 @@ function initialize() {
     async * $iterable(this: string) { yield this; }
   }, String.prototype);
 
+  RegisterUtil.properties({
+    async * $iterable(this: Buffer) { yield this; }
+  }, Buffer.prototype);
+
   // Register globals
   const helperProps = Object.getOwnPropertyDescriptors(GlobalHelpers);
   delete helperProps.prototype;

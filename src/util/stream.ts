@@ -89,6 +89,8 @@ export class StreamUtil {
       waiter?.resolve(null);
     };
 
+    // Listen for any closing
+    src.on('end', () => tick(done = true));
     src.on('close', () => tick(done = true));
 
     if (mode === 'text') {
@@ -127,13 +129,14 @@ export class StreamUtil {
   /**
    * Track a stream to wait until finished
    */
-  static trackStream<T extends Readable | Writable>(stream: T) {
-    return AsyncUtil.trackWithTimer(new Promise((res, rej) => {
+  static trackStream<T extends Readable | Writable>(stream: T, withTimer = true) {
+    const completed = new Promise((res, rej) => {
       stream.on('finish', res);
       stream.on('end', res);
       stream.on('close', res);
       stream.on('error', rej);
-    }));
+    });
+    return withTimer ? AsyncUtil.trackWithTimer(completed) : completed;
   }
 
   /**
