@@ -68,7 +68,7 @@ export class StreamUtil {
   static readStream<T extends Readable>(input: T | string, config: ReadStreamConfig<'raw'>): $AsyncIterable<CompletableStream<T>>;
   static async * readStream(input: Readable | string, config: ReadStreamConfig<IOType> = {}): $AsyncIterable<string | Buffer | CompletableStream> {
     const mode = config.mode ?? 'text';
-    const stream = typeof input === 'string' ? fs.createReadStream(input, { encoding: 'utf8' }) : input;
+    const stream = typeof input === 'string' ? fs.createReadStream(input, { encoding: mode === 'text' ? 'utf8' : undefined }) : input;
     const completed = this.trackStream(stream);
 
     if (mode === 'raw') {

@@ -1,7 +1,7 @@
 Changelog
 -----------------------------
 
-## 1.6.0
+## 1.6.2
 Added in gzip/gunzip support
 Supports glob patterns in file matching
 General improvements
