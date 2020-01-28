@@ -3,7 +3,7 @@
   Nodesh - The Node Shell
 </h1>
 
-![Node Supported Versions](https://img.shields.io/static/v1?label=Node&message=%3E10.x.x&color=green)
+![Node Supported Versions](https://img.shields.io/static/v1?label=Node&message=%3E10.0.0&color=green)
 
 Nodesh is an `npm` package aimed at providing shell-like operations/simplicity within the node ecosystem.  The goal is to make working with files/folders, http requests, and transformations, as easy as possible.  The library is built upon the async generation constructs within ecmascript as well as stream constructs within the node ecosystem.  This means the performance is iterative and real-time, the same way piping works in a Unix shell.
 
@@ -514,7 +514,8 @@ Example
 
 `dir` provides the ability to recursively search for files within a file system.  It expects as the
 input sequence type:
-* A `string` which represents a suffix search on file names (e.g. `.csv`)
+* A `string` which represents a a file extension (e.g. `.csv`). Will match all files recursively.
+* A `string` which represents a glob pattern search on file names (e.g. `**\/*.csv`).
 * A `RegExp` which represents a file pattern to search on (e.g. `/path\/sub\/.*[.]js/`)
 
 In addition to the input sequence type, there is an optional config to affect the output.

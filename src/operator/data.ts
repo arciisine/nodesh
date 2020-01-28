@@ -1,7 +1,9 @@
 import * as readline from 'readline';
-
+import * as zlib from 'zlib';
 import { Readable, Writable } from 'stream';
-import { $AsyncIterable } from '../types';
+
+import { $AsyncIterable, IOType } from '../types';
+import { StreamUtil } from '../util/stream';
 
 /**
  * Support for dealing with specific data formats as inputs
@@ -56,5 +58,39 @@ export class DataOperators {
     } finally {
       intf!.close();
     }
+  }
+
+  /**
+   * Compresses inbound binary/text data into compressed stream of Buffers
+   *
+   * @example
+   * __filename
+   *  .$read() // Read current file
+   *  .$gzip() // Compress
+   *  .$write(`${__filename}.gz`)// Store
+   */
+  async * $gzip(this: AsyncIterable<string | Buffer>): $AsyncIterable<Buffer> {
+    const zipper = zlib.createGzip();
+    const stream = this.$stream('binary');
+    yield* StreamUtil.readStream(stream.pipe(zipper), { mode: 'binary' });
+  }
+
+  /**
+   * Decompresses inbound gzip'd data into uncompressed stream.
+   *
+   * 'Hello World'
+   *  .$gzip() // Compress
+   *  .$gunzip() // Decompress
+   *  .$stdout // Prints 'Hello World'
+   */
+  $gunzip<T extends Buffer>(this: AsyncIterable<T>, mode: 'text'): $AsyncIterable<string>;
+  $gunzip<T extends Buffer>(this: AsyncIterable<T>, mode: 'binary'): $AsyncIterable<Buffer>;
+  $gunzip<T extends Buffer>(this: AsyncIterable<T>): $AsyncIterable<Buffer>;
+  async * $gunzip<T extends Buffer>(this: AsyncIterable<T>, mode?: IOType): $AsyncIterable<Buffer | string> {
+    const unzipper = zlib.createGunzip();
+    const stream = this.$stream('binary');
+    const outbound = stream.pipe(unzipper);
+
+    yield* StreamUtil.readStream(outbound, { mode: mode as 'binary' });
   }
 }

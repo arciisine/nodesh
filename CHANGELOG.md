@@ -1,6 +1,11 @@
 Changelog
 -----------------------------
 
+## 1.6.0
+Added in gzip/gunzip support
+Supports glob patterns in file matching
+General improvements
+
 ## 1.5.0
 $tokens extracts now by pattern, vs separator.
 

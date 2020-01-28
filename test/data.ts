@@ -45,4 +45,29 @@ export class DataSuite {
 
     assert(result === 'hello');
   }
+
+  @Test()
+  async testGzip() {
+    const result = await __filename.$replace('.js', '.ts').$read().$gzip();
+
+    assert(result[0] instanceof Buffer);
+
+    const [contents] = await result.$gunzip('text');
+
+    assert(contents.includes('async testGzip()'));
+  }
+
+  @Test()
+  async testGzipSimple() {
+    const result = await __filename.$gzip();
+
+    const all = Buffer.concat(result);
+
+    assert(all instanceof Buffer);
+
+    const [contents] = await all.$gunzip('text');
+
+    assert(contents === __filename);
+  }
+
 }
