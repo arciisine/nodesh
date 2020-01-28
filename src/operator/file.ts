@@ -5,8 +5,10 @@ const picomatch = require('picomatch');
 import { StreamUtil } from '../util/stream';
 import { FileUtil, ScanEntry } from '../util/file';
 
-import { $AsyncIterable, ReadDirConfig, ReadStreamConfig, IOType } from '../types';
+import { $AsyncIterable, ReadDirConfig, ReadStreamConfig, ReadTextLineConfig, IOType } from '../types';
 
+
+type Line = { text: string, number: number, file: string };
 
 /**
  * Some of the most common shell operations are iterating through files,
@@ -16,6 +18,57 @@ import { $AsyncIterable, ReadDirConfig, ReadStreamConfig, IOType } from '../type
  * `Symbol.asyncIterator` property, these are the most common way of finding files.
  */
 export class FileOperators {
+
+  /**
+   * This operator will read a text file as a series of `Line` objects, which include the file name,
+   * line number, and associated text.
+   *
+   * When `mode` is `text` or undefined, the result will be a series of string in the format `{{file}}:{{number}} {{text}}`
+   * When `mode` is 'object', the result will be the raw `Line` objects
+   *
+   * When in `text` mode, the line number, and file name can be toggled off as needed by passing in additional config.
+   *
+   * @example
+   * '<file>'
+   *   .$readLines({ number:false }) // Read as a series of lines, without numbering
+   *
+   * @example
+   * '<file>'
+   *   .$readLines({ mode:'object' }) // Read as a series of line objects
+   *   .$filter(line => line.number === 5) // Read only 5th line
+   *
+   * @example
+   * '.js'
+   *   .$dir()
+   *   .$readLines() // Read as a series of lines, with filename, line number prepended
+   */
+  $readLines(this: AsyncIterable<string>, config: Omit<ReadTextLineConfig, 'mode'> & { mode: 'text' }): $AsyncIterable<string>;
+  $readLines(this: AsyncIterable<string>, config: { mode: 'object' }): $AsyncIterable<Line>;
+  $readLines(this: AsyncIterable<string>): $AsyncIterable<Line>;
+  async * $readLines(this: AsyncIterable<string>, config: ReadTextLineConfig = {}): $AsyncIterable<Line | string> {
+    for await (const file of this) {
+      let i = 0;
+      const out = StreamUtil
+        .readStream(file, { mode: 'text' })
+        .$map(line => ({ number: ++i, file: file.replace(config.base ?? '', '.'), text: line }));
+      if (config.mode === 'object') {
+        yield* out;
+      } else {
+        yield* out.$map(line => {
+          let prefix = '';
+          if (config.number !== false) {
+            const padding = line.number >= 100 ? '' : line.number >= 10 ? ' ' : '  ';
+            prefix = `${padding}${line.number}`;
+          }
+          if (config.file !== false) {
+            prefix = `${line.file} ${prefix}`;
+          }
+          return `${prefix}: ${line.text}`;
+        });
+      }
+    }
+  }
+
   /**
    * This operator will treat the inbound string sequence as file names, and will convert the filename (based on IOType)
    * * `text` (default) - The sequence will produce as series of lines of text
@@ -26,16 +79,15 @@ export class FileOperators {
    *
    * @example
    * '<file>'
-   *   .$read('binary') // Read as a series of buffers
+   *   .$read({ mode: 'binary' }) // Read as a series of buffers
    *   .$reduce((acc, buffer) => {
    *     return acc  + buffer.length;
    *   }, 0); // Count number of bytes in file
    *
    * @example
    * '<file>'
-   *   .$read('binary', true) // Read as a single buffer
+   *   .$read({ mode:'binary', singleValue: true }) // Read as a single buffer
    *   .$map(buffer => buffer.length) // Count number of bytes in file
-   *
    */
   $read(this: AsyncIterable<string>, config?: Omit<ReadStreamConfig, 'mode'>): $AsyncIterable<string>
   $read(this: AsyncIterable<string>, config: ReadStreamConfig<'text'>): $AsyncIterable<string>

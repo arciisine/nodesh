@@ -16,6 +16,12 @@ export type ReadStreamConfig<M = IOType> = {
   mode?: M;
   singleValue?: boolean;
 };
+export type ReadTextLineConfig = {
+  number?: boolean;
+  file?: boolean;
+  mode?: 'text' | 'object';
+  base?: string;
+};
 export type ExecConfig<M = IOType> = ReadStreamConfig<M> & {
   input?: IOType;
   args?: string[];

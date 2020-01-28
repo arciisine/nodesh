@@ -18,6 +18,7 @@ count.init = () => new Map();
 $stdin
   // Extract URLs from stdin
   .$tokens($pattern.URL)
+  .$tap(console.log.bind(console.log))
   // Request each URL
   .$http()
   // Extract proper name tokens from resultant web responses
