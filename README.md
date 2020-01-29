@@ -477,6 +477,42 @@ extension or a regex pattern. With `String`s and `RegExp`s supporting the
 
 
 
+#### $readLines
+
+This operator will read a text file as a series of `Line` objects, which include the file name,
+line number, and associated text.
+
+When `mode` is `text` or undefined, the result will be a series of string in the format `{{file}}:{{number}} {{text}}`
+When `mode` is 'object', the result will be the raw `Line` objects
+
+When in `text` mode, the line number, and file name can be toggled off as needed by passing in additional config.
+
+```typescript
+$readLines(this: AsyncIterable<string>, config: ReadTextLineConfig<'text'>): $AsyncIterable<string>;
+$readLines(this: AsyncIterable<string>, config: {mode: 'object';}): $AsyncIterable<Line>;
+$readLines(this: AsyncIterable<string>): $AsyncIterable<string>;
+```
+Example
+```javascript
+'<file>'
+  .$readLines({ number:false }) // Read as a series of lines, without numbering
+
+```
+
+```javascript
+'<file>'
+  .$readLines({ mode:'object' }) // Read as a series of line objects
+  .$filter(line => line.number === 5) // Read only 5th line
+
+```
+
+```javascript
+'.js'
+  .$dir()
+  .$readLines() // Read as a series of lines, with filename, line number prepended
+
+```
+
 #### $read
 
 This operator will treat the inbound string sequence as file names, and will convert the filename (based on IOType)
@@ -495,7 +531,7 @@ $read(this: AsyncIterable<string>, config: ReadStreamConfig<'raw'>): $AsyncItera
 Example
 ```javascript
 '<file>'
-  .$read('binary') // Read as a series of buffers
+  .$read({ mode: 'binary' }) // Read as a series of buffers
   .$reduce((acc, buffer) => {
     return acc  + buffer.length;
   }, 0); // Count number of bytes in file
@@ -504,9 +540,8 @@ Example
 
 ```javascript
 '<file>'
-  .$read('binary', true) // Read as a single buffer
+  .$read({ mode:'binary', singleValue: true }) // Read as a single buffer
   .$map(buffer => buffer.length) // Count number of bytes in file
-
 
 ```
 
@@ -783,18 +818,27 @@ Example
 
 `$match` provides the ability to easily retain or exclude lines.
 
-Additionally, mode will determine what is emitted when a match is found (within a single line):
-* `undefined` - (default) Return entire line
-* `'negate'` - Return only lines that do not match
+Additionally, the config provides standard functionality, commensurate with grep:
+* `negate` - Return only lines that do not match
+* `before` - The number of lines to return before a match
+* `after` - The number of lines to return after a match
 
 ```typescript
-$match(this: AsyncIterable<string>, regex: Pattern, mode?: 'negate'): $AsyncIterable<string>;
+$match(this: AsyncIterable<string>, pattern: Pattern, config?: MatchConfig): $AsyncIterable<string>;
 ```
 Example
 ```javascript
 '<file>'
   .$read()
-  .$match(/(FIXME|TODO)/, 'negate')
+  .$match('TODO')
+  // All lines  with TODO in them
+
+```
+
+```javascript
+'<file>'
+  .$read()
+  .$match(/(FIXME|TODO)/, { negate:true })
   // Exclude all lines that include FIXME or TODO
 
 ```
@@ -802,7 +846,7 @@ Example
 ```javascript
 '<file>'
   .$read()
-  .$match(/\d{3}(-)?\d{3}(-)?\d{4}/)
+  .$match(/\d{3}(-)?\d{3}(-)?\d{4}/, { after:1, before:1 })
   // Match all lines with phone numbers
 
 ```
@@ -1159,12 +1203,19 @@ The default concurrency limit is number of processors minus one. This means the 
 until there are `concurrent` pending tasks, and will only fetch the next item once there is capacity.
 
 ```typescript
-$parallel<T, U = T>(this: AsyncIterable<T>, op: (item: T) => AsyncIterable<U> | Promise<U>, concurrent?: number): $AsyncIterable<U>;
+$parallel<T, U = T>(this: AsyncIterable<T>, op: (item: T) => AsyncIterable<U> | Promise<U>, config?: number | {concurrent?: number;}): $AsyncIterable<U>;
 ```
 Example
 ```javascript
 [10, 9, 8, 7, 6, 5, 4, 2, 1]
  .$parallel(x => (x).$wait(x * 1000))
+ .$console
+
+```
+
+```javascript
+$range(1000)
+ .$parallel(x => doWork(x), 100) // 100 concurrent workers
  .$console
 
 ```

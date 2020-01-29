@@ -4,6 +4,7 @@ Changelog
 ## 1.7.0
 * Support reading text files with filename/line number context
 * Support contextual lines for $match, before/after lines.
+* Changed some signature to support objects, future proofing more complex configs
 
 ## 1.6.2
 * Added in gzip/gunzip support
