@@ -46,4 +46,21 @@ export class FileUtil {
       }
     }
   }
+
+  /**
+   * Generates a matcher for file names, given the input string
+   */
+  static getFileMatcher(pattern: string | RegExp): (name: string) => boolean {
+    if (pattern instanceof RegExp) {
+      return pattern.test.bind(pattern);
+    }
+
+    if (/[?*{}\[\]]/.test(pattern)) {
+      const picomatch = require('picomatch');
+      const pm = picomatch(pattern);
+      return x => pm(x);
+    }
+
+    return x => x.endsWith(pattern);
+  }
 }

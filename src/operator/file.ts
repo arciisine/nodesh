@@ -1,12 +1,10 @@
 import * as path from 'path';
 import * as fs from 'fs';
-const picomatch = require('picomatch');
 
 import { StreamUtil } from '../util/stream';
 import { FileUtil, ScanEntry } from '../util/file';
 
 import { $AsyncIterable, ReadDirConfig, ReadStreamConfig, ReadTextLineConfig, IOType } from '../types';
-
 
 type Line = { text: string, number: number, file: string };
 
@@ -42,15 +40,19 @@ export class FileOperators {
    *   .$dir()
    *   .$readLines() // Read as a series of lines, with filename, line number prepended
    */
-  $readLines(this: AsyncIterable<string>, config: Omit<ReadTextLineConfig, 'mode'> & { mode: 'text' }): $AsyncIterable<string>;
+  $readLines(this: AsyncIterable<string>, config: ReadTextLineConfig<'text'>): $AsyncIterable<string>;
   $readLines(this: AsyncIterable<string>, config: { mode: 'object' }): $AsyncIterable<Line>;
-  $readLines(this: AsyncIterable<string>): $AsyncIterable<Line>;
+  $readLines(this: AsyncIterable<string>): $AsyncIterable<string>;
   async * $readLines(this: AsyncIterable<string>, config: ReadTextLineConfig = {}): $AsyncIterable<Line | string> {
     for await (const file of this) {
       let i = 0;
       const out = StreamUtil
         .readStream(file, { mode: 'text' })
-        .$map(line => ({ number: ++i, file: file.replace(config.base ?? '', '.'), text: line }));
+        .$map(line => ({
+          number: ++i,
+          file: config.base ? file.replace(config.base, '.') : file,
+          text: line
+        }));
       if (config.mode === 'object') {
         yield* out;
       } else {
@@ -124,13 +126,8 @@ export class FileOperators {
     config.base = path.resolve(process.cwd(), config.base! || ''); // relative to working directory, but pull path
 
     for await (const pattern of this) {
-      const matcher = typeof pattern === 'string' ?
-        (/^[.][a-zA-Z0-9]+$/.test(pattern) ?
-          picomatch(`**/*${pattern}`) :
-          picomatch(pattern)) :
-        pattern.test.bind(pattern);
-
-      yield* FileUtil.scanDir({ testFile: x => matcher(x) }, config.base!).$map(x => config.full ? x : x.file);
+      const testFile = FileUtil.getFileMatcher(pattern);
+      yield* FileUtil.scanDir({ testFile }, config.base!).$map(x => config.full ? x : x.file);
     }
   }
 }

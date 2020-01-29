@@ -9,7 +9,7 @@
   .$http() // Request URL
   .$tokens($pattern.URL) // Pull out URLs
   .$map(x => new URL(x).host) // Extract host
-  .$match('wiki', 'negate') // Exclude all hosts with 'wiki'
+  .$match('wiki', { negate: true }) // Exclude all hosts with 'wiki'
   .$sort()
   .$unique({ count: true }) // Count by unique
   .$sort((a, b) => b[1] - a[1]) // Sort by count desc

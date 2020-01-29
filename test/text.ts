@@ -63,10 +63,43 @@ export class TextSuite {
 
     const res3 = await 'test/files/book.txt'
       .$read()
-      .$match(/Chapter/, 'negate')
+      .$match(/Chapter/, { negate: true })
       .$notEmpty();
 
     assert(res3.length === 4);
+  }
+
+  @Test()
+  async testMatchContext() {
+    const res = await 'test/files/book.txt'
+      .$read()
+      .$match(/Chapter 2/, { after: 1, before: 1 });
+
+    assert(res === ['', 'Chapter 2', 'Line 3']);
+
+    const res2 = await 'test/files/book.txt'
+      .$read()
+      .$match(/Chapter 2/, { after: 100 });
+
+    assert(res2 === ['Chapter 2', 'Line 3', 'Line 4']);
+
+    const res3 = await 'test/files/book.txt'
+      .$read()
+      .$match(/Chapter 2/, { before: 100, after: 100 });
+
+    assert(res3 === ['Chapter 1', 'Line 1', 'Line 2', '', 'Chapter 2', 'Line 3', 'Line 4']);
+
+    const res4 = await 'test/files/book.txt'
+      .$read()
+      .$match(/Line 4/, { before: 100 });
+
+    assert(res4 === ['Chapter 1', 'Line 1', 'Line 2', '', 'Chapter 2', 'Line 3', 'Line 4']);
+
+    const res5 = await 'test/files/book.txt'
+      .$read()
+      .$match(/Chapter 1/, { after: 100 });
+
+    assert(res5 === ['Chapter 1', 'Line 1', 'Line 2', '', 'Chapter 2', 'Line 3', 'Line 4']);
   }
 
   @Test()

@@ -72,4 +72,52 @@ export class FileSuite {
     assert(all[0].relative === 'files/a.txt');
     assert(+all[0].stats.mtime > 0);
   }
+
+  @Test()
+  async testReadLineObjects() {
+    const allNames = await '**/*.txt'
+      .$dir({ base: __dirname });
+
+    const all = await allNames
+      .$readLines({ mode: 'object' });
+
+    assert(all.length === 10);
+
+    const names = await all
+      .$map(x => x.file)
+      .$unique();
+
+    assert.deepStrictEqual(names, allNames);
+  }
+
+  @Test()
+  async testReadLines() {
+    const allNames = await '**/*.txt'
+      .$dir({ base: __dirname });
+
+    const all = await allNames
+      .$readLines();
+
+    assert(all.length === 10);
+
+    const names = await all
+      .$map(x => x.split(' ')[0])
+      .$unique();
+
+    assert.deepStrictEqual(names, allNames);
+
+    const [numbers] = await all
+      .$tokens(/\s+\d+:/)
+      .$map(x => 1)
+      .$reduce((acc, v) => acc + v, 0);
+
+
+    assert(numbers === 10);
+
+    const allWithoutNumbers = await allNames
+      .$readLines({ number: false })
+      .$tokens(/\s+\d+:/);
+
+    assert(allWithoutNumbers.length === 0);
+  }
 }

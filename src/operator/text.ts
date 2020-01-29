@@ -3,6 +3,7 @@ import { TextUtil } from '../util/text';
 
 type Replacer = Parameters<string['replace']>[1];
 type ColumnsConfig<V extends readonly string[]> = { sep?: Pattern, names: V };
+type MatchConfig = { negate: true } | { before?: number, after?: number };
 
 function isIter<T>(x: any): x is Iterable<T> {
   return !!x[Symbol.iterator];
@@ -92,32 +93,58 @@ export class TextOperators {
   /**
    * `$match` provides the ability to easily retain or exclude lines.
    *
-   * Additionally, mode will determine what is emitted when a match is found (within a single line):
-   * * `undefined` - (default) Return entire line
-   * * `'negate'` - Return only lines that do not match
+   * Additionally, the config provides standard functionality, commensurate with grep:
+   * * `negate` - Return only lines that do not match
+   * * `before` - The number of lines to return before a match
+   * * `after` - The number of lines to return after a match
    *
    * @example
    * '<file>'
    *   .$read()
-   *   .$match(/(FIXME|TODO)/, 'negate')
+   *   .$match(/(FIXME|TODO)/, { negate:true })
    *   // Exclude all lines that include FIXME or TODO
    *
    * @example
    * '<file>'
    *   .$read()
-   *   .$match(/\d{3}(-)?\d{3}(-)?\d{4}/)
+   *   .$match(/\d{3}(-)?\d{3}(-)?\d{4}/, { after:1, before:1 })
    *   // Match all lines with phone numbers
    */
-  async * $match(this: AsyncIterable<string>, regex: Pattern, mode?: 'negate'): $AsyncIterable<string> {
-    regex = TextUtil.createRegExp(regex, '');
+  async * $match(this: AsyncIterable<string>, pattern: Pattern, config: MatchConfig = {}): $AsyncIterable<string> {
+    const regex = TextUtil.createRegExp(pattern, '');
+    const negate = 'negate' in config ? config.negate : false;
+    const before = ('before' in config ? config.before : 0) ?? 0;
+    const after = ('after' in config ? config.after : 0) ?? 0;
 
-    for await (const el of this) {
-      if (mode === 'negate') {
+    if (negate) {
+      for await (const el of this) {
         if (!regex.test(el)) {
           yield el;
         }
-      } else if (regex.test(el)) {
-        yield el;
+      }
+    } else {
+      let lastN = [];
+      let counter = 0;
+
+      for await (const el of this) {
+        if (regex.test(el)) {
+          if (before && lastN.length) {
+            yield* lastN;
+            lastN = [];
+          }
+          yield el;
+          if (after) {
+            counter = after;
+          }
+        } else if (counter) {
+          yield el;
+          counter -= 1;
+        } else if (before) {
+          lastN.push(el);
+          if (lastN.length > before) {
+            lastN.shift();
+          }
+        }
       }
     }
   }

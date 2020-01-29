@@ -16,10 +16,10 @@ export type ReadStreamConfig<M = IOType> = {
   mode?: M;
   singleValue?: boolean;
 };
-export type ReadTextLineConfig = {
+export type ReadTextLineConfig<M = 'text' | 'object'> = {
   number?: boolean;
   file?: boolean;
-  mode?: 'text' | 'object';
+  mode?: M;
   base?: string;
 };
 export type ExecConfig<M = IOType> = ReadStreamConfig<M> & {

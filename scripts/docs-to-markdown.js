@@ -83,7 +83,7 @@ function processTyping(file) {
   return `dist/${file}.d.ts`
     .$read()
     .$trim()
-    .$match(/(^[/][/])|(export [{])|(^\s*[}]\s*$)/, 'negate') // Remove comments and close braces
+    .$match(/(^[/][/])|(export [{])|(^\s*[}]\s*$)/, { negate: true }) // Remove comments and close braces
     .$reduce(groupDocs, [])
     .$flatten()
     .$filter(x => x.length > 0)
