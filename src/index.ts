@@ -39,7 +39,9 @@ function initialize() {
   // Register globals
   const helperProps = Object.getOwnPropertyDescriptors(GlobalHelpers);
   delete helperProps.prototype;
-  Object.defineProperties(globalThis, helperProps);
+  for (const [key, prop] of Object.entries(helperProps)) {
+    RegisterUtil.defineProperty(globalThis, key, prop);
+  }
 
   // Make generators thenable, but only on node 11+
   if (parseInt(process.version.replace(/^v/i, '').split('.')[0], 10) > 10) {

@@ -25,7 +25,7 @@ export class AdvancedSuite {
     const start = Date.now();
 
     await $range(5)
-      .$parallel((el) => el.$wait(100), 1);
+      .$parallel((el) => el.$wait(100), { concurrent: 1 });
 
     const delta = Date.now() - start;
 

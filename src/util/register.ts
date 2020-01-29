@@ -28,10 +28,13 @@ export class RegisterUtil {
         get<T>(this: AsyncIterable<T>) {
           const p = this.$values;
           return p.then.bind(p);
-        },
-        configurable: true
+        }
       }
     }, t.prototype);
+  }
+
+  static defineProperty(obj: any, key: string | symbol, desc: PropertyDescriptor) {
+    Object.defineProperty(obj, key, { ...desc, configurable: true });
   }
 
   /**
@@ -46,8 +49,7 @@ export class RegisterUtil {
       if ('apply' in val) {
         val = { get: val } as any;
       }
-      (val as any).configurable = true;
-      Object.defineProperty(proto, key, val);
+      this.defineProperty(proto, key, val as PropertyDescriptor);
     }
   }
 
@@ -84,7 +86,7 @@ export class RegisterUtil {
             }
           };
         }
-        Object.defineProperty(target.prototype, key, { ...prop, configurable: true });
+        this.defineProperty(target.prototype, key, prop);
       }
     }
   }
