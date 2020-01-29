@@ -35,12 +35,49 @@ export class DataSuite {
     ]);
   }
 
+
+  @Test()
+  async testCSVHeaderRow() {
+    const val = await [
+      'a,b,c',
+      'd,e,f',
+      'g,h,i',
+      'j',
+      'k,,'
+    ]
+      .$csv({ headerRow: true });
+
+    assert(val.length === 4);
+    assert(val[0].a === 'd');
+    assert(val[3].a === 'k');
+    assert(val[3].b === '');
+  }
+
+  @Test()
+  async testCSVConfig() {
+    const val = await [
+      'a|b|c',
+      'd|e|f',
+      '"abc|def"|"ij""kl"|"z\"\"d"',
+      '"abc'
+    ]
+      .$csv({ headerRow: true, sep: '|' });
+
+    assert(val.length === 3);
+    assert(val[0].a === 'd');
+    assert(val[1].a === 'abc|def');
+    assert(val[1].b === 'ij"kl');
+    assert(val[1].c === 'z"d');
+    assert(val[2].a === 'abc');
+  }
+
+
   @Test()
   async testPrompt() {
     const input = 'hello\n'.$stream();
 
     const result = await 'What do you say?'
-      .$prompt(input)
+      .$prompt({ input })
       .$value;
 
     assert(result === 'hello');
@@ -69,5 +106,4 @@ export class DataSuite {
 
     assert(contents === __filename);
   }
-
 }

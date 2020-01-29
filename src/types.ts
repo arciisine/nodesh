@@ -35,7 +35,10 @@ export type HttpOpts<M = IOType> = ReadStreamConfig<M> & {
   data?: AsyncIterable<string | Buffer> | Buffer | string;
   contentType?: string;
 };
-
+export type CSVConfig = {
+  sep: string;
+  quote: string;
+};
 export type Pattern = string | Iterable<string> | RegExp;
 
 export type CompletableStream<T extends Readable = Readable> = {

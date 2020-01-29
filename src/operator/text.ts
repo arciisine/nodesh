@@ -101,6 +101,12 @@ export class TextOperators {
    * @example
    * '<file>'
    *   .$read()
+   *   .$match('TODO')
+   *   // All lines  with TODO in them
+   *
+   * @example
+   * '<file>'
+   *   .$read()
    *   .$match(/(FIXME|TODO)/, { negate:true })
    *   // Exclude all lines that include FIXME or TODO
    *

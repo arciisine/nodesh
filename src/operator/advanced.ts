@@ -19,9 +19,21 @@ export class AdvancedOperators {
    * [10, 9, 8, 7, 6, 5, 4, 2, 1]
    *  .$parallel(x => (x).$wait(x * 1000))
    *  .$console
+   *
+   * @example
+   * $range(1000)
+   *  .$parallel(x => doWork(x), 100) // 100 concurrent workers
+   *  .$console
    */
-  async * $parallel<T, U = T>(this: AsyncIterable<T>, op: (item: T) => AsyncIterable<U> | Promise<U>, concurrent?: number): $AsyncIterable<U> {
-    concurrent = concurrent ?? os.cpus().length - 1;
+  async * $parallel<T, U = T>(
+    this: AsyncIterable<T>, op: (item: T) => AsyncIterable<U> | Promise<U>,
+    config: number | { concurrent?: number } = {}
+  ): $AsyncIterable<U> {
+    if (typeof config === 'number') {
+      config = { concurrent: config };
+    }
+
+    const concurrent = config.concurrent ?? os.cpus().length - 1;
 
     const items: { p?: Promise<U> }[] = [];
 
