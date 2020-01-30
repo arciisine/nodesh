@@ -93,8 +93,6 @@ const lineGenerator = $of(fs.createReadStream('data.txt'));
 ... or ...
 
 const lineGenerator = fs.createReadStream('data.txt').$map(x => ...);
-
-
 ```
 
 #### Primitives
@@ -131,7 +129,7 @@ exposing them globally proves useful.
 
 
 
-####  $of
+#### $of
 
 Will turn any value into a sequence. If the input value is of type:
 * `Iterable` - Returns sequence of elements
@@ -156,7 +154,6 @@ $of([1,2,3])
 
  [1,2,3]
    .$map(x => x ** 2)
-
 ```
 
 #### $exec
@@ -164,14 +161,13 @@ $of([1,2,3])
 Top level access to execute a program
 
 ```typescript
-static get $exec(): AsyncIterable<any>['$exec'];
+static get $exec(): string['$exec'];
 ```
 Example
 ```javascript
 $exec('ls', ['-lsa'])
  .$columns(['blockSize', 'perms', 'size', 'group', 'owner', 'month', 'day', 'time', 'path'])
  .$console
-
 ```
 
 #### $registerOperator
@@ -200,7 +196,6 @@ $registerOperator(AsyncIterable);
 $stdin
  .$reverse()
  .$stdout;
-
 ```
 
 #### $argv
@@ -219,10 +214,9 @@ static get $argv(): string[];
 ```
 Example
 ```javascript
-(argv[0] ?? 'Enter a file name:'.$prompt())
+($argv[0] ?? 'Enter a file name:'.$prompt())
   // Pull in name from argv[0] or prompt if missing
   .$read() // Read file
-
 ```
 
 #### $stdin
@@ -237,7 +231,6 @@ Example
 $stdin // Stream stdin, one line at a time
  .$map(line => line.split('').reverse().join('')) // Reverse each line
  .$stdout // Pipe to stdout
-
 ```
 
 #### $env
@@ -252,7 +245,6 @@ Example
 ```javascript
 ($env.user_name ?? ask('Enter a user name')) // Prompt user name if there
   .$map(userName => ... )
-
 ```
 
 #### $pattern
@@ -260,8 +252,7 @@ Example
 Common patterns that can be used where regular expressions are supported
 
 ```typescript
-static get $pattern(): {
-URL: RegExp;EMAIL: RegExp;PROPER_NAME: RegExp;};
+static get $pattern(): Record<'URL' | 'EMAIL' | 'PROPER_NAME', RegExp>;
 ```
 Example
 ```javascript
@@ -269,10 +260,9 @@ Example
  .$read() // Read a file
  .$tokens($pattern.URL) // Extract URLs
  .$filter(url => url.endsWith('.com'))
-
 ```
 
-####  $range
+#### $range
 
 Produces a numeric range, between start (1 by default) and stop (inclusive).  A step
 parameter can be defined to specify the distance between iterated numbers.
@@ -288,7 +278,6 @@ $range(1, 3)
 
 $range(10, 1, 2)
   // sequence of 1, 3, 5, 7, 9
-
 ```
 
 ## Operators
@@ -323,7 +312,6 @@ Example
 ```javascript
 fs.createReadStream('<file>') //  Now a line-oriented sequence
   .$forEach(console.log)  // Will output each line
-
 ```
 
 #### $map
@@ -339,7 +327,6 @@ Example
 fs.createReadStream('<file>') //  Now a line-oriented sequence
  .$map(line => line.toUpperCase())
  // is now a sequence of all uppercase lines
-
 ```
 
 #### $filter
@@ -355,7 +342,6 @@ Example
 fs.createReadStream('<file>') //  Now a line-oriented sequence
   .$filter(x => x.length > 10)
   // Will retain all lines that are more than 10 characters
-
 ```
 
 #### $flatten
@@ -371,7 +357,6 @@ Example
 fs.createReadStream('<file>') //  Now a line-oriented sequence
   .$map(line => line.split(/\s+/g)) // Now a string[] sequence
   .$flatten() // Now a string sequence for each word in the file
-
 ```
 
 #### $flatMap
@@ -387,7 +372,6 @@ Example
 ```javascript
 fs.createReadStream('<file>') //  Now a line-oriented sequence
   .$flatMap(line => line.split(/\s+/g)) // Now a word sequence for the file
-
 ```
 
 #### $reduce
@@ -408,7 +392,6 @@ fs.createReadStream('<file>') //  Now a line-oriented sequence
     acc[token] = (acc[token] ?? 0) + 1;
     return acc;
   }, {}); // Produces a map of words and their respective frequencies within the document
-
 ```
 
 #### $collect
@@ -424,7 +407,6 @@ fs.createReadStream('<file>') //  Now a line-oriented sequence
   .$collect() // Now a sequence with a single array (of all the lines)
   .$map(lines => lines.join('\n'))
   // Produces a single string of the whole file
-
 ```
 
 #### $wrap
@@ -448,7 +430,6 @@ async function translate*(lang, gen) {
 
 fs.createReadStream('<file>') //  Now a line-oriented sequence
   .$wrap(translate.bind(null, 'fr')); // Produces a sequence of french-translated word
-
 ```
 
 #### $onError
@@ -463,7 +444,6 @@ Example
 '<file>'.
  .$read()
  .$onError(() => `Sample Text`)
-
 ```
 
 
@@ -496,21 +476,18 @@ Example
 ```javascript
 '<file>'
   .$readLines({ number:false }) // Read as a series of lines, without numbering
-
 ```
 
 ```javascript
 '<file>'
   .$readLines({ mode:'object' }) // Read as a series of line objects
   .$filter(line => line.number === 5) // Read only 5th line
-
 ```
 
 ```javascript
 '.js'
   .$dir()
   .$readLines() // Read as a series of lines, with filename, line number prepended
-
 ```
 
 #### $read
@@ -535,14 +512,12 @@ Example
   .$reduce((acc, buffer) => {
     return acc  + buffer.length;
   }, 0); // Count number of bytes in file
-
 ```
 
 ```javascript
 '<file>'
   .$read({ mode:'binary', singleValue: true }) // Read as a single buffer
   .$map(buffer => buffer.length) // Count number of bytes in file
-
 ```
 
 #### $dir
@@ -569,7 +544,6 @@ Example
     // Display the filename, and it's modification time
     console.log(f.file, f.stats.mtime);
   });
-
 ```
 
 
@@ -592,7 +566,6 @@ Example
 '<file>'
   .$read()
   .$notEmpty() // Return all non-empty lines of the file
-
 ```
 
 #### $tap
@@ -609,7 +582,6 @@ Example
   .$dir()
   .$tap(({stats}) => collectMetrics(stats))
   // Stream unchanged, but was able to track file stat information
-
 ```
 
 #### $unique
@@ -626,7 +598,6 @@ Example
 [1, 2, 2, 3, 4, 5, 5, 1, 7]
   .$unique() // Will produce [1, 2, 3, 4, 5, 1, 7]
   // The final 1 repeats as it's not duplicated in sequence
-
 ```
 
 #### $unique
@@ -641,14 +612,12 @@ Example
 ```javascript
 [1, 2, 2, 2, 3, 4, 5, 5]
   .$unique({ count: true }) // Will produce [[1, 1], [2, 3], [3, 1], [4, 1], [5, 2]]
-
 ```
 
 ```javascript
 [0, 2, 2, 2, 4, 1, 3, 2]
   .$unique({ count: true, compare: (x,y) => x%2 === y%2 })
   // Will produce [0, 1, 3, 2] as it captures the first even or odd of a run
-
 ```
 
 #### $sort
@@ -665,7 +634,6 @@ Example
   .$read() // Now a sequence of lines
   .$sort() // Sort lines alphabetically
   // Now a sequence of sorted lines
-
 ```
 
 #### $batch
@@ -683,7 +651,6 @@ Example
   .$batch(20) // Generator of array of lines, at most 20 items in length
   .$map(lines => lines.sort()) // Sort each batch
   // Generator of sorted list strings
-
 ```
 
 #### $pair
@@ -709,7 +676,6 @@ Example
     .$map(([a,b]) => [b, a]) // Reverse the order of the columns
   )
   // Generator of file lines with, file name attached
-
 ```
 
 #### $join
@@ -725,7 +691,6 @@ Example
   .$read() // Read as a series of lines
   .$join('\n')
   // Produces a sequence of lines inter-spliced with new lines
-
 ```
 
 #### $concat
@@ -742,7 +707,6 @@ $range(1, 10)
  .$collect()
  .$map(all => all.length)
  .$stdout; // Displays 30
-
 ```
 
 
@@ -771,7 +735,6 @@ Example
   .$read() // Read as lines
   .$columns('\t') // Separate on tabs
   // Now an array of tuples (as defined by tabs in the tsv)
-
 ```
 
 #### $columns
@@ -789,7 +752,6 @@ Example
   .$read() // Read as lines
   .$columns({names: ['Name', 'Age', 'Major'], sep: '\t'}) // Separate on tabs
   // Now an array of objects { Name: string, Age: string, Major: string } (as defined by tabs in the tsv)
-
 ```
 
 #### $tokens
@@ -804,14 +766,12 @@ Example
 '<file>'
   .$read() // Read file as lines
   .$tokens(/\b[A-Za-z]{6,100}\b/i) // Extract 6+ letter words
-
 ```
 
 ```javascript
 '<file>'
   .$read() // Read file as lines
   .$tokens($pattern.URL) // Extract all URLs
-
 ```
 
 #### $match
@@ -832,7 +792,6 @@ Example
   .$read()
   .$match('TODO')
   // All lines  with TODO in them
-
 ```
 
 ```javascript
@@ -840,7 +799,6 @@ Example
   .$read()
   .$match(/(FIXME|TODO)/, { negate:true })
   // Exclude all lines that include FIXME or TODO
-
 ```
 
 ```javascript
@@ -848,7 +806,6 @@ Example
   .$read()
   .$match(/\d{3}(-)?\d{3}(-)?\d{4}/, { after:1, before:1 })
   // Match all lines with phone numbers
-
 ```
 
 #### $replace
@@ -861,11 +818,10 @@ $replace(this: AsyncIterable<string>, pattern: Pattern, sub: string | Replacer):
 ```
 Example
 ```javascript
- '<file>'
+'<file>'
   .$read()
   .$replace(/TODO/, 'FIXME')
   // All occurrences replaced
-
 ```
 
 #### $replace
@@ -878,7 +834,7 @@ $replace(this: AsyncIterable<string>, pattern: Record<string, string>): $AsyncIt
 ```
 Example
 ```javascript
- '<file>.html'
+'<file>.html'
   .$read()
   .$replace({
      '<': '&lt;',
@@ -886,7 +842,6 @@ Example
      '"': '&quot;'
   })
   // Html special chars escaped
-
 ```
 
 #### $trim
@@ -902,7 +857,6 @@ Example
   .$read()
   .$trim()
   // Cleans leading/trailing whitespace per line
-
 ```
 
 #### $toString
@@ -920,7 +874,6 @@ Example
   .$read()
   .$toString() // Convert to a single string
   .$replace(/<[^>]+?>/) // Remove all HTML tags
-
 ```
 
 
@@ -941,14 +894,12 @@ Example
 '<file>'
   .$read()
   .$first(10) // Read first 10 lines
-
 ```
 
 ```javascript
 '<file>'
   .$read()
   .$first() // Read first line
-
 ```
 
 #### $skip
@@ -963,7 +914,6 @@ Example
 '<file>.csv'
   .$read()
   .$skip(1) // Skip header
-
 ```
 
 #### $last
@@ -980,14 +930,12 @@ Example
 '<file>'
   .$read()
   .$last(7) // Read last 7 lines of file
-
 ```
 
 ```javascript
 '<file>'
   .$read()
   .$last() // Read last line of file
-
 ```
 
 #### $repeat
@@ -1002,7 +950,6 @@ Example
 '<file>'
   .$read()
   .$first(10) // Read first 10 lines
-
 ```
 
 
@@ -1019,10 +966,10 @@ appended to the command as needed.  If the output is specified as 'binary', the 
 will return a sequence of `Buffer`s, otherwise will return `string`s
 
 ```typescript
-$exec(cmd: string, config?: string[] | Omit<ExecConfig, 'mode'>): $AsyncIterable<string>;
-$exec(cmd: string, config: ExecConfig<'text'>): $AsyncIterable<string>;
-$exec(cmd: string, config: ExecConfig<'binary'>): $AsyncIterable<Buffer>;
-$exec(cmd: string, config: ExecConfig<'raw'>): $AsyncIterable<CompletableStream>;
+$exec<T>(this: AsyncIterable<T> | void, cmd: string, config?: string[] | Omit<ExecConfig, 'mode'>): $AsyncIterable<string>;
+$exec<T>(this: AsyncIterable<T> | void, cmd: string, config: ExecConfig<'text'>): $AsyncIterable<string>;
+$exec<T>(this: AsyncIterable<T> | void, cmd: string, config: ExecConfig<'binary'>): $AsyncIterable<Buffer>;
+$exec<T>(this: AsyncIterable<T> | void, cmd: string, config: ExecConfig<'raw'>): $AsyncIterable<CompletableStream>;
 ```
 Example
 ```javascript
@@ -1031,7 +978,6 @@ Example
   .$read() // Read all files
   .$exec('wc', ['-l']) // Execute word count for all files
   // Run in a single operation
-
 ```
 
 ```javascript
@@ -1045,7 +991,6 @@ Example
      }
   }) // Tslint every file
   // Run in a single operation
-
 ```
 
 
@@ -1076,7 +1021,6 @@ const stream = '<file>.png'
   .$stream('binary') // Read converted output into NodeJS stream
 
 stream.pipe(fs.createWriteStream('out.png')); // Write out
-
 ```
 
 #### $write
@@ -1094,7 +1038,6 @@ Example
   .$read('binary') // Read file as binary
   .$exec('convert', ['-size=100x20']) // Pipe to convert function
   .$write('out.png') // Write file out
-
 ```
 
 #### $writeFinal
@@ -1112,7 +1055,6 @@ Example
   .$read()
   .$replace(/TEMP/, 'final')
   .$writeFinal('<file>');
-
 ```
 
 #### $values
@@ -1132,7 +1074,6 @@ const values = await '<file>.csv'
     int(Width) * int(Height) * int(Depth) // Compute volume
   )
   .$values // Get all values;
-
 ```
 
 #### $value
@@ -1147,7 +1088,6 @@ Example
 const name = await 'What is your name?'
   .$prompt() // Prompt for name
   .$value  // Get single value
-
 ```
 
 #### $stdout
@@ -1165,7 +1105,6 @@ Example
   .$read() // Read file
   .$map(line => line.length) // Convert each line to it's length
   .$stdout // Pipe to stdout
-
 ```
 
 #### $console
@@ -1182,7 +1121,6 @@ Example
  .$read() // Read file
  .$json()
  .$console // Log out objects
-
 ```
 
 
@@ -1210,13 +1148,11 @@ Example
 [10, 9, 8, 7, 6, 5, 4, 2, 1]
  .$parallel(x => (x).$wait(x * 1000))
  .$console
-
 ```
 
 ```javascript
 $range(1000)
  .$parallel(x => doWork(x), 100) // 100 concurrent workers
  .$console
-
 ```
 

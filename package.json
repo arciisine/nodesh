@@ -1,10 +1,10 @@
 {
   "name": "@arcsine/nodesh",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "A node-based library, providing Unix shell-like functionality",
   "scripts": {
     "clean": "rm -rf dist/",
-    "docs": "./bin/nodesh ./scripts/docs-to-markdown",
+    "docs": "./bin/nodesh ./scripts/docs/generate",
     "minify": "./bin/nodesh ./scripts/minify",
     "build": "npx tsc",
     "build:publish": "npm run build && npm run minify",
@@ -12,6 +12,7 @@
     "build:dev": "npm run clean && npx tsc -w",
     "prepublish": "npm run clean && npm run build:publish && npm run docs"
   },
+  "homepage": "https://arciisine.github.io/nodesh",
   "bin": "./bin/nodesh",
   "types": "./dist/index.d.ts",
   "main": "./dist/index.js",
@@ -40,6 +41,7 @@
     "babel-minify": "^0.5.1",
     "comment-parser": "^0.7.2",
     "eslint": "^6.8.0",
+    "highlightjs": "^9.16.2",
     "typescript": "^3.7.4"
   },
   "dependencies": {

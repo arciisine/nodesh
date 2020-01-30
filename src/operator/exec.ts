@@ -32,17 +32,24 @@ export class ExecOperators {
    *   }) // Tslint every file
    *   // Run in a single operation
    */
-  $exec(cmd: string, config?: string[] | Omit<ExecConfig, 'mode'>): $AsyncIterable<string>;
-  $exec(cmd: string, config: ExecConfig<'text'>): $AsyncIterable<string>;
-  $exec(cmd: string, config: ExecConfig<'binary'>): $AsyncIterable<Buffer>;
-  $exec(cmd: string, config: ExecConfig<'raw'>): $AsyncIterable<CompletableStream>;
+  $exec<T>(this: AsyncIterable<T> | void, cmd: string, config?: string[] | Omit<ExecConfig, 'mode'>): $AsyncIterable<string>;
+  $exec<T>(this: AsyncIterable<T> | void, cmd: string, config: ExecConfig<'text'>): $AsyncIterable<string>;
+  $exec<T>(this: AsyncIterable<T> | void, cmd: string, config: ExecConfig<'binary'>): $AsyncIterable<Buffer>;
+  $exec<T>(this: AsyncIterable<T> | void, cmd: string, config: ExecConfig<'raw'>): $AsyncIterable<CompletableStream>;
   async * $exec<T>(
-    this: AsyncIterable<T>, cmd: string, configOrArgs: string[] | ExecConfig = {}
+    this: AsyncIterable<T> | void, cmd: string, configOrArgs: string[] | ExecConfig = {}
   ): $AsyncIterable<string | Buffer | CompletableStream> {
     const config = Array.isArray(configOrArgs) ? { args: configOrArgs } : configOrArgs;
     const { proc, result } = ExecUtil.exec(cmd, config);
 
-    StreamUtil.toStream(this, config.input).pipe(proc.stdin!);
+    if (this !== undefined) {
+      StreamUtil.toStream(this, config.input).pipe(proc.stdin!);
+      proc.stdin!.on('error', (err) => {
+        if ('code' in err && err['code'] !== 'EPIPE') {
+          throw err;
+        }
+      });
+    }
 
     if (config.mode === 'raw') {
       const res = await StreamUtil.readStream(proc.stdout!, config as { mode: 'raw' }).$value;

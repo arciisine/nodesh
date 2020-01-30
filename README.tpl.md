@@ -93,8 +93,6 @@ const lineGenerator = $of(fs.createReadStream('data.txt'));
 ... or ...
 
 const lineGenerator = fs.createReadStream('data.txt').$map(x => ...);
-
-
 ```
 
 #### Primitives

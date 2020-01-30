@@ -1,0 +1,1145 @@
+<html>  <head>    <title>Nodesh - The Node Shell</title>    <link rel="icon" href="./logo.png" type="image/png">    <link href="./page.css" rel="stylesheet">    <script src="./page.js" lang="javascript"></script>  </head>  <body>    <header>      <img src="./logo.png">      <h1>Nodesh</h1>    </header>    <div class="left-nav">      <input type="search" placeholder="filter...">      <ul>        <li><a href="#top"><span class="proper-name">Home</span></a></li>        <li>          <a href="#goals"><span class="proper-name">Goals</span></a>        </li>        <li>          <a href="#architecture"><span class="proper-name">Architecture</span></a>        </li>        <li>          <a href="#globalhelpers"><span class="proper-name">Global</span> <span class="proper-name">Helpers</span></a>          <ul>            <li><a href="#$of"><span class="operator">$of</span></a></li>
+<li><a href="#$exec"><span class="operator">$exec</span></a></li>
+<li><a href="#$registeroperator"><span class="operator">$registerOperator</span></a></li>
+<li><a href="#$argv"><span class="operator">$argv</span></a></li>
+<li><a href="#$stdin"><span class="operator">$stdin</span></a></li>
+<li><a href="#$env"><span class="operator">$env</span></a></li>
+<li><a href="#$pattern"><span class="operator">$pattern</span></a></li>
+<li><a href="#$range"><span class="operator">$range</span></a></li>          </ul>        </li>        <li>          <a href="#operators"><span class="proper-name">Operators</span></a>          <ul>            
+      <li><a href="#core"><span class="proper-name">Core</span></a>
+      <ul>
+        <li><a href="#$foreach"><span class="operator">$forEach</span></a></li>
+<li><a href="#$map"><span class="operator">$map</span></a></li>
+<li><a href="#$filter"><span class="operator">$filter</span></a></li>
+<li><a href="#$flatten"><span class="operator">$flatten</span></a></li>
+<li><a href="#$flatmap"><span class="operator">$flatMap</span></a></li>
+<li><a href="#$reduce"><span class="operator">$reduce</span></a></li>
+<li><a href="#$collect"><span class="operator">$collect</span></a></li>
+<li><a href="#$wrap"><span class="operator">$wrap</span></a></li>
+<li><a href="#$onerror"><span class="operator">$onError</span></a></li>
+      </ul>
+    
+
+      <li><a href="#file"><span class="proper-name">File</span></a>
+      <ul>
+        <li><a href="#$readlines"><span class="operator">$readLines</span></a></li>
+<li><a href="#$read"><span class="operator">$read</span></a></li>
+<li><a href="#$dir"><span class="operator">$dir</span></a></li>
+      </ul>
+    
+
+      <li><a href="#transform"><span class="proper-name">Transform</span></a>
+      <ul>
+        <li><a href="#$notempty"><span class="operator">$notEmpty</span></a></li>
+<li><a href="#$tap"><span class="operator">$tap</span></a></li>
+<li><a href="#$unique"><span class="operator">$unique</span></a></li>
+<li><a href="#$sort"><span class="operator">$sort</span></a></li>
+<li><a href="#$batch"><span class="operator">$batch</span></a></li>
+<li><a href="#$pair"><span class="operator">$pair</span></a></li>
+<li><a href="#$join"><span class="operator">$join</span></a></li>
+<li><a href="#$concat"><span class="operator">$concat</span></a></li>
+      </ul>
+    
+
+      <li><a href="#text"><span class="proper-name">Text</span></a>
+      <ul>
+        <li><a href="#$columns"><span class="operator">$columns</span></a></li>
+<li><a href="#$tokens"><span class="operator">$tokens</span></a></li>
+<li><a href="#$match"><span class="operator">$match</span></a></li>
+<li><a href="#$replace"><span class="operator">$replace</span></a></li>
+<li><a href="#$trim"><span class="operator">$trim</span></a></li>
+<li><a href="#$tostring"><span class="operator">$toString</span></a></li>
+      </ul>
+    
+
+      <li><a href="#limit"><span class="proper-name">Limit</span></a>
+      <ul>
+        <li><a href="#$first"><span class="operator">$first</span></a></li>
+<li><a href="#$skip"><span class="operator">$skip</span></a></li>
+<li><a href="#$last"><span class="operator">$last</span></a></li>
+<li><a href="#$repeat"><span class="operator">$repeat</span></a></li>
+      </ul>
+    
+
+      <li><a href="#exec"><span class="proper-name">Exec</span></a>
+      <ul>
+        <li><a href="#$exec"><span class="operator">$exec</span></a></li>
+      </ul>
+    
+
+      <li><a href="#export"><span class="proper-name">Export</span></a>
+      <ul>
+        <li><a href="#$stream"><span class="operator">$stream</span></a></li>
+<li><a href="#$write"><span class="operator">$write</span></a></li>
+<li><a href="#$writefinal"><span class="operator">$writeFinal</span></a></li>
+<li><a href="#$values"><span class="operator">$values</span></a></li>
+<li><a href="#$value"><span class="operator">$value</span></a></li>
+<li><a href="#$stdout"><span class="operator">$stdout</span></a></li>
+<li><a href="#$console"><span class="operator">$console</span></a></li>
+      </ul>
+    
+
+      <li><a href="#advanced"><span class="proper-name">Advanced</span></a>
+      <ul>
+        <li><a href="#$parallel"><span class="operator">$parallel</span></a></li>
+      </ul>
+              </ul>        </li>      </ul>    </div>    <div class="content">      <div class="inner" id="top">        <p>Nodesh is an <code>npm</code> package aimed at providing shell-like operations/simplicity within the node ecosystem.  The goal is to make working with files/folders, http requests, and transformations, as easy as possible.  The library is built upon the async generation constructs within ecmascript as well as stream constructs within the node ecosystem.  <span class="proper-name">This</span> means the performance is iterative and real-time, the same way piping works in a <span class="proper-name">Unix</span> shell.</p>
+<p><strong>(remote-tokens.js) <span class="proper-name">Example</span> of processing URLs from the input stream</strong></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-meta">#!/usr/bin/env -S npx @arcsine/nodesh</span>
+
+<span class="operator">$stdin</span> <span class="hljs-comment">// <span class="proper-name">Automatically</span> pipe from stdin </span>
+  .<span class="operator">$tokens</span>(<span class="operator">$pattern</span>.URL)  <span class="hljs-comment">// <span class="proper-name">Retain</span> only URL patterns and emit as single values</span>
+  .<span class="operator">$http</span>() <span class="hljs-comment">// <span class="proper-name">Request</span> each url that comes through</span>
+  .<span class="operator">$tokens</span>() <span class="hljs-comment">// <span class="proper-name">Break</span> down returned webpage into tokens</span>
+  .<span class="operator">$filter</span>(<span class="hljs-function"><span class="hljs-params">x</span> =&gt;</span> 
+    x.length &gt;= <span class="hljs-number">6</span> &amp;&amp;  <span class="hljs-comment">// <span class="proper-name">Retain</span> words that are 6 chars or more</span>
+    x.charAt(<span class="hljs-number">0</span>) === x.charAt(<span class="hljs-number">0</span>).toUpperCase() <span class="hljs-comment">// <span class="proper-name">And</span> that start with an uppercase letter</span>
+  )  
+  .<span class="operator">$stdout</span>; <span class="hljs-comment">// <span class="proper-name">Pipe</span> the token stream to stdout</span>
+</code>
+        </pre>
+<p><strong>NOTE:</strong> The shebang defined here is using <code>env</code>'s <code>-S</code> flag which will allow for the passing of multiple arguments in the shebang.</p>
+<p><span class="proper-name">As</span> you can see above, the library's aim is to mimic the pattern of command piping, as well as integrate with stdin/stdout seamlessly.  <span class="proper-name">With</span> the shebang applied appropriately, this script can be used just like any other cli command.</p>
+<p><strong><span class="proper-name">Example</span> of integrating node scripts within the shell</strong></p>
+<pre>
+          <code class="hljs language-bash">$ find . -name <span class="hljs-string">'*.ts'</span> |\
+    cat |\
+    ./remote-tokens.js |\
+    sort -u
+</code>
+        </pre>
+<h2 id="table-of-contents"><span class="proper-name">Table</span> of <span class="proper-name">Contents</span></h2>
+<ul>
+<li><a href="#goals"><span class="proper-name">Goals</span></a>
+<ul>
+<li><a href="#motivation"><span class="proper-name">Motivation</span></a></li>
+</ul>
+</li>
+<li><a href="#architecture"><span class="proper-name">Architecture</span></a>
+<ul>
+<li><a href="#sources"><span class="proper-name">Sources</span></a></li>
+</ul>
+</li>
+<li><a href="#global-helpers"><span class="proper-name">Global</span> <span class="proper-name">Helpers</span></a></li>
+<li><a href="#operators"><span class="proper-name">Operators</span></a></li>
+</ul>
+<h2 id="goals"><span class="proper-name">Goals</span></h2>
+<p><span class="proper-name">This</span> tools is aimed at simple workflows that normally live within the domain of bash scripts.  <span class="proper-name">It</span> is meant to be an alternative of staying in bash or jumping over to another language like python.  <span class="proper-name">It</span>'s aimed at being able to leverage node libraries and utilities while providing a solid set of foundational elements.</p>
+<p>The goal of this tool is not to be:</p>
+<ul>
+<li>a comprehensive streaming framework</li>
+<li>a reactive framework (e.g. rxjs)</li>
+<li>a build system alternative.</li>
+</ul>
+<p><span class="proper-name">This</span> tool has aspects of all of the above, but it's primary design goal is to focus on providing simplicity in shell-like interaction.  <span class="proper-name">To</span> that end, design decisions were made towards simplicity over performance, and towards common patterns versus being completely configurable.</p>
+<h3 id="motivation"><span class="proper-name">Motivation</span></h3>
+<p><span class="proper-name">When</span> solving simple problems involving file systems, file contents, and even http requests, the <span class="proper-name">Unix</span> command line is a great place to operate.  The command line is a powerful tool with all of the built in functionality, and the simplicity of the <span class="proper-name">Unix</span> philosophy.  <span class="proper-name">As</span> bash scripts grow in complexity, maintenance and understanding tend to drop off quickly.  <span class="proper-name">When</span> piping a file through 5-10+ commands, following the logic can be challenging.</p>
+<p><span class="proper-name">Usually</span> at this point, is when I would switch over to something like <span class="proper-name">Python</span> given it's &quot;batteries included&quot; mentality, as it's a perfectly fine language in it's own right.  <span class="proper-name">That</span> being said, I find it more and more desirable to be able to leverage common tools/libraries from the node ecosystem in these tasks.</p>
+<h2 id="architecture"><span class="proper-name">Architecture</span></h2>
+<p>The tool revolves around the use of <code>async</code> generators, as denoted by <code>async function *</code>.  <span class="proper-name">This</span> allows for the iterative operation, as well as support for asynchronous operations.  <span class="proper-name">This</span> means everything within the framework is non-blocking.  <span class="proper-name">This</span> also means the primary way of using the framework is by accessing your data as an async generator.  The library has built in support for converting basic data types into async generators, as well as built-in support for common patterns.</p>
+<p><strong><span class="proper-name">Example</span> of simple async generator</strong></p>
+<pre>
+          <code class="hljs language-typescript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> * <span class="hljs-title">asyncWorker</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) {
+    <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> longOp();
+    <span class="hljs-keyword">yield</span> result;
+  }
+}
+</code>
+        </pre>
+<h3 id="sources"><span class="proper-name">Sources</span></h3>
+<p><span class="proper-name">Out</span> of the box, the following types support the async iterator symbol (<code><span class="proper-name">AsyncIterable</span></code>):</p>
+<h4 id="iterables"><span class="proper-name">Iterables</span></h4>
+<ul>
+<li><span class="proper-name">Generator</span> - <span class="proper-name">This</span> will return the generator, but as an async generator</li>
+<li><code><span class="proper-name">Set</span></code> - <span class="proper-name">This</span> will return an async generator over the set contents</li>
+<li><code><span class="proper-name">Map</span></code> - <span class="proper-name">This</span> will return an async generator over the map's entries [key, value]</li>
+<li><code><span class="proper-name">Array</span></code> - <span class="proper-name">This</span> will return an async generator over the array contents</li>
+<li><code>URLSearchParams</code> - <span class="proper-name">This</span> will generate over the key/value pairs</li>
+<li><code>NodeJS:<span class="proper-name">ReadStream</span></code> - <span class="proper-name">This</span> will return a line-oriented async generator over the read stream
+<ul>
+<li><code>stream.<span class="proper-name">Readable</span></code></li>
+<li><code>http.<span class="proper-name">IncomingMessage</span></code></li>
+<li><code>fs.<span class="proper-name">ReadStream</span></code></li>
+</ul>
+</li>
+</ul>
+<p><strong><span class="proper-name">Example</span> of read stream</strong></p>
+<pre>
+          <code class="hljs language-typescript"><span class="hljs-keyword">const</span> lineGenerator = <span class="operator">$of</span>(<span class="hljs-built_in">fs</span>.createReadStream(<span class="hljs-string">'data.txt'</span>));
+
+... or ...
+
+<span class="hljs-keyword">const</span> lineGenerator = <span class="hljs-built_in">fs</span>.createReadStream(<span class="hljs-string">'data.txt'</span>).<span class="operator">$map</span>(<span class="hljs-function"><span class="hljs-params">x</span> =&gt;</span> ...);
+</code>
+        </pre>
+<h4 id="primitives"><span class="proper-name">Primitives</span></h4>
+<p>The following primitives are also supported, but will return a generator that only has
+a single value, that of the primitive</p>
+<ul>
+<li><code><span class="proper-name">String</span></code></li>
+<li><code><span class="proper-name">Number</span></code></li>
+<li><code><span class="proper-name">RegExp</span></code></li>
+<li><code><span class="proper-name">Boolean</span></code></li>
+<li><code><span class="proper-name">Buffer</span></code></li>
+</ul>
+<p><span class="proper-name">In</span> addition to the built-in functionality, a global function <code><span class="operator">$of</span></code> is declared that will allow any value passed in to be converted to an async iterable.  <span class="proper-name">If</span> the item is iterable or is a stream, it will return the iteration as a generator, otherwise return the value as a single-valued generator.</p>
+<p><strong><span class="proper-name">Example</span> of simple value</strong></p>
+<pre>
+          <code class="hljs language-typescript"><span class="hljs-keyword">const</span> bigIntGen = <span class="operator">$of</span>(<span class="hljs-number">10000n</span>);
+</code>
+        </pre>
+<h3 id="promises"><span class="proper-name">Promises</span></h3>
+<p><span class="proper-name">In</span> general, all sequences can be converted to promises by using <code>.<span class="operator">$value</span></code> to return the first element or by <code>.<span class="operator">$values</span></code> to return the entire sequence as an array.  <span class="proper-name">In</span> addition, in <code>node</code> versions <code>11</code> and higher, the sequence can be <code>await</code>ed directly and will produce the entire sequence as an array.</p>
+<p><strong><span class="proper-name">Example</span> of awaiting the sequence as a promise</strong></p>
+<pre>
+          <code class="hljs language-typescript"><span class="hljs-keyword">const</span> lines = <span class="hljs-keyword">await</span> <span class="hljs-string">`&lt;cook-book-file&gt;`</span>
+  .<span class="operator">$read</span>()
+  .<span class="operator">$match</span>(<span class="hljs-string">'potato'</span>)
+</code>
+        </pre>
+<h3 id="globalhelpers"><span class="proper-name">GlobalHelpers</span></h3>
+<p><span class="proper-name">Within</span> the framework there are some common enough patterns that
+exposing them globally proves useful.</p>
+<h4 id="$of"><span class="operator">$of</span></h4>
+<p><span class="proper-name">Will</span> turn any value into a sequence. <span class="proper-name">If</span> the input value is of type:</p>
+<ul>
+<li><code><span class="proper-name">Iterable</span></code> - <span class="proper-name">Returns</span> sequence of elements</li>
+<li><code><span class="proper-name">AsyncIterable</span></code> - <span class="proper-name">Returns</span> sequence of elements</li>
+<li><code><span class="proper-name">Readable</span></code>/<code><span class="proper-name">ReadStream</span></code> - <span class="proper-name">Returns</span> a sequence of lines read from stream</li>
+<li><span class="proper-name">Everything</span> else - <span class="proper-name">Returns</span> a sequence of a single element</li>
+</ul>
+<pre>
+          <code class="hljs language-typescript"><span class="hljs-keyword">static</span> <span class="operator">$of</span>(el: <span class="proper-name">Readable</span>): <span class="proper-name">AsyncGenerator</span>&lt;<span class="hljs-built_in">string</span>&gt;;
+<span class="hljs-keyword">static</span> <span class="operator">$of</span>(el: <span class="hljs-built_in">string</span>): <span class="proper-name">AsyncGenerator</span>&lt;<span class="hljs-built_in">string</span>&gt;;
+<span class="hljs-keyword">static</span> <span class="operator">$of</span>&lt;T&gt;(el: <span class="proper-name">AsyncIterable</span>&lt;T&gt;): <span class="proper-name">AsyncGenerator</span>&lt;T&gt;;
+<span class="hljs-keyword">static</span> <span class="operator">$of</span>&lt;T&gt;(el: <span class="proper-name">Iterable</span>&lt;T&gt;): <span class="proper-name">AsyncGenerator</span>&lt;T&gt;;
+<span class="hljs-keyword">static</span> <span class="operator">$of</span>&lt;T&gt;(el: <span class="proper-name">AsyncIterable</span>&lt;T&gt;): <span class="proper-name">AsyncGenerator</span>&lt;T&gt;;
+<span class="hljs-keyword">static</span> <span class="operator">$of</span>&lt;T&gt;(el: T[]): <span class="proper-name">AsyncGenerator</span>&lt;T&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript">$<span class="hljs-keyword">of</span>([<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>])
+   .<span class="operator">$map</span>(<span class="hljs-function"><span class="hljs-params">x</span> =&gt;</span> x ** <span class="hljs-number">2</span>)
+
+ <span class="hljs-comment">// <span class="proper-name">Should</span> be identical</span>
+
+ [<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>]
+   .<span class="operator">$map</span>(<span class="hljs-function"><span class="hljs-params">x</span> =&gt;</span> x ** <span class="hljs-number">2</span>)
+</code>
+        </pre>
+<h4 id="$exec"><span class="operator">$exec</span></h4>
+<p><span class="proper-name">Top</span> level access to execute a program</p>
+<pre>
+          <code class="hljs language-typescript"><span class="hljs-keyword">static</span> <span class="hljs-keyword">get</span> <span class="operator">$exec</span>(): <span class="hljs-built_in">string</span>[<span class="hljs-string">'<span class="operator">$exec</span>'</span>];
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="operator">$exec</span>(<span class="hljs-string">'ls'</span>, [<span class="hljs-string">'-lsa'</span>])
+ .<span class="operator">$columns</span>([<span class="hljs-string">'blockSize'</span>, <span class="hljs-string">'perms'</span>, <span class="hljs-string">'size'</span>, <span class="hljs-string">'group'</span>, <span class="hljs-string">'owner'</span>, <span class="hljs-string">'month'</span>, <span class="hljs-string">'day'</span>, <span class="hljs-string">'time'</span>, <span class="hljs-string">'path'</span>])
+ .$<span class="hljs-built_in">console</span>
+</code>
+        </pre>
+<h4 id="$registeroperator"><span class="operator">$registerOperator</span></h4>
+<p><span class="proper-name">In</span> the process of using the tool, there may be a need for encapsulating common
+operations.  <span class="proper-name">By</span> default, <code><span class="operator">$wrap</span></code> provides an easy path for re-using functionality,
+but it lacks the clarity of intent enjoyed by the built in operators.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="hljs-keyword">static</span> <span class="hljs-keyword">get</span> <span class="operator">$registerOperator</span>(): <span class="hljs-function">(<span class="hljs-params">op: <span class="hljs-built_in"><span class="proper-name">Function</span></span></span>) =&gt;</span> <span class="hljs-built_in">void</span>;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-comment">/** @template T */</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title"><span class="proper-name">AsyncIterable</span></span> </span>{
+  <span class="hljs-comment">/** @returns {<span class="proper-name">AsyncIterable</span>&lt;T&gt;} */</span>
+  <span class="operator">$reverse</span>() {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>
+      .<span class="operator">$collect</span>() <span class="hljs-comment">// <span class="proper-name">Gather</span> the entire sequence as an array</span>
+      .<span class="operator">$flatMap</span>(<span class="hljs-function"><span class="hljs-params">x</span> =&gt;</span> x.reverse()); <span class="hljs-comment">// <span class="proper-name">Reverse</span> it and flatten</span>
+  }
+}
+
+<span class="operator">$registerOperator</span>(<span class="proper-name">AsyncIterable</span>);
+
+<span class="operator">$stdin</span>
+ .<span class="operator">$reverse</span>()
+ .<span class="operator">$stdout</span>;
+</code>
+        </pre>
+<h4 id="$argv"><span class="operator">$argv</span></h4>
+<p>The cleaned argv parameters for the running script. <span class="proper-name">Starting</span> at index 0,
+is the first meaning parameter for the script.  <span class="proper-name">This</span> differs from <code>process.argv</code>
+by excluding the executable and script name.  <span class="proper-name">This</span> is useful as the script may
+be invoked in many different ways and the desire is to limit the amount of
+guessing needed to handle inputs appropriately.</p>
+<p>NOTE: <span class="proper-name">If</span> you are going to use a command line parsing tool, then you would continue to
+use <code>process.argv</code> as normal.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="hljs-keyword">static</span> <span class="hljs-keyword">get</span> <span class="operator">$argv</span>(): <span class="hljs-built_in">string</span>[];
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript">(<span class="operator">$argv</span>[<span class="hljs-number">0</span>] ?? <span class="hljs-string">'<span class="proper-name">Enter</span> a file name:'</span>.<span class="operator">$prompt</span>())
+  <span class="hljs-comment">// <span class="proper-name">Pull</span> in name from argv[0] or prompt if missing</span>
+  .<span class="operator">$read</span>() <span class="hljs-comment">// <span class="proper-name">Read</span> file</span>
+</code>
+        </pre>
+<h4 id="$stdin"><span class="operator">$stdin</span></h4>
+<p><span class="proper-name">Provides</span> direct access to stdin as sequence of lines</p>
+<pre>
+          <code class="hljs language-typescript"><span class="hljs-keyword">static</span> <span class="hljs-keyword">get</span> <span class="operator">$stdin</span>(): <span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="operator">$stdin</span> <span class="hljs-comment">// <span class="proper-name">Stream</span> stdin, one line at a time</span>
+ .<span class="operator">$map</span>(<span class="hljs-function"><span class="hljs-params">line</span> =&gt;</span> line.split(<span class="hljs-string">''</span>).reverse().join(<span class="hljs-string">''</span>)) <span class="hljs-comment">// <span class="proper-name">Reverse</span> each line</span>
+ .<span class="operator">$stdout</span> <span class="hljs-comment">// <span class="proper-name">Pipe</span> to stdout</span>
+</code>
+        </pre>
+<h4 id="$env"><span class="operator">$env</span></h4>
+<p>A case insensitive map for accessing environment variables. <span class="proper-name">Like</span> <code>process.env</code>, but
+doesn't require knowledge of the case.  <span class="proper-name">Useful</span> for simplifying script interactions.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="hljs-keyword">static</span> <span class="hljs-keyword">get</span> <span class="operator">$env</span>(): <span class="proper-name">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">string</span>&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript">(<span class="operator">$env</span>.user_name ?? ask(<span class="hljs-string">'<span class="proper-name">Enter</span> a user name'</span>)) <span class="hljs-comment">// <span class="proper-name">Prompt</span> user name if there</span>
+  .<span class="operator">$map</span>(<span class="hljs-function"><span class="hljs-params">userName</span> =&gt;</span> ... )
+</code>
+        </pre>
+<h4 id="$pattern"><span class="operator">$pattern</span></h4>
+<p><span class="proper-name">Common</span> patterns that can be used where regular expressions are supported</p>
+<pre>
+          <code class="hljs language-typescript"><span class="hljs-keyword">static</span> <span class="hljs-keyword">get</span> <span class="operator">$pattern</span>(): <span class="proper-name">Record</span>&lt;<span class="hljs-string">'URL'</span> | <span class="hljs-string">'EMAIL'</span> | <span class="hljs-string">'PROPER_NAME'</span>, <span class="hljs-built_in"><span class="proper-name">RegExp</span></span>&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript">&lt;file&gt;
+ .<span class="operator">$read</span>() <span class="hljs-comment">// <span class="proper-name">Read</span> a file</span>
+ .<span class="operator">$tokens</span>(<span class="operator">$pattern</span>.URL) <span class="hljs-comment">// <span class="proper-name">Extract</span> URLs</span>
+ .<span class="operator">$filter</span>(<span class="hljs-function"><span class="hljs-params">url</span> =&gt;</span> url.endsWith(<span class="hljs-string">'.com'</span>))
+</code>
+        </pre>
+<h4 id="$range"><span class="operator">$range</span></h4>
+<p><span class="proper-name">Produces</span> a numeric range, between start (1 by default) and stop (inclusive).  A step
+parameter can be defined to specify the distance between iterated numbers.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="hljs-keyword">static</span> <span class="operator">$range</span>(stop: <span class="hljs-built_in">number</span>, start?: <span class="hljs-built_in">number</span>, step?: <span class="hljs-built_in">number</span>): <span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">number</span>&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="operator">$range</span>(<span class="hljs-number">1</span>, <span class="hljs-number">3</span>)
+  .<span class="operator">$map</span>(<span class="hljs-function"><span class="hljs-params">x</span> =&gt;</span> x**<span class="hljs-number">2</span>)
+  <span class="hljs-comment">// sequence of 1, 4, 9</span>
+
+<span class="operator">$range</span>(<span class="hljs-number">10</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>)
+  <span class="hljs-comment">// sequence of 1, 3, 5, 7, 9</span>
+</code>
+        </pre>
+<h2 id="operators"><span class="proper-name">Operators</span></h2>
+<p>The entirety of this project centers on the set of available operators.  These operators can be broken into the following groups</p>
+<ul>
+<li><a href="#core"><span class="proper-name">Core</span></a></li>
+<li><a href="#file"><span class="proper-name">File</span></a></li>
+<li><a href="#transform"><span class="proper-name">Transform</span></a></li>
+<li><a href="#text"><span class="proper-name">Text</span></a></li>
+<li><a href="#limit"><span class="proper-name">Limit</span></a></li>
+<li><a href="#exec"><span class="proper-name">Exec</span></a></li>
+<li><a href="#export"><span class="proper-name">Export</span></a></li>
+<li><a href="#advanced"><span class="proper-name">Advanced</span></a></li>
+</ul>
+<h3 id="core"><span class="proper-name">Core</span></h3>
+<p>The core functionality provides some very basic support for sequences</p>
+<h4 id="$foreach"><span class="operator">$forEach</span></h4>
+<p><span class="proper-name">This</span> operator is a terminal action that receives each element of the sequence in sequence,
+but returns no value.  <span class="proper-name">This</span> function produces a promise that should be waited on to ensure the
+sequence is exhausted.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$forEach</span>&lt;T&gt;(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;, fn: <span class="proper-name">PromFunc</span>&lt;T, <span class="hljs-built_in">any</span>&gt;): <span class="hljs-built_in"><span class="proper-name">Promise</span></span>&lt;<span class="hljs-built_in">void</span>&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-built_in">fs</span>.createReadStream(<span class="hljs-string">'&lt;file&gt;'</span>) <span class="hljs-comment">//  <span class="proper-name">Now</span> a line-oriented sequence</span>
+  .<span class="operator">$forEach</span>(<span class="hljs-built_in">console</span>.log)  <span class="hljs-comment">// <span class="proper-name">Will</span> output each line</span>
+</code>
+        </pre>
+<h4 id="$map"><span class="operator">$map</span></h4>
+<p><span class="proper-name">Converts</span> the sequence of data into another, by applying an operation
+on each element.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$map</span>&lt;T, U&gt;(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;, fn: <span class="proper-name">PromFunc</span>&lt;T, U&gt;): $<span class="proper-name">AsyncIterable</span>&lt;U&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-built_in">fs</span>.createReadStream(<span class="hljs-string">'&lt;file&gt;'</span>) <span class="hljs-comment">//  <span class="proper-name">Now</span> a line-oriented sequence</span>
+ .<span class="operator">$map</span>(<span class="hljs-function"><span class="hljs-params">line</span> =&gt;</span> line.toUpperCase())
+ <span class="hljs-comment">// is now a sequence of all uppercase lines</span>
+</code>
+        </pre>
+<h4 id="$filter"><span class="operator">$filter</span></h4>
+<p><span class="proper-name">Determines</span> if items in the sequence are valid or not. <span class="proper-name">Invalid</span> items
+are discarded, while valid items are retained.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$filter</span>&lt;T&gt;(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;, pred: <span class="proper-name">PromFunc</span>&lt;T, <span class="hljs-built_in">boolean</span>&gt;): $<span class="proper-name">AsyncIterable</span>&lt;T&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-built_in">fs</span>.createReadStream(<span class="hljs-string">'&lt;file&gt;'</span>) <span class="hljs-comment">//  <span class="proper-name">Now</span> a line-oriented sequence</span>
+  .<span class="operator">$filter</span>(<span class="hljs-function"><span class="hljs-params">x</span> =&gt;</span> x.length &gt; <span class="hljs-number">10</span>)
+  <span class="hljs-comment">// <span class="proper-name">Will</span> retain all lines that are more than 10 characters</span>
+</code>
+        </pre>
+<h4 id="$flatten"><span class="operator">$flatten</span></h4>
+<p><span class="proper-name">Flattens</span> a sequence of arrays, or a sequence of sequences.  <span class="proper-name">This</span> allows for operators that
+return arrays/sequences, to be able to be represented as a single sequence.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$flatten</span>&lt;T, U&gt;(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;<span class="proper-name">AsyncIterable</span>&lt;U&gt; | <span class="proper-name">Iterable</span>&lt;U&gt;&gt;): $<span class="proper-name">AsyncIterable</span>&lt;U&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-built_in">fs</span>.createReadStream(<span class="hljs-string">'&lt;file&gt;'</span>) <span class="hljs-comment">//  <span class="proper-name">Now</span> a line-oriented sequence</span>
+  .<span class="operator">$map</span>(<span class="hljs-function"><span class="hljs-params">line</span> =&gt;</span> line.split(<span class="hljs-regexp">/\s+/g</span>)) <span class="hljs-comment">// <span class="proper-name">Now</span> a string[] sequence</span>
+  .<span class="operator">$flatten</span>() <span class="hljs-comment">// <span class="proper-name">Now</span> a string sequence for each word in the file</span>
+</code>
+        </pre>
+<h4 id="$flatmap"><span class="operator">$flatMap</span></h4>
+<p><span class="proper-name">This</span> is a combination of <code><span class="operator">$map</span></code> and <code><span class="operator">$flatten</span></code> as they are common enough in usage to warrant a
+combined operator.  <span class="proper-name">This</span> will map the the contents of the sequence (which produces an array
+or sequence), and producing a flattened output.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$flatMap</span>&lt;T, U&gt;(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;, fn: <span class="proper-name">PromFunc</span>&lt;T, <span class="proper-name">AsyncIterable</span>&lt;U&gt; | <span class="proper-name">Iterable</span>&lt;U&gt;&gt;): $<span class="proper-name">AsyncIterable</span>&lt;U&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-built_in">fs</span>.createReadStream(<span class="hljs-string">'&lt;file&gt;'</span>) <span class="hljs-comment">//  <span class="proper-name">Now</span> a line-oriented sequence</span>
+  .<span class="operator">$flatMap</span>(<span class="hljs-function"><span class="hljs-params">line</span> =&gt;</span> line.split(<span class="hljs-regexp">/\s+/g</span>)) <span class="hljs-comment">// <span class="proper-name">Now</span> a word sequence for the file</span>
+</code>
+        </pre>
+<h4 id="$reduce"><span class="operator">$reduce</span></h4>
+<p><span class="proper-name">This</span> is the standard reduce operator and behaves similarly as <code><span class="proper-name">Array</span>.prototype.reduce</code>.  <span class="proper-name">This</span> operator
+takes in an accumulation function, which allows for computing a single value based on visiting each element
+in the sequence.  <span class="proper-name">Given</span> that reduce is a comprehensive and produces a singular value, this operation cannot
+stream and will block until the stream is exhausted. <span class="proper-name">Normally</span> it is common to understand <code><span class="operator">$map</span></code> and <code><span class="operator">$filter</span></code> as
+being implemented by <code><span class="operator">$reduce</span></code>, but in this situation they behave differently.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$reduce</span>&lt;T, U&gt;<span class="hljs-function">(<span class="hljs-params"><span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;, fn: PromFunc2&lt;U, T, U&gt; &amp; {init?: (<span class="hljs-params"></span>) =&gt; U;}, acc?: U</span>): $<span class="hljs-params"><span class="proper-name">AsyncIterable</span></span>&lt;<span class="hljs-params">U</span>&gt;;
+</span></code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-built_in">fs</span>.createReadStream(<span class="hljs-string">'&lt;file&gt;'</span>) <span class="hljs-comment">//  <span class="proper-name">Now</span> a line-oriented sequence</span>
+  .<span class="operator">$flatMap</span>(<span class="hljs-function"><span class="hljs-params">line</span> =&gt;</span> line.split(<span class="hljs-regexp">/\s+/g</span>)) <span class="hljs-comment">// <span class="proper-name">Now</span> a string sequence for each word in the file</span>
+  .<span class="operator">$reduce</span>(<span class="hljs-function">(<span class="hljs-params">acc, token</span>) =&gt;</span> {
+    acc[token] = (acc[token] ?? <span class="hljs-number">0</span>) + <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">return</span> acc;
+  }, {}); <span class="hljs-comment">// <span class="proper-name">Produces</span> a map of words and their respective frequencies within the document</span>
+</code>
+        </pre>
+<h4 id="$collect"><span class="operator">$collect</span></h4>
+<p><span class="proper-name">Gathers</span> the entire sequence output as a single array.  <span class="proper-name">This</span> is useful if you need the entire stream to perform an action.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$collect</span>&lt;T&gt;(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;): $<span class="proper-name">AsyncIterable</span>&lt;T[]&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-built_in">fs</span>.createReadStream(<span class="hljs-string">'&lt;file&gt;'</span>) <span class="hljs-comment">//  <span class="proper-name">Now</span> a line-oriented sequence</span>
+  .<span class="operator">$collect</span>() <span class="hljs-comment">// <span class="proper-name">Now</span> a sequence with a single array (of all the lines)</span>
+  .<span class="operator">$map</span>(<span class="hljs-function"><span class="hljs-params">lines</span> =&gt;</span> lines.join(<span class="hljs-string">'\n'</span>))
+  <span class="hljs-comment">// <span class="proper-name">Produces</span> a single string of the whole file</span>
+</code>
+        </pre>
+<h4 id="$wrap"><span class="operator">$wrap</span></h4>
+<p><span class="proper-name">This</span> is the simplest mechanism for extending the framework as the operator takes in a function that operates on the sequence of
+data as a whole.  <span class="proper-name">It</span> will consume the sequence and produce an entirely new sequence.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$wrap</span>&lt;T, U&gt;<span class="hljs-function">(<span class="hljs-params"><span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;, fn: (<span class="hljs-params">input: <span class="proper-name">AsyncIterable</span>&lt;T&gt;</span>) =&gt; (<span class="hljs-params"><span class="proper-name">AsyncIterable</span>&lt;U&gt; | <span class="proper-name">Iterable</span>&lt;U&gt;</span>)</span>): $<span class="hljs-params"><span class="proper-name">AsyncIterable</span></span>&lt;<span class="hljs-params">U</span>&gt;;
+</span></code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">translate</span>*(<span class="hljs-params">lang, gen</span>) </span>{
+  <span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> line <span class="hljs-keyword">of</span> gen) {
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> word <span class="hljs-keyword">of</span> line.split(<span class="hljs-regexp">/\s+/g</span>)) {
+      <span class="hljs-keyword">const</span> translated = <span class="hljs-keyword">await</span> doTranslate(lang, word);
+      <span class="hljs-keyword">yield</span> translated;
+    }
+  }
+}
+
+<span class="hljs-built_in">fs</span>.createReadStream(<span class="hljs-string">'&lt;file&gt;'</span>) <span class="hljs-comment">//  <span class="proper-name">Now</span> a line-oriented sequence</span>
+  .<span class="operator">$wrap</span>(translate.bind(<span class="hljs-literal">null</span>, <span class="hljs-string">'fr'</span>)); <span class="hljs-comment">// <span class="proper-name">Produces</span> a sequence of french-translated word</span>
+</code>
+        </pre>
+<h4 id="$onerror"><span class="operator">$onError</span></h4>
+<p><span class="proper-name">If</span> an error occurs, use the provided sequence instead</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$onError</span>&lt;T&gt;(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;, alt: <span class="proper-name">OrCallable</span>&lt;<span class="proper-name">AsyncIterable</span>&lt;T&gt; | <span class="proper-name">Iterable</span>&lt;T&gt;&gt;): $<span class="proper-name">AsyncIterable</span>&lt;T&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;'</span>.
+ .<span class="operator">$read</span>()
+ .<span class="operator">$onError</span>(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-string">`<span class="proper-name">Sample</span> <span class="proper-name">Text</span>`</span>)
+</code>
+        </pre>
+<h3 id="file"><span class="proper-name">File</span></h3>
+<p><span class="proper-name">Some</span> of the most common shell operations are iterating through files,
+and operating upon those files.  <span class="proper-name">To</span> support this, the framework supports
+producing files as a sequence of file objects or filenames, given a file
+extension or a regex pattern. <span class="proper-name">With</span> <code><span class="proper-name">String</span></code>s and <code><span class="proper-name">RegExp</span></code>s supporting the
+<code><span class="proper-name">Symbol</span>.asyncIterator</code> property, these are the most common way of finding files.</p>
+<h4 id="$readlines"><span class="operator">$readLines</span></h4>
+<p><span class="proper-name">This</span> operator will read a text file as a series of <code><span class="proper-name">Line</span></code> objects, which include the file name,
+line number, and associated text.</p>
+<p><span class="proper-name">When</span> <code>mode</code> is <code>text</code> or undefined, the result will be a series of string in the format <code>{{file}}:{{number}} {{text}}</code>
+<span class="proper-name">When</span> <code>mode</code> is 'object', the result will be the raw <code><span class="proper-name">Line</span></code> objects</p>
+<p><span class="proper-name">When</span> in <code>text</code> mode, the line number, and file name can be toggled off as needed by passing in additional config.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$readLines</span>(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;, config: <span class="proper-name">ReadTextLineConfig</span>&lt;<span class="hljs-string">'text'</span>&gt;): $<span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;;
+<span class="operator">$readLines</span>(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;, config: {mode: <span class="hljs-string">'object'</span>;}): $<span class="proper-name">AsyncIterable</span>&lt;<span class="proper-name">Line</span>&gt;;
+<span class="operator">$readLines</span>(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;): $<span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;'</span>
+  .<span class="operator">$readLines</span>({ <span class="hljs-attr">number</span>:<span class="hljs-literal">false</span> }) <span class="hljs-comment">// <span class="proper-name">Read</span> as a series of lines, without numbering</span>
+</code>
+        </pre>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;'</span>
+  .<span class="operator">$readLines</span>({ <span class="hljs-attr">mode</span>:<span class="hljs-string">'object'</span> }) <span class="hljs-comment">// <span class="proper-name">Read</span> as a series of line objects</span>
+  .<span class="operator">$filter</span>(<span class="hljs-function"><span class="hljs-params">line</span> =&gt;</span> line.number === <span class="hljs-number">5</span>) <span class="hljs-comment">// <span class="proper-name">Read</span> only 5th line</span>
+</code>
+        </pre>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'.js'</span>
+  .<span class="operator">$dir</span>()
+  .<span class="operator">$readLines</span>() <span class="hljs-comment">// <span class="proper-name">Read</span> as a series of lines, with filename, line number prepended</span>
+</code>
+        </pre>
+<h4 id="$read"><span class="operator">$read</span></h4>
+<p><span class="proper-name">This</span> operator will treat the inbound string sequence as file names, and will convert the filename (based on IOType)</p>
+<ul>
+<li><code>text</code> (default) - The sequence will produce as series of lines of text</li>
+<li><code>binary</code> - The sequence will produce a series of <code><span class="proper-name">Buffer</span></code> objects</li>
+</ul>
+<p><span class="proper-name">If</span> singleValue is set to true, this produce a single value for the whole stream instead of chunk by chunk.  <span class="proper-name">This</span>
+mode can be easier to work with for certain operations, but is much more memory intensive.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$read</span>(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;, config?: <span class="proper-name">Omit</span>&lt;<span class="proper-name">ReadStreamConfig</span>, <span class="hljs-string">'mode'</span>&gt;): $<span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;;
+<span class="operator">$read</span>(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;, config: <span class="proper-name">ReadStreamConfig</span>&lt;<span class="hljs-string">'text'</span>&gt;): $<span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;;
+<span class="operator">$read</span>(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;, config: <span class="proper-name">ReadStreamConfig</span>&lt;<span class="hljs-string">'binary'</span>&gt;): $<span class="proper-name">AsyncIterable</span>&lt;<span class="proper-name">Buffer</span>&gt;;
+<span class="operator">$read</span>(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;, config: <span class="proper-name">ReadStreamConfig</span>&lt;<span class="hljs-string">'raw'</span>&gt;): $<span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">fs</span>.<span class="proper-name">ReadStream</span>&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;'</span>
+  .<span class="operator">$read</span>({ <span class="hljs-attr">mode</span>: <span class="hljs-string">'binary'</span> }) <span class="hljs-comment">// <span class="proper-name">Read</span> as a series of buffers</span>
+  .<span class="operator">$reduce</span>(<span class="hljs-function">(<span class="hljs-params">acc, buffer</span>) =&gt;</span> {
+    <span class="hljs-keyword">return</span> acc  + buffer.length;
+  }, <span class="hljs-number">0</span>); <span class="hljs-comment">// <span class="proper-name">Count</span> number of bytes in file</span>
+</code>
+        </pre>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;'</span>
+  .<span class="operator">$read</span>({ <span class="hljs-attr">mode</span>:<span class="hljs-string">'binary'</span>, <span class="hljs-attr">singleValue</span>: <span class="hljs-literal">true</span> }) <span class="hljs-comment">// <span class="proper-name">Read</span> as a single buffer</span>
+  .<span class="operator">$map</span>(<span class="hljs-function"><span class="hljs-params">buffer</span> =&gt;</span> buffer.length) <span class="hljs-comment">// <span class="proper-name">Count</span> number of bytes in file</span>
+</code>
+        </pre>
+<h4 id="$dir"><span class="operator">$dir</span></h4>
+<p><code>dir</code> provides the ability to recursively search for files within a file system.  <span class="proper-name">It</span> expects as the
+input sequence type:</p>
+<ul>
+<li>A <code>string</code> which represents a a file extension (e.g. <code>.csv</code>). <span class="proper-name">Will</span> match all files recursively.</li>
+<li>A <code>string</code> which represents a glob pattern search on file names (e.g. <code>**\/*.csv</code>).</li>
+<li>A <code><span class="proper-name">RegExp</span></code> which represents a file pattern to search on (e.g. <code>/path\/sub\/.*[.]js/</code>)</li>
+</ul>
+<p><span class="proper-name">In</span> addition to the input sequence type, there is an optional config to affect the output.
+<span class="proper-name">By</span> default the output of this sequence will be a series of file names, relative to the <code>process.cwd()</code>
+that will be eligible for reading or any other file operation.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$dir</span>(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span> | <span class="hljs-built_in"><span class="proper-name">RegExp</span></span>&gt;, config: <span class="proper-name">ReadDirConfig</span> &amp; {full: <span class="hljs-literal">true</span>;}): $<span class="proper-name">AsyncIterable</span>&lt;<span class="proper-name">ScanEntry</span>&gt;;
+<span class="operator">$dir</span>(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span> | <span class="hljs-built_in"><span class="proper-name">RegExp</span></span>&gt;, config?: <span class="proper-name">Omit</span>&lt;<span class="proper-name">ReadDirConfig</span>, <span class="hljs-string">'full'</span>&gt;): $<span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'.csv'</span>
+  .<span class="operator">$dir</span>({ <span class="hljs-attr">full</span>: <span class="hljs-literal">true</span> }) <span class="hljs-comment">// <span class="proper-name">List</span> all '.csv' files, recursively</span>
+  .<span class="operator">$forEach</span>(<span class="hljs-function"><span class="hljs-params">f</span> =&gt;</span> {
+    <span class="hljs-comment">// <span class="proper-name">Display</span> the filename, and it's modification time</span>
+    <span class="hljs-built_in">console</span>.log(f.file, f.stats.mtime);
+  });
+</code>
+        </pre>
+<h3 id="transform"><span class="proper-name">Transform</span></h3>
+<p><span class="proper-name">Standard</span> operators regarding common patterns for transformations</p>
+<h4 id="$notempty"><span class="operator">$notEmpty</span></h4>
+<p><span class="proper-name">This</span> is a special type of filter that excludes <code>null</code>, <code>undefined</code> and <code>''</code>.
+<span class="proper-name">Useful</span> for removing empty values.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$notEmpty</span>&lt;T&gt;(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;): $<span class="proper-name">AsyncIterable</span>&lt;T&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;'</span>
+  .<span class="operator">$read</span>()
+  .<span class="operator">$notEmpty</span>() <span class="hljs-comment">// <span class="proper-name">Return</span> all non-empty lines of the file</span>
+</code>
+        </pre>
+<h4 id="$tap"><span class="operator">$tap</span></h4>
+<p><code><span class="operator">$tap</span></code> provides the ability to inspect the sequence without affecting it's production.  The function passed in
+can produce a promise that will be waited on, if needed.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$tap</span>&lt;T&gt;(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;, visit?: <span class="proper-name">PromFunc</span>&lt;T, <span class="hljs-built_in">any</span>&gt;): $<span class="proper-name">AsyncIterable</span>&lt;T&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'.csv'</span>
+  .<span class="operator">$dir</span>()
+  .<span class="operator">$tap</span>(<span class="hljs-function">(<span class="hljs-params">{stats}</span>) =&gt;</span> collectMetrics(stats))
+  <span class="hljs-comment">// <span class="proper-name">Stream</span> unchanged, but was able to track file stat information</span>
+</code>
+        </pre>
+<h4 id="$unique"><span class="operator">$unique</span></h4>
+<p><code><span class="operator">$unique</span></code> will ensure the output sequence does not have any consecutive duplicates, similar to the unix <code>uniq</code> command.
+The uniqueness is only guaranteed linearly, to allow for streaming.  <span class="proper-name">Otherwise</span> this would need to wait
+for all data before proceeding.  <span class="proper-name">You</span> can also specify a custom equality function as needed.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$unique</span>&lt;T&gt;(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;): $<span class="proper-name">AsyncIterable</span>&lt;T&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript">[<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">5</span>, <span class="hljs-number">1</span>, <span class="hljs-number">7</span>]
+  .<span class="operator">$unique</span>() <span class="hljs-comment">// <span class="proper-name">Will</span> produce [1, 2, 3, 4, 5, 1, 7]</span>
+  <span class="hljs-comment">// The final 1 repeats as it's not duplicated in sequence</span>
+</code>
+        </pre>
+<h4 id="$unique"><span class="operator">$unique</span></h4>
+<p><code><span class="operator">$unique</span></code> also supports configuration for custom comparators, as well as the ability to count the values as they come through.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$unique</span>&lt;T&gt;(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;, config: {compare?: <span class="proper-name">AsyncCompare</span>&lt;T&gt;;count: <span class="hljs-literal">true</span>;}): $<span class="proper-name">AsyncIterable</span>&lt;[T, <span class="hljs-built_in">number</span>]&gt;;
+<span class="operator">$unique</span>&lt;T&gt;(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;, config: {compare?: <span class="proper-name">AsyncCompare</span>&lt;T&gt;;count?: <span class="hljs-literal">false</span>;}): $<span class="proper-name">AsyncIterable</span>&lt;T&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript">[<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">5</span>]
+  .<span class="operator">$unique</span>({ <span class="hljs-attr">count</span>: <span class="hljs-literal">true</span> }) <span class="hljs-comment">// <span class="proper-name">Will</span> produce [[1, 1], [2, 3], [3, 1], [4, 1], [5, 2]]</span>
+</code>
+        </pre>
+<pre>
+          <code class="hljs language-javascript">[<span class="hljs-number">0</span>, <span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">4</span>, <span class="hljs-number">1</span>, <span class="hljs-number">3</span>, <span class="hljs-number">2</span>]
+  .<span class="operator">$unique</span>({ <span class="hljs-attr">count</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">compare</span>: <span class="hljs-function">(<span class="hljs-params">x,y</span>) =&gt;</span> x%<span class="hljs-number">2</span> === y%<span class="hljs-number">2</span> })
+  <span class="hljs-comment">// <span class="proper-name">Will</span> produce [0, 1, 3, 2] as it captures the first even or odd of a run</span>
+</code>
+        </pre>
+<h4 id="$sort"><span class="operator">$sort</span></h4>
+<p><code><span class="operator">$sort</span></code> is a blocking operation as it requires all the data to be able to sort properly.  <span class="proper-name">This</span> means it will wait
+on the entire sequence before producing new data.  The function operates identically to how <code><span class="proper-name">Array</span>.prototype.sort</code> behaves.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$sort</span>&lt;T&gt;<span class="hljs-function">(<span class="hljs-params"><span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;, compare?: (<span class="hljs-params">a: T, b: T</span>) =&gt; <span class="hljs-built_in">number</span></span>): $<span class="hljs-params"><span class="proper-name">AsyncIterable</span></span>&lt;<span class="hljs-params">T</span>&gt;;
+</span></code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;'</span>
+  .<span class="operator">$read</span>() <span class="hljs-comment">// <span class="proper-name">Now</span> a sequence of lines</span>
+  .<span class="operator">$sort</span>() <span class="hljs-comment">// <span class="proper-name">Sort</span> lines alphabetically</span>
+  <span class="hljs-comment">// <span class="proper-name">Now</span> a sequence of sorted lines</span>
+</code>
+        </pre>
+<h4 id="$batch"><span class="operator">$batch</span></h4>
+<p><span class="proper-name">Allows</span> for iterative grouping of streamed data, and produces a sequence of arrays.  <span class="proper-name">Each</span> array will be <code><span class="operator">$batch</span></code> sized,
+except for the final array which will be at most <code>batch</code> size.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$batch</span>&lt;T&gt;(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;, size: <span class="hljs-built_in">number</span>): $<span class="proper-name">AsyncIterable</span>&lt;T[]&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;'</span>
+  .<span class="operator">$read</span>() <span class="hljs-comment">// <span class="proper-name">Generator</span> of file lines</span>
+  .<span class="operator">$batch</span>(<span class="hljs-number">20</span>) <span class="hljs-comment">// <span class="proper-name">Generator</span> of array of lines, at most 20 items in length</span>
+  .<span class="operator">$map</span>(<span class="hljs-function"><span class="hljs-params">lines</span> =&gt;</span> lines.sort()) <span class="hljs-comment">// <span class="proper-name">Sort</span> each batch</span>
+  <span class="hljs-comment">// <span class="proper-name">Generator</span> of sorted list strings</span>
+</code>
+        </pre>
+<h4 id="$pair"><span class="operator">$pair</span></h4>
+<p><code><span class="operator">$pair</span></code> allows for combining two sets of data into a single sequence of pairs.
+The second value can either be a single value, which will be added to every item,
+or it could be an iterable element that will match with each item as possible. <span class="proper-name">If</span> the second
+iterator runs out, the remaining values can be affected by the mode parameter:</p>
+<ul>
+<li><code>'empty'</code>  - <span class="proper-name">Fill</span> in with <code>undefined</code> once the second iterator is exhausted.  <span class="proper-name">This</span> is default for iterable values.</li>
+<li><code>'repeat'</code> - <span class="proper-name">Loop</span> iteration on the secondary iterator.  <span class="proper-name">This</span> is default for string values.</li>
+<li><code>'exact'</code>  - <span class="proper-name">Stop</span> the emitting values once the secondary iterator is exhausted.</li>
+</ul>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$pair</span>&lt;T, U&gt;(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;, value: <span class="proper-name">OrCallable</span>&lt;U | <span class="proper-name">Iterable</span>&lt;U&gt; | <span class="proper-name">AsyncIterable</span>&lt;U&gt;&gt;, mode?: <span class="proper-name">PairMode</span>): $<span class="proper-name">AsyncIterable</span>&lt;[T, U]&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'.ts'</span>
+  .<span class="operator">$dir</span>() <span class="hljs-comment">// <span class="proper-name">List</span> all '.ts' files</span>
+  .<span class="operator">$flatMap</span>(<span class="hljs-function"><span class="hljs-params">file</span> =&gt;</span> file
+    .<span class="operator">$read</span>() <span class="hljs-comment">// <span class="proper-name">Read</span> each file as a sequence of lines</span>
+    .<span class="operator">$pair</span>(file) <span class="hljs-comment">// <span class="proper-name">Combine</span> each line with the file name</span>
+    .<span class="operator">$map</span>(<span class="hljs-function">(<span class="hljs-params">[a,b]</span>) =&gt;</span> [b, a]) <span class="hljs-comment">// <span class="proper-name">Reverse</span> the order of the columns</span>
+  )
+  <span class="hljs-comment">// <span class="proper-name">Generator</span> of file lines with, file name attached</span>
+</code>
+        </pre>
+<h4 id="$join"><span class="operator">$join</span></h4>
+<p><span class="proper-name">This</span> operator allows for combining a sequence of elements with a join element</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$join</span>&lt;T&gt;(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;, joiner: T | $<span class="proper-name">AsyncIterable</span>&lt;T&gt;): $<span class="proper-name">AsyncIterable</span>&lt;T&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;'</span>
+  .<span class="operator">$read</span>() <span class="hljs-comment">// <span class="proper-name">Read</span> as a series of lines</span>
+  .<span class="operator">$join</span>(<span class="hljs-string">'\n'</span>)
+  <span class="hljs-comment">// <span class="proper-name">Produces</span> a sequence of lines inter-spliced with new lines</span>
+</code>
+        </pre>
+<h4 id="$concat"><span class="operator">$concat</span></h4>
+<p><span class="proper-name">Combine</span> multiple streams, linearly</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$concat</span>&lt;T&gt;(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;, other: <span class="proper-name">AsyncIterable</span>&lt;T&gt;, ...rest: <span class="proper-name">AsyncIterable</span>&lt;T&gt;[]): <span class="proper-name">AsyncGenerator</span>&lt;T, <span class="hljs-built_in">void</span>, unknown&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="operator">$range</span>(<span class="hljs-number">1</span>, <span class="hljs-number">10</span>)
+ .<span class="operator">$concat</span>(<span class="operator">$range</span>(<span class="hljs-number">11</span>, <span class="hljs-number">20</span>), <span class="operator">$range</span>(<span class="hljs-number">21</span>, <span class="hljs-number">30</span>))
+ .<span class="operator">$collect</span>()
+ .<span class="operator">$map</span>(<span class="hljs-function"><span class="hljs-params">all</span> =&gt;</span> all.length)
+ .<span class="operator">$stdout</span>; <span class="hljs-comment">// <span class="proper-name">Displays</span> 30</span>
+</code>
+        </pre>
+<h3 id="text"><span class="proper-name">Text</span></h3>
+<p><span class="proper-name">Support</span> for common textual operations.</p>
+<p><span class="proper-name">As</span> text operators, these only apply to sequences that
+produce string values.</p>
+<h4 id="$columns"><span class="operator">$columns</span></h4>
+<p><code><span class="operator">$columns</span></code> is similar to the unix <code>awk</code> in that it allows for production of
+columns from a single line of text. <span class="proper-name">This</span> is useful for dealing with column
+oriented output.  The separator defaults to all whitespace but can tailored
+as needed by regex or string.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$columns</span>(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;, sep?: <span class="hljs-built_in">string</span> | <span class="hljs-built_in"><span class="proper-name">RegExp</span></span>): $<span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>[]&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;.tsv'</span> <span class="hljs-comment">// <span class="proper-name">Tab</span>-separated file</span>
+  .<span class="operator">$read</span>() <span class="hljs-comment">// <span class="proper-name">Read</span> as lines</span>
+  .<span class="operator">$columns</span>(<span class="hljs-string">'\t'</span>) <span class="hljs-comment">// <span class="proper-name">Separate</span> on tabs</span>
+  <span class="hljs-comment">// <span class="proper-name">Now</span> an array of tuples (as defined by tabs in the tsv)</span>
+</code>
+        </pre>
+<h4 id="$columns"><span class="operator">$columns</span></h4>
+<p><span class="proper-name">Supports</span> passing in column names to produce objects instead of tuples.  These values will be
+matched with the columns produced by the separator. <span class="proper-name">Any</span> row that is shorter than the names
+array will have undefined for the associated keys.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$columns</span>&lt;V <span class="hljs-keyword">extends</span> readonly <span class="hljs-built_in">string</span>[]&gt;(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;, config: V | <span class="proper-name">ColumnsConfig</span>&lt;V&gt;): $<span class="proper-name">AsyncIterable</span>&lt;<span class="proper-name">Record</span>&lt;V[<span class="hljs-built_in">number</span>], <span class="hljs-built_in">string</span>&gt;&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;.tsv'</span> <span class="hljs-comment">// <span class="proper-name">Tab</span>-separated file</span>
+  .<span class="operator">$read</span>() <span class="hljs-comment">// <span class="proper-name">Read</span> as lines</span>
+  .<span class="operator">$columns</span>({<span class="hljs-attr">names</span>: [<span class="hljs-string">'<span class="proper-name">Name</span>'</span>, <span class="hljs-string">'<span class="proper-name">Age</span>'</span>, <span class="hljs-string">'<span class="proper-name">Major</span>'</span>], <span class="hljs-attr">sep</span>: <span class="hljs-string">'\t'</span>}) <span class="hljs-comment">// <span class="proper-name">Separate</span> on tabs</span>
+  <span class="hljs-comment">// <span class="proper-name">Now</span> an array of objects { <span class="proper-name">Name</span>: string, <span class="proper-name">Age</span>: string, <span class="proper-name">Major</span>: string } (as defined by tabs in the tsv)</span>
+</code>
+        </pre>
+<h4 id="$tokens"><span class="operator">$tokens</span></h4>
+<p><span class="proper-name">This</span> operator allows for producing a single sequence of tokens out of lines of text.  The default token is all sequences of non-whitespace.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$tokens</span>(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;, token?: <span class="proper-name">Pattern</span>): $<span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;'</span>
+  .<span class="operator">$read</span>() <span class="hljs-comment">// <span class="proper-name">Read</span> file as lines</span>
+  .<span class="operator">$tokens</span>(<span class="hljs-regexp">/\b[A-<span class="proper-name">Za</span>-z]{6,100}\b/i</span>) <span class="hljs-comment">// <span class="proper-name">Extract</span> 6+ letter words</span>
+</code>
+        </pre>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;'</span>
+  .<span class="operator">$read</span>() <span class="hljs-comment">// <span class="proper-name">Read</span> file as lines</span>
+  .<span class="operator">$tokens</span>(<span class="operator">$pattern</span>.URL) <span class="hljs-comment">// <span class="proper-name">Extract</span> all URLs</span>
+</code>
+        </pre>
+<h4 id="$match"><span class="operator">$match</span></h4>
+<p><code><span class="operator">$match</span></code> provides the ability to easily retain or exclude lines.</p>
+<p><span class="proper-name">Additionally</span>, the config provides standard functionality, commensurate with grep:</p>
+<ul>
+<li><code>negate</code> - <span class="proper-name">Return</span> only lines that do not match</li>
+<li><code>before</code> - The number of lines to return before a match</li>
+<li><code>after</code> - The number of lines to return after a match</li>
+</ul>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$match</span>(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;, pattern: <span class="proper-name">Pattern</span>, config?: <span class="proper-name">MatchConfig</span>): $<span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;'</span>
+  .<span class="operator">$read</span>()
+  .<span class="operator">$match</span>(<span class="hljs-string">'TODO'</span>)
+  <span class="hljs-comment">// <span class="proper-name">All</span> lines  with TODO in them</span>
+</code>
+        </pre>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;'</span>
+  .<span class="operator">$read</span>()
+  .<span class="operator">$match</span>(<span class="hljs-regexp">/(FIXME|TODO)/</span>, { <span class="hljs-attr">negate</span>:<span class="hljs-literal">true</span> })
+  <span class="hljs-comment">// <span class="proper-name">Exclude</span> all lines that include FIXME or TODO</span>
+</code>
+        </pre>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;'</span>
+  .<span class="operator">$read</span>()
+  .<span class="operator">$match</span>(<span class="hljs-regexp">/\d{3}(-)?\d{3}(-)?\d{4}/</span>, { <span class="hljs-attr">after</span>:<span class="hljs-number">1</span>, <span class="hljs-attr">before</span>:<span class="hljs-number">1</span> })
+  <span class="hljs-comment">// <span class="proper-name">Match</span> all lines with phone numbers</span>
+</code>
+        </pre>
+<h4 id="$replace"><span class="operator">$replace</span></h4>
+<p><code><span class="operator">$replace</span></code> behaves identically to <code><span class="proper-name">String</span>.prototype.replace</code>, but will only operate
+on a single sequence value at a time.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$replace</span>(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;, pattern: <span class="proper-name">Pattern</span>, sub: <span class="hljs-built_in">string</span> | <span class="proper-name">Replacer</span>): $<span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;'</span>
+  .<span class="operator">$read</span>()
+  .<span class="operator">$replace</span>(<span class="hljs-regexp">/TODO/</span>, <span class="hljs-string">'FIXME'</span>)
+  <span class="hljs-comment">// <span class="proper-name">All</span> occurrences replaced</span>
+</code>
+        </pre>
+<h4 id="$replace"><span class="operator">$replace</span></h4>
+<p><code><span class="operator">$replace</span></code> also supports a mode where you can pass in a series of tokens, and replacements, and will apply all
+consistently. The largest token will win if there is any overlap.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$replace</span>(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;, pattern: <span class="proper-name">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">string</span>&gt;): $<span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;.html'</span>
+  .<span class="operator">$read</span>()
+  .<span class="operator">$replace</span>({
+     <span class="hljs-string">'&lt;'</span>: <span class="hljs-string">'&amp;lt;'</span>,
+     <span class="hljs-string">'&gt;'</span>: <span class="hljs-string">'&amp;gt;'</span>,
+     <span class="hljs-string">'&amp;quot;'</span>: <span class="hljs-string">'&amp;quot;'</span>
+  })
+  <span class="hljs-comment">// <span class="proper-name">Html</span> special chars escaped</span>
+</code>
+        </pre>
+<h4 id="$trim"><span class="operator">$trim</span></h4>
+<p><code><span class="operator">$trim</span></code> behaves identically to <code><span class="proper-name">String</span>.prototype.trim</code>, but will only operate on a single sequence value at a time</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$trim</span>(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;): $<span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;'</span>
+  .<span class="operator">$read</span>()
+  .<span class="operator">$trim</span>()
+  <span class="hljs-comment">// <span class="proper-name">Cleans</span> leading/trailing whitespace per line</span>
+</code>
+        </pre>
+<h4 id="$tostring"><span class="operator">$toString</span></h4>
+<p><code><span class="operator">$toString</span></code> is a convenience method for converting an entire block of
+text into a single string.  <span class="proper-name">This</span> is useful when looking for patterns that
+may span multiple lines.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$toString</span>(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;): $<span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;.html'</span>
+  .<span class="operator">$read</span>()
+  .<span class="operator">$toString</span>() <span class="hljs-comment">// <span class="proper-name">Convert</span> to a single string</span>
+  .<span class="operator">$replace</span>(<span class="hljs-regexp">/&lt;[^&gt;]+?&gt;/</span>) <span class="hljs-comment">// <span class="proper-name">Remove</span> all HTML tags</span>
+</code>
+        </pre>
+<h3 id="limit"><span class="proper-name">Limit</span></h3>
+<p><span class="proper-name">Support</span> for limiting sequence values based on ordering</p>
+<h4 id="$first"><span class="operator">$first</span></h4>
+<p><span class="proper-name">This</span> will return the first <code>n</code> elements with a default of a single element.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$first</span>&lt;T&gt;(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;, n?: <span class="hljs-built_in">number</span>): $<span class="proper-name">AsyncIterable</span>&lt;T&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;'</span>
+  .<span class="operator">$read</span>()
+  .<span class="operator">$first</span>(<span class="hljs-number">10</span>) <span class="hljs-comment">// <span class="proper-name">Read</span> first 10 lines</span>
+</code>
+        </pre>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;'</span>
+  .<span class="operator">$read</span>()
+  .<span class="operator">$first</span>() <span class="hljs-comment">// <span class="proper-name">Read</span> first line</span>
+</code>
+        </pre>
+<h4 id="$skip"><span class="operator">$skip</span></h4>
+<p><span class="proper-name">This</span> will return all but the first <code>n</code> elements.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$skip</span>&lt;T&gt;(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;, n: <span class="hljs-built_in">number</span>): $<span class="proper-name">AsyncIterable</span>&lt;T&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;.csv'</span>
+  .<span class="operator">$read</span>()
+  .<span class="operator">$skip</span>(<span class="hljs-number">1</span>) <span class="hljs-comment">// <span class="proper-name">Skip</span> header</span>
+</code>
+        </pre>
+<h4 id="$last"><span class="operator">$last</span></h4>
+<p><span class="proper-name">This</span> will return the last <code>n</code> elements with a default of a single element.
+<span class="proper-name">Since</span> this method requires knowledge of the length of the sequence to
+work properly, this now becomes a blocking operator.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$last</span>&lt;T&gt;(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;, n?: <span class="hljs-built_in">number</span>): $<span class="proper-name">AsyncIterable</span>&lt;T&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;'</span>
+  .<span class="operator">$read</span>()
+  .<span class="operator">$last</span>(<span class="hljs-number">7</span>) <span class="hljs-comment">// <span class="proper-name">Read</span> last 7 lines of file</span>
+</code>
+        </pre>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;'</span>
+  .<span class="operator">$read</span>()
+  .<span class="operator">$last</span>() <span class="hljs-comment">// <span class="proper-name">Read</span> last line of file</span>
+</code>
+        </pre>
+<h4 id="$repeat"><span class="operator">$repeat</span></h4>
+<p><span class="proper-name">This</span> will repeat the first <code>n</code> elements with a default of all elements.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$repeat</span>&lt;T&gt;(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;, n?: <span class="hljs-built_in">number</span>): $<span class="proper-name">AsyncIterable</span>&lt;T&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;'</span>
+  .<span class="operator">$read</span>()
+  .<span class="operator">$first</span>(<span class="hljs-number">10</span>) <span class="hljs-comment">// <span class="proper-name">Read</span> first 10 lines</span>
+</code>
+        </pre>
+<h3 id="exec"><span class="proper-name">Exec</span></h3>
+<p><span class="proper-name">Support</span> for dealing with execution of external programs</p>
+<h4 id="$exec"><span class="operator">$exec</span></h4>
+<p><span class="proper-name">Pipe</span> the entire sequence as input into the command to be executed.  <span class="proper-name">Allow</span> for args and flags to be
+appended to the command as needed.  <span class="proper-name">If</span> the output is specified as 'binary', the generator
+will return a sequence of <code><span class="proper-name">Buffer</span></code>s, otherwise will return <code>string</code>s</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$exec</span>&lt;T&gt;(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt; | <span class="hljs-built_in">void</span>, cmd: <span class="hljs-built_in">string</span>, config?: <span class="hljs-built_in">string</span>[] | <span class="proper-name">Omit</span>&lt;<span class="proper-name">ExecConfig</span>, <span class="hljs-string">'mode'</span>&gt;): $<span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;;
+<span class="operator">$exec</span>&lt;T&gt;(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt; | <span class="hljs-built_in">void</span>, cmd: <span class="hljs-built_in">string</span>, config: <span class="proper-name">ExecConfig</span>&lt;<span class="hljs-string">'text'</span>&gt;): $<span class="proper-name">AsyncIterable</span>&lt;<span class="hljs-built_in">string</span>&gt;;
+<span class="operator">$exec</span>&lt;T&gt;(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt; | <span class="hljs-built_in">void</span>, cmd: <span class="hljs-built_in">string</span>, config: <span class="proper-name">ExecConfig</span>&lt;<span class="hljs-string">'binary'</span>&gt;): $<span class="proper-name">AsyncIterable</span>&lt;<span class="proper-name">Buffer</span>&gt;;
+<span class="operator">$exec</span>&lt;T&gt;(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt; | <span class="hljs-built_in">void</span>, cmd: <span class="hljs-built_in">string</span>, config: <span class="proper-name">ExecConfig</span>&lt;<span class="hljs-string">'raw'</span>&gt;): $<span class="proper-name">AsyncIterable</span>&lt;<span class="proper-name">CompletableStream</span>&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'.ts'</span>
+  .<span class="operator">$dir</span>() <span class="hljs-comment">// <span class="proper-name">Get</span> all files</span>
+  .<span class="operator">$read</span>() <span class="hljs-comment">// <span class="proper-name">Read</span> all files</span>
+  .<span class="operator">$exec</span>(<span class="hljs-string">'wc'</span>, [<span class="hljs-string">'-l'</span>]) <span class="hljs-comment">// <span class="proper-name">Execute</span> word count for all files</span>
+  <span class="hljs-comment">// <span class="proper-name">Run</span> in a single operation</span>
+</code>
+        </pre>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'.ts'</span>
+  .<span class="operator">$dir</span>() <span class="hljs-comment">// <span class="proper-name">Get</span> all files</span>
+  .<span class="operator">$read</span>() <span class="hljs-comment">// <span class="proper-name">Read</span> all files</span>
+  .<span class="operator">$exec</span>(<span class="hljs-string">'npx'</span>, {
+     <span class="hljs-attr">args</span>: [<span class="hljs-string">'tslint'</span>],
+     <span class="hljs-attr">spawn</span> : {
+       <span class="hljs-attr">env</span> : { <span class="hljs-attr">NO_COLOR</span>: <span class="hljs-string">'1'</span> }
+     }
+  }) <span class="hljs-comment">// <span class="proper-name">Tslint</span> every file</span>
+  <span class="hljs-comment">// <span class="proper-name">Run</span> in a single operation</span>
+</code>
+        </pre>
+<h3 id="export"><span class="proper-name">Export</span></h3>
+<p><span class="proper-name">Support</span> for exporting data from a sequence. <span class="proper-name">For</span> all methods that convert the data to a stream (e.g. <span class="operator">$write</span>, <span class="operator">$writeFinal</span>, <span class="operator">$stdout</span>)
+<code><span class="proper-name">Buffer</span></code> data implies raw binary data and will be outputted without being processed.
+<span class="proper-name">Otherwise</span> treat data as line oriented output and will have newlines appended to each sequence element..</p>
+<h4 id="$stream"><span class="operator">$stream</span></h4>
+<p><span class="proper-name">Converts</span> a sequence into a node stream.  <span class="proper-name">This</span> readable stream should be
+considered standard, and usable in any place a stream is expected.
+<span class="proper-name">If</span> the mode is specified, it determines if the stream is string or <code><span class="proper-name">Buffer</span></code> oriented.
+<span class="proper-name">If</span> the mode is not specified, then <code><span class="proper-name">Buffer</span></code> data implies raw binary data with no processing.
+<span class="proper-name">Otherwise</span> treat data as line oriented output (with newlines appended).</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$stream</span>&lt;T&gt;(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;, mode?: IOType): <span class="proper-name">Readable</span>;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-keyword">const</span> stream = <span class="hljs-string">'&lt;file&gt;.png'</span>
+  .<span class="operator">$read</span>(<span class="hljs-string">'binary'</span>) <span class="hljs-comment">// <span class="proper-name">Read</span> file as binary</span>
+  .<span class="operator">$exec</span>(<span class="hljs-string">'convert'</span>, [<span class="hljs-string">'-size=100x20'</span>]) <span class="hljs-comment">// <span class="proper-name">Pipe</span> to convert function</span>
+  .<span class="operator">$stream</span>(<span class="hljs-string">'binary'</span>) <span class="hljs-comment">// <span class="proper-name">Read</span> converted output into NodeJS stream</span>
+
+stream.pipe(<span class="hljs-built_in">fs</span>.createWriteStream(<span class="hljs-string">'out.png'</span>)); <span class="hljs-comment">// <span class="proper-name">Write</span> out</span>
+</code>
+        </pre>
+<h4 id="$write"><span class="operator">$write</span></h4>
+<p><span class="proper-name">Emits</span> the sequence contents to a write stream.  <span class="proper-name">If</span> the write stream is a string, it
+is considered to be a file name. <span class="proper-name">Buffer</span> contents are written as is.  <span class="proper-name">String</span> contents
+are written as lines.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$write</span>&lt;T <span class="hljs-keyword">extends</span> <span class="hljs-built_in">string</span> | <span class="proper-name">Buffer</span> | <span class="hljs-built_in">any</span>&gt;(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;, writable: <span class="proper-name">Writable</span> | <span class="hljs-built_in">string</span>): <span class="hljs-built_in"><span class="proper-name">Promise</span></span>&lt;<span class="hljs-built_in">void</span>&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;.png'</span>
+  .<span class="operator">$read</span>(<span class="hljs-string">'binary'</span>) <span class="hljs-comment">// <span class="proper-name">Read</span> file as binary</span>
+  .<span class="operator">$exec</span>(<span class="hljs-string">'convert'</span>, [<span class="hljs-string">'-size=100x20'</span>]) <span class="hljs-comment">// <span class="proper-name">Pipe</span> to convert function</span>
+  .<span class="operator">$write</span>(<span class="hljs-string">'out.png'</span>) <span class="hljs-comment">// <span class="proper-name">Write</span> file out</span>
+</code>
+        </pre>
+<h4 id="$writefinal"><span class="operator">$writeFinal</span></h4>
+<p><span class="proper-name">Writes</span> the entire stream to a file, as a final step. The write stream will not be created until all the values
+have been emitted.  <span class="proper-name">This</span> is useful for reading and writing the same file.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$writeFinal</span>(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;<span class="proper-name">Buffer</span> | <span class="hljs-built_in">string</span>&gt;, file: <span class="hljs-built_in">string</span>): <span class="hljs-built_in"><span class="proper-name">Promise</span></span>&lt;<span class="hljs-built_in">void</span>&gt;;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">declare</span> <span class="hljs-keyword">class</span> <span class="proper-name">ExportPropOperators</span>&lt;T&gt; {
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;'</span>
+  .<span class="operator">$read</span>()
+  .<span class="operator">$replace</span>(<span class="hljs-regexp">/TEMP/</span>, <span class="hljs-string">'final'</span>)
+  .<span class="operator">$writeFinal</span>(<span class="hljs-string">'&lt;file&gt;'</span>);
+</code>
+        </pre>
+<h4 id="$values"><span class="operator">$values</span></h4>
+<p><span class="proper-name">Extract</span> all sequence contents into a single array and return
+as a promise</p>
+<pre>
+          <code class="hljs language-typescript"><span class="hljs-keyword">get</span> <span class="operator">$values</span>(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;): <span class="hljs-built_in"><span class="proper-name">Promise</span></span>&lt;T[]&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-keyword">const</span> values = <span class="hljs-keyword">await</span> <span class="hljs-string">'&lt;file&gt;.csv'</span>
+  .<span class="operator">$read</span>()
+  .<span class="operator">$csv</span>(<span class="hljs-string">'<span class="proper-name">Width</span>'</span>, <span class="hljs-string">'<span class="proper-name">Depth</span>'</span>, <span class="hljs-string">'<span class="proper-name">Height</span>'</span>])<span class="hljs-comment">// <span class="proper-name">Convert</span> to objects</span>
+  .<span class="operator">$map</span>(<span class="hljs-function">(<span class="hljs-params">{<span class="proper-name">Width</span>, <span class="proper-name">Height</span>, <span class="proper-name">Depth</span>}</span>) =&gt;</span>
+    int(<span class="proper-name">Width</span>) * int(<span class="proper-name">Height</span>) * int(<span class="proper-name">Depth</span>) <span class="hljs-comment">// <span class="proper-name">Compute</span> volume</span>
+  )
+  .<span class="operator">$values</span> <span class="hljs-comment">// <span class="proper-name">Get</span> all values;</span>
+</code>
+        </pre>
+<h4 id="$value"><span class="operator">$value</span></h4>
+<p><span class="proper-name">Extract</span> first sequence element and return as a promise</p>
+<pre>
+          <code class="hljs language-typescript"><span class="hljs-keyword">get</span> <span class="operator">$value</span>(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;): <span class="hljs-built_in"><span class="proper-name">Promise</span></span>&lt;T&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-keyword">const</span> name = <span class="hljs-keyword">await</span> <span class="hljs-string">'<span class="proper-name">What</span> is your name?'</span>
+  .<span class="operator">$prompt</span>() <span class="hljs-comment">// <span class="proper-name">Prompt</span> for name</span>
+  .<span class="operator">$value</span>  <span class="hljs-comment">// <span class="proper-name">Get</span> single value</span>
+</code>
+        </pre>
+<h4 id="$stdout"><span class="operator">$stdout</span></h4>
+<p><span class="proper-name">Simple</span> method that allows any sequence to be automatically written to stdout.
+<code><span class="proper-name">Buffer</span></code> data will be written as is, and all other data will be treated as line-oriented output
+with newlines appended.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="hljs-keyword">get</span> <span class="operator">$stdout</span>(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;): <span class="hljs-built_in"><span class="proper-name">Promise</span></span>&lt;<span class="hljs-built_in">void</span>&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;'</span>
+  .<span class="operator">$read</span>() <span class="hljs-comment">// <span class="proper-name">Read</span> file</span>
+  .<span class="operator">$map</span>(<span class="hljs-function"><span class="hljs-params">line</span> =&gt;</span> line.length) <span class="hljs-comment">// <span class="proper-name">Convert</span> each line to it's length</span>
+  .<span class="operator">$stdout</span> <span class="hljs-comment">// <span class="proper-name">Pipe</span> to stdout</span>
+</code>
+        </pre>
+<h4 id="$console"><span class="operator">$console</span></h4>
+<p><span class="proper-name">Simple</span> property that allows any sequence to be automatically called with <code>console.log</code>.
+<span class="proper-name">Useful</span> for retaining the structure/formatting (e.g. arrays, objects) of data being processed in the stream.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="hljs-keyword">get</span> $<span class="hljs-built_in">console</span>(<span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;): <span class="hljs-built_in"><span class="proper-name">Promise</span></span>&lt;<span class="hljs-built_in">void</span>&gt;;
+</code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript"><span class="hljs-string">'&lt;file&gt;'</span>
+ .<span class="operator">$read</span>() <span class="hljs-comment">// <span class="proper-name">Read</span> file</span>
+ .<span class="operator">$json</span>()
+ .$<span class="hljs-built_in">console</span> <span class="hljs-comment">// <span class="proper-name">Log</span> out objects</span>
+</code>
+        </pre>
+<h3 id="advanced"><span class="proper-name">Advanced</span></h3>
+<p><span class="proper-name">Advanced</span> operators represent more complex use cases.</p>
+<h4 id="$parallel"><span class="operator">$parallel</span></h4>
+<p><span class="proper-name">Run</span> iterator in parallel, returning values in order of first completion.  <span class="proper-name">If</span> the passed in function produces
+an async generator, only the first value will be used.  <span class="proper-name">This</span> is because the method needs an array of promises
+and an <span class="proper-name">AsyncIterable</span> cannot produce an array of promises as it's length is unknown until all promises are
+resolved.</p>
+<p>The default concurrency limit is number of processors minus one. <span class="proper-name">This</span> means the operator will process the sequence in order
+until there are <code>concurrent</code> pending tasks, and will only fetch the next item once there is capacity.</p>
+<pre>
+          <code class="hljs language-typescript"><span class="operator">$parallel</span>&lt;T, U = T&gt;<span class="hljs-function">(<span class="hljs-params"><span class="hljs-keyword">this</span>: <span class="proper-name">AsyncIterable</span>&lt;T&gt;, op: (<span class="hljs-params">item: T</span>) =&gt; <span class="proper-name">AsyncIterable</span>&lt;U&gt; | <span class="hljs-built_in"><span class="proper-name">Promise</span></span>&lt;U&gt;, config?: <span class="hljs-built_in">number</span> | {concurrent?: <span class="hljs-built_in">number</span>;}</span>): $<span class="hljs-params"><span class="proper-name">AsyncIterable</span></span>&lt;<span class="hljs-params">U</span>&gt;;
+</span></code>
+        </pre>
+<p><span class="proper-name">Example</span></p>
+<pre>
+          <code class="hljs language-javascript">[<span class="hljs-number">10</span>, <span class="hljs-number">9</span>, <span class="hljs-number">8</span>, <span class="hljs-number">7</span>, <span class="hljs-number">6</span>, <span class="hljs-number">5</span>, <span class="hljs-number">4</span>, <span class="hljs-number">2</span>, <span class="hljs-number">1</span>]
+ .<span class="operator">$parallel</span>(<span class="hljs-function"><span class="hljs-params">x</span> =&gt;</span> (x).<span class="operator">$wait</span>(x * <span class="hljs-number">1000</span>))
+ .$<span class="hljs-built_in">console</span>
+</code>
+        </pre>
+<pre>
+          <code class="hljs language-javascript"><span class="operator">$range</span>(<span class="hljs-number">1000</span>)
+ .<span class="operator">$parallel</span>(<span class="hljs-function"><span class="hljs-params">x</span> =&gt;</span> doWork(x), <span class="hljs-number">100</span>) <span class="hljs-comment">// 100 concurrent workers</span>
+ .$<span class="hljs-built_in">console</span>
+</code>
+        </pre>      </div>    </div>  </body></html>

@@ -12,7 +12,7 @@ module.exports = {
         "$registerOperator": "readonly",
         "$pattern": "readonly",
         "$env": "readonly",
-	"$exec": "readonly"
+        "$exec": "readonly"
     },
     "parser": "@typescript-eslint/parser",
     "extends": [

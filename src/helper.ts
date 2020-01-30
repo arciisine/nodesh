@@ -40,9 +40,8 @@ export class GlobalHelpers {
    *  .$columns(['blockSize', 'perms', 'size', 'group', 'owner', 'month', 'day', 'time', 'path'])
    *  .$console
    */
-  static get $exec(): AsyncIterable<any>['$exec'] {
-    const empty: any[] = [];
-    return empty.$exec.bind(empty);
+  static get $exec(): string['$exec'] {
+    return ([].$exec as any).bind([]);
   }
 
   /**
@@ -82,7 +81,7 @@ export class GlobalHelpers {
    * use `process.argv` as normal.
    *
    * @example
-   * (argv[0] ?? 'Enter a file name:'.$prompt())
+   * ($argv[0] ?? 'Enter a file name:'.$prompt())
    *   // Pull in name from argv[0] or prompt if missing
    *   .$read() // Read file
    */
@@ -129,7 +128,7 @@ export class GlobalHelpers {
    *  .$tokens($pattern.URL) // Extract URLs
    *  .$filter(url => url.endsWith('.com'))
    */
-  static get $pattern() {
+  static get $pattern(): Record<'URL' | 'EMAIL' | 'PROPER_NAME', RegExp> {
     return {
       URL: /https?:\/\/[\/A-Za-z0-9:=?\-&.%]+/g,
       EMAIL: /[A-Za-z0-9_]+@[A-Za-z0-9_.]+[.][A-Za-z]+/g,

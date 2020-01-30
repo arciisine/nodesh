@@ -92,6 +92,7 @@ export class StreamUtil {
     // Listen for any closing
     src.on('end', () => tick(done = true));
     src.on('close', () => tick(done = true));
+    src.on('error', (err) => waiter!.reject(err));
 
     if (mode === 'text') {
       src.on('line', v => tick(TextUtil.toText(v)));

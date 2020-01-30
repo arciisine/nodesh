@@ -59,13 +59,13 @@ export class DataOperators {
    *   // Convert to objects from CSV (actually TSV)
    */
   $csv(this: AsyncIterable<string>, config: Partial<CSVConfig> & { headerRow: true }): $AsyncIterable<Record<string, string>>;
-
   async * $csv(this: AsyncIterable<string>,
     config: string[] | Partial<CSVConfig> & { columns?: string[], headerRow?: boolean } = {}
   ): $AsyncIterable<Record<string, string> | string[]> {
     if (Array.isArray(config)) {
       config = { columns: config };
     }
+
     const itr = this[Symbol.asyncIterator]();
     let columns = config.columns;
     const finalConfig = {

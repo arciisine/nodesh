@@ -16,7 +16,7 @@ export class ExecUtil {
     const mem = StreamUtil.memoryWritable();
     proc.stderr!.pipe(mem);
 
-    const retCode = new Promise(res => proc.on('exit', res));
+    const retCode = new Promise<number>(res => proc.on('exit', res));
     const result = async function () {
       if ((await retCode) !== 0) {
         throw new Error(mem.getText());
