@@ -12,7 +12,7 @@
     "build:dev": "npm run clean && npx tsc -w",
     "prepublish": "npm run clean && npm run build:publish && npm run docs"
   },
-  "homepage": "https://arciisine.github.io/nodesh",
+  "homepage": "https://nodesh.arcsine.dev",
   "repository": {
     "url": "https://github.com/arciisine/nodesh"
   },
