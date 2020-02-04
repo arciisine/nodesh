@@ -1,6 +1,6 @@
 {
   "name": "@arcsine/nodesh",
-  "version": "1.7.1",
+  "version": "1.7.3",
   "description": "A node-based library, providing Unix shell-like functionality",
   "scripts": {
     "clean": "rm -rf dist/",
@@ -13,6 +13,9 @@
     "prepublish": "npm run clean && npm run build:publish && npm run docs"
   },
   "homepage": "https://arciisine.github.io/nodesh",
+  "repository": {
+    "url": "https://github.com/arciisine/nodesh"
+  },
   "bin": "./bin/nodesh",
   "types": "./dist/index.d.ts",
   "main": "./dist/index.js",
