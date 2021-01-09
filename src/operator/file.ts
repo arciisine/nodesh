@@ -130,8 +130,8 @@ export class FileOperators {
       const testFile = FileUtil.getFileMatcher(pattern);
       yield* FileUtil.scanDir({
         testFile: config.type !== 'dir' ? testFile : undefined,
-        testDir: config.type === 'dir' ? testFile : undefined
       }, config as ReadDirConfig & { base: string, type: string })
+        .$filter(x => config.type === 'file' || testFile(x.relative))
         .$map(x => config.full ? x : x.file);
     }
   }
