@@ -10,6 +10,8 @@ export type OrCallable<X> = X | (() => X);
 
 export type ReadDirConfig = {
   base?: string;
+  allowHidden?: boolean;
+  type?: 'file' | 'dir';
   full?: boolean;
 };
 export type ReadStreamConfig<M = IOType> = {

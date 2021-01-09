@@ -127,7 +127,11 @@ export class FileOperators {
 
     for await (const pattern of this) {
       const testFile = FileUtil.getFileMatcher(pattern);
-      yield* FileUtil.scanDir({ testFile }, config.base!).$map(x => config.full ? x : x.file);
+      yield* FileUtil.scanDir({
+        testFile: config.type !== 'dir' ? testFile : undefined,
+        testDir: config.type === 'dir' ? testFile : undefined
+      }, config as ReadDirConfig & { base: string })
+        .$map(x => config.full ? x : x.file);
     }
   }
 }

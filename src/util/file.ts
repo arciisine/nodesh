@@ -12,15 +12,23 @@ export interface ScanHandler {
   testDir?(relative: string, entry?: ScanEntry): boolean;
 }
 
+interface ScanConfig {
+  base: string;
+  entry?: ScanEntry;
+  type?: 'file' | 'dir';
+  visited?: Set<string>;
+  allowHidden?: boolean;
+}
+
 export class FileUtil {
   /**
    * Searches recursively for files/folders.
    */
-  static async * scanDir(handler: ScanHandler, base: string, entry?: ScanEntry, visited = new Set<string>()): AsyncGenerator<ScanEntry> {
+  static async * scanDir(handler: ScanHandler, { base, allowHidden, type, entry, visited = new Set<string>() }: ScanConfig): AsyncGenerator<ScanEntry> {
     entry = (entry! ?? { file: base });
 
     for (const file of fs.readdirSync(entry.file)) {
-      if (file.startsWith('.')) {
+      if (!allowHidden && file.startsWith('.')) {
         continue;
       }
 
@@ -32,17 +40,21 @@ export class FileUtil {
         if (subEntry.stats.isSymbolicLink()) {
           const p = fs.realpathSync(full);
           if (!visited.has(p)) {
-            yield subEntry;
+            if (type === 'dir' || !type) {
+              yield subEntry;
+            }
             visited.add(p);
           } else {
             continue;
           }
         }
         if (!handler.testDir || handler.testDir(subEntry.relative, subEntry)) {
-          yield* FileUtil.scanDir(handler, base, subEntry, visited);
+          yield* FileUtil.scanDir(handler, { base, entry: subEntry, type, visited, allowHidden });
         }
       } else if (!handler.testFile || handler.testFile(subEntry.relative, subEntry)) {
-        yield subEntry;
+        if (type === 'file' || !type) {
+          yield subEntry;
+        }
       }
     }
   }
