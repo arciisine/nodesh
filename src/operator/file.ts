@@ -124,13 +124,14 @@ export class FileOperators {
   $dir(this: AsyncIterable<string | RegExp>, config?: Omit<ReadDirConfig, 'full'>): $AsyncIterable<string>;
   async * $dir(this: AsyncIterable<string | RegExp>, config: ReadDirConfig = { base: process.cwd() }): $AsyncIterable<ScanEntry | string> {
     config.base = path.resolve(process.cwd(), config.base! || ''); // relative to working directory, but pull path
+    config.type = config.type || 'file';
 
     for await (const pattern of this) {
       const testFile = FileUtil.getFileMatcher(pattern);
       yield* FileUtil.scanDir({
         testFile: config.type !== 'dir' ? testFile : undefined,
         testDir: config.type === 'dir' ? testFile : undefined
-      }, config as ReadDirConfig & { base: string })
+      }, config as ReadDirConfig & { base: string, type: string })
         .$map(x => config.full ? x : x.file);
     }
   }

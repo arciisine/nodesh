@@ -15,7 +15,7 @@ export interface ScanHandler {
 interface ScanConfig {
   base: string;
   entry?: ScanEntry;
-  type?: 'file' | 'dir';
+  type: 'file' | 'dir';
   visited?: Set<string>;
   allowHidden?: boolean;
 }
@@ -37,22 +37,20 @@ export class FileUtil {
       const subEntry = { stats, file: full, relative: full.replace(`${base}/`, '') };
 
       if (subEntry.stats.isDirectory() || subEntry.stats.isSymbolicLink()) {
-        if (subEntry.stats.isSymbolicLink()) {
-          const p = fs.realpathSync(full);
-          if (!visited.has(p)) {
-            if (type === 'dir' || !type) {
-              yield subEntry;
-            }
-            visited.add(p);
-          } else {
-            continue;
-          }
+        const p = fs.realpathSync(full);
+        if (!visited.has(p)) {
+          visited.add(p);
+        } else {
+          continue;
         }
         if (!handler.testDir || handler.testDir(subEntry.relative, subEntry)) {
+          if (type === 'dir') {
+            yield subEntry;
+          }
           yield* FileUtil.scanDir(handler, { base, entry: subEntry, type, visited, allowHidden });
         }
       } else if (!handler.testFile || handler.testFile(subEntry.relative, subEntry)) {
-        if (type === 'file' || !type) {
+        if (type === 'file') {
           yield subEntry;
         }
       }
