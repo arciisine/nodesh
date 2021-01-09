@@ -38,21 +38,22 @@ export class FileUtil {
 
       if (subEntry.stats.isDirectory() || subEntry.stats.isSymbolicLink()) {
         const p = fs.realpathSync(full);
-        if (!visited.has(p)) {
-          visited.add(p);
-        } else {
-          continue;
-        }
-        if (!handler.testDir || handler.testDir(subEntry.relative, subEntry)) {
-          if (type === 'dir') {
-            yield subEntry;
+        if (!fs.statSync(p).isFile()) { // Only on folders
+          if (!visited.has(p)) {
+            visited.add(p);
+          } else {
+            continue;
           }
-          yield* FileUtil.scanDir(handler, { base, entry: subEntry, type, visited, allowHidden });
+          if (!handler.testDir || handler.testDir(subEntry.relative, subEntry)) {
+            if (type === 'dir') {
+              yield subEntry;
+            }
+            yield* FileUtil.scanDir(handler, { base, entry: subEntry, type, visited, allowHidden });
+          }
         }
-      } else if (!handler.testFile || handler.testFile(subEntry.relative, subEntry)) {
-        if (type === 'file') {
-          yield subEntry;
-        }
+      }
+      if (type === 'file' && (!handler.testFile || handler.testFile(subEntry.relative, subEntry))) {
+        yield subEntry;
       }
     }
   }
