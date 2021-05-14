@@ -28,7 +28,7 @@ export class FileUtil {
     entry = (entry! ?? { file: base });
 
     for (const file of fs.readdirSync(entry.file)) {
-      if (!allowHidden && file.startsWith('.')) {
+      if (file === '.' || file === '..' || (!allowHidden && file.startsWith('.'))) {
         continue;
       }
 
